@@ -1,8 +1,22 @@
-# My macOS config
+# hypr-mac
 
-yabai, skhd, JankyBorders, Karabiner-Elements, Ghostty, LazyVim and zsh, set up to work like my Omarchy
-[dotfiles](https://github.com/RyanAHayden/dotfiles), with the ryha-silver colors. Everything here is a plain
-config file stowed into `~`. Older setups are in git history.
+My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, workspaces and look as my Linux
+[dotfiles](https://github.com/RyanAHayden/dotfiles), in the ryha-silver colors.
+
+![Three tiled Ghostty windows (fastfetch, skhd binds, yabai config) with the workspace bar top left](media/desktop.png)
+
+- **Tiling** with yabai and skhd. SUPER is left Cmd, and the binds follow Omarchy's
+- **Instant workspaces** (1-10, plus a scratchpad), with no macOS slide. Alt-tab, minimize and fullscreen stay
+  on the workspace you're on
+- **Workspace bar** in the top left of the menu bar, drawn by a small native helper (`yabai-helper`)
+
+  ![Workspace bar: S, 1-5 and the current workspace highlighted](media/workspace-bar.png)
+- **Linux-style keys** via Karabiner: Caps Lock is Ctrl, and Ctrl+C/V/S work in GUI apps
+- **One command**: `./setup.sh` installs everything, stows the configs into `~`, applies the macOS settings and,
+  with SIP off, grants every permission up front, so nothing prompts
+
+Built from yabai, skhd, JankyBorders, Karabiner-Elements, Ghostty, LazyVim and zsh. Everything is a plain config
+file stowed into `~`. Older setups are in git history.
 
 ## Setup
 
