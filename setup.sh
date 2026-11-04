@@ -205,6 +205,9 @@ yabai --start-service 2>/dev/null || yabai --restart-service
 skhd --start-service 2>/dev/null || skhd --restart-service
 brew services start borders 2>/dev/null || brew services restart borders
 brew services start syncthing
+# "Fix Keyboard" app (Raycast/Spotlight): runs ~/.local/bin/fixkeys to restart Karabiner + skhd
+mkdir -p ~/Applications
+osacompile -o ~/Applications/Fix\ Keyboard.app -e "do shell script \"$HOME/.local/bin/fixkeys\"" 2>/dev/null
 if $sip_off; then
 	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 11 (1-9, 10 on 0, workspace "0" on ~)
 	yabai --restart-service
@@ -240,7 +243,7 @@ Manual steps:
      (covers "access data from other apps"), Accessibility, Input Monitoring, Screen & System Audio Recording,
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
-     for Karabiner-Core-Service (SIP off: done above). Until then, SUPER (Cmd) binds don't fire: skhd only listens for right Cmd
+     for Karabiner-Core-Service (SIP off: done above). Until then the Ctrl shortcuts and Caps Lock -> Ctrl don't work (SUPER binds do: skhd binds left Cmd itself)
   3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 11
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384

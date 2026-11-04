@@ -1,101 +1,102 @@
 # skhd bindings, Omarchy-style, ported from github.com/RyanAHayden/dotfiles (.config/hypr/bindings.lua)
-# SUPER = Cmd. Karabiner turns left Cmd into right Cmd, and only rcmd is bound here, so the
-# left Cmd it sends for Linux-style ctrl shortcuts (ctrl+c -> cmd+c) never hits these.
+# SUPER = physical left Cmd (lcmd), bound natively so these work even when Karabiner isn't running
+# (after boot/login, around sleep). Right Cmd stays a normal Cmd, and Karabiner's Linux-style ctrl
+# shortcuts (ctrl+c -> cmd+c) send right Cmd, so neither ever hits these.
 # SUPER+ALT = Cmd + Option. Unbound Cmd combos (cmd+c/v/q/tab) still reach macOS apps.
 # Option is never bound alone, so it reaches nvim/tmux as Meta (M-h, M-1..9, M-Enter, ...).
 # Reload: skhd --restart-service
 
 # --- Apps ------------------------------------------------------------------
-rcmd - return                 : touch ~/.cache/yabai-new-window; open -na Ghostty
-rcmd + alt - return           : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/tmux new -A -s Work
-rcmd + shift - b              : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
-rcmd + shift - return         : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
-rcmd + shift + alt - b        : touch ~/.cache/yabai-new-window; open -na Helium --args --incognito
-rcmd + shift - f              : open ~
-rcmd + shift - n              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim
-rcmd + shift - t              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop
-rcmd + shift - g              : open -a Steam
-rcmd + shift - 0x2C           : open -a KeePassXC
-rcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
-rcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
-rcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
+lcmd - return                 : touch ~/.cache/yabai-new-window; open -na Ghostty
+lcmd + alt - return           : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/tmux new -A -s Work
+lcmd + shift - b              : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
+lcmd + shift - return         : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
+lcmd + shift + alt - b        : touch ~/.cache/yabai-new-window; open -na Helium --args --incognito
+lcmd + shift - f              : open ~
+lcmd + shift - n              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim
+lcmd + shift - t              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop
+lcmd + shift - g              : open -a Steam
+lcmd + shift - 0x2C           : open -a KeePassXC
+lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
+lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
+lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
 
 
 # --- Windows ---------------------------------------------------------------
-rcmd - w                      : ~/.local/bin/close-window
-rcmd + shift - w              : ~/.local/bin/force-kill-window
-rcmd - q                      : ~/.local/bin/quit-app
-rcmd - s                      : yabai -m window --minimize
-rcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
-rcmd - f                      : yabai -m window --toggle zoom-fullscreen
-rcmd + alt - f                : yabai -m window --toggle native-fullscreen
-rcmd - t                      : yabai -m window --toggle float --grid 6:6:1:1:4:4
-rcmd - 0x2A                   : yabai -m window --toggle split
-rcmd + shift - i              : yabai -m window --swap largest
-rcmd + ctrl + shift - i       : yabai -m space --mirror y-axis
-rcmd - 0x1B                   : yabai -m window --ratio rel:-0.05
-rcmd - 0x18                   : yabai -m window --ratio rel:0.05
-rcmd + shift - r              : yabai -m space --balance
-rcmd + alt - g                : ~/.local/bin/quadrant-tile
-rcmd + shift - space          : ~/.local/bin/toggle-menubar
+lcmd - w                      : ~/.local/bin/close-window
+lcmd + shift - w              : ~/.local/bin/force-kill-window
+lcmd - q                      : ~/.local/bin/quit-app
+lcmd - s                      : yabai -m window --minimize
+lcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
+lcmd - f                      : yabai -m window --toggle zoom-fullscreen
+lcmd + alt - f                : yabai -m window --toggle native-fullscreen
+lcmd - t                      : yabai -m window --toggle float --grid 6:6:1:1:4:4
+lcmd - 0x2A                   : yabai -m window --toggle split
+lcmd + shift - i              : yabai -m window --swap largest
+lcmd + ctrl + shift - i       : yabai -m space --mirror y-axis
+lcmd - 0x1B                   : yabai -m window --ratio rel:-0.05
+lcmd - 0x18                   : yabai -m window --ratio rel:0.05
+lcmd + shift - r              : yabai -m space --balance
+lcmd + alt - g                : ~/.local/bin/quadrant-tile
+lcmd + shift - space          : ~/.local/bin/toggle-menubar
 
 # Focus (vim keys + arrows)
-rcmd - h                      : yabai -m window --focus west
-rcmd - j                      : yabai -m window --focus south
-rcmd - k                      : yabai -m window --focus north
-rcmd - l                      : yabai -m window --focus east
-rcmd - left                   : yabai -m window --focus west
-rcmd - down                   : yabai -m window --focus south
-rcmd - up                     : yabai -m window --focus north
-rcmd - right                  : yabai -m window --focus east
+lcmd - h                      : yabai -m window --focus west
+lcmd - j                      : yabai -m window --focus south
+lcmd - k                      : yabai -m window --focus north
+lcmd - l                      : yabai -m window --focus east
+lcmd - left                   : yabai -m window --focus west
+lcmd - down                   : yabai -m window --focus south
+lcmd - up                     : yabai -m window --focus north
+lcmd - right                  : yabai -m window --focus east
 
 # Move (like Hyprland movewindow: re-split into that side)
-rcmd + shift - h              : yabai -m window --warp west
-rcmd + shift - j              : yabai -m window --warp south
-rcmd + shift - k              : yabai -m window --warp north
-rcmd + shift - l              : yabai -m window --warp east
-rcmd + shift - left           : yabai -m window --swap west
-rcmd + shift - down           : yabai -m window --swap south
-rcmd + shift - up             : yabai -m window --swap north
-rcmd + shift - right          : yabai -m window --swap east
+lcmd + shift - h              : yabai -m window --warp west
+lcmd + shift - j              : yabai -m window --warp south
+lcmd + shift - k              : yabai -m window --warp north
+lcmd + shift - l              : yabai -m window --warp east
+lcmd + shift - left           : yabai -m window --swap west
+lcmd + shift - down           : yabai -m window --swap south
+lcmd + shift - up             : yabai -m window --swap north
+lcmd + shift - right          : yabai -m window --swap east
 
 # --- Workspaces (Spaces) ---------------------------------------------------
-rcmd - a                      : ~/.local/bin/ws focus prev
-rcmd - d                      : ~/.local/bin/ws focus next
-rcmd + shift - a              : ~/.local/bin/ws move prev
-rcmd + shift - d              : ~/.local/bin/ws move next
+lcmd - a                      : ~/.local/bin/ws focus prev
+lcmd - d                      : ~/.local/bin/ws focus next
+lcmd + shift - a              : ~/.local/bin/ws move prev
+lcmd + shift - d              : ~/.local/bin/ws move next
 
-rcmd - 1 : ~/.local/bin/ws focus 1
-rcmd - 2 : ~/.local/bin/ws focus 2
-rcmd - 3 : ~/.local/bin/ws focus 3
-rcmd - 4 : ~/.local/bin/ws focus 4
-rcmd - 5 : ~/.local/bin/ws focus 5
-rcmd - 6 : ~/.local/bin/ws focus 6
-rcmd - 7 : ~/.local/bin/ws focus 7
-rcmd - 8 : ~/.local/bin/ws focus 8
-rcmd - 9 : ~/.local/bin/ws focus 9
-rcmd - 0 : ~/.local/bin/ws focus 10
+lcmd - 1 : ~/.local/bin/ws focus 1
+lcmd - 2 : ~/.local/bin/ws focus 2
+lcmd - 3 : ~/.local/bin/ws focus 3
+lcmd - 4 : ~/.local/bin/ws focus 4
+lcmd - 5 : ~/.local/bin/ws focus 5
+lcmd - 6 : ~/.local/bin/ws focus 6
+lcmd - 7 : ~/.local/bin/ws focus 7
+lcmd - 8 : ~/.local/bin/ws focus 8
+lcmd - 9 : ~/.local/bin/ws focus 9
+lcmd - 0 : ~/.local/bin/ws focus 10
 
-rcmd + shift - 1 : ~/.local/bin/ws move 1
-rcmd + shift - 2 : ~/.local/bin/ws move 2
-rcmd + shift - 3 : ~/.local/bin/ws move 3
-rcmd + shift - 4 : ~/.local/bin/ws move 4
-rcmd + shift - 5 : ~/.local/bin/ws move 5
-rcmd + shift - 6 : ~/.local/bin/ws move 6
-rcmd + shift - 7 : ~/.local/bin/ws move 7
-rcmd + shift - 8 : ~/.local/bin/ws move 8
-rcmd + shift - 9 : ~/.local/bin/ws move 9
-rcmd + shift - 0 : ~/.local/bin/ws move 10
+lcmd + shift - 1 : ~/.local/bin/ws move 1
+lcmd + shift - 2 : ~/.local/bin/ws move 2
+lcmd + shift - 3 : ~/.local/bin/ws move 3
+lcmd + shift - 4 : ~/.local/bin/ws move 4
+lcmd + shift - 5 : ~/.local/bin/ws move 5
+lcmd + shift - 6 : ~/.local/bin/ws move 6
+lcmd + shift - 7 : ~/.local/bin/ws move 7
+lcmd + shift - 8 : ~/.local/bin/ws move 8
+lcmd + shift - 9 : ~/.local/bin/ws move 9
+lcmd + shift - 0 : ~/.local/bin/ws move 10
 
 # Workspace "0" = 11th Space on the ` key, left of 1 (like the number row: SUPER to go, +Shift to move)
-rcmd - 0x32         : ~/.local/bin/ws focus 0
-rcmd + shift - 0x32 : ~/.local/bin/ws move 0
+lcmd - 0x32         : ~/.local/bin/ws focus 0
+lcmd + shift - 0x32 : ~/.local/bin/ws move 0
 
 # Move window to the other display
-rcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west
-rcmd + ctrl + shift - l             : yabai -m window --display east; yabai -m display --focus east
+lcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west
+lcmd + ctrl + shift - l             : yabai -m window --display east; yabai -m display --focus east
 
 # --- System ----------------------------------------------------------------
-rcmd + ctrl - l               : pmset displaysleepnow
-rcmd + alt - y                : yabai --restart-service; skhd --restart-service
+lcmd + ctrl - l               : pmset displaysleepnow
+lcmd + alt - y                : yabai --restart-service; skhd --restart-service
 

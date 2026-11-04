@@ -42,8 +42,10 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q, Cmd+Tab |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
 
-Karabiner swaps the Cmd keys: physical left Cmd sends right Cmd (SUPER), physical right Cmd sends left Cmd (a
-normal Cmd), and the Ctrl shortcuts send left Cmd too. skhd binds only `rcmd`, so right Cmd and Ctrl+S stay normal. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
+SUPER is physical left Cmd, bound natively by skhd (`lcmd`), so binds keep working when Karabiner isn't running
+(right after boot/login, around sleep/wake). Right Cmd is a normal Cmd, and Karabiner's Ctrl shortcuts send right
+Cmd, so Ctrl+S saves instead of firing SUPER+S. If Ctrl shortcuts stop working, `fixkeys` (or "Fix Keyboard" in
+Raycast) restarts Karabiner. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
 the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/skhd/skhdrc` (Cmd+I shows it).
 
 | Key | Action |
