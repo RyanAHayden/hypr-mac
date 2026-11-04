@@ -13,6 +13,8 @@ brew install --cask keepassxc font-jetbrains-mono-nerd-font zen spotify discord 
 
 echo "==> Macarchy (everything except its SketchyBar; the native menu bar + SwiftBar is used instead)"
 [ -d "$MACARCHY" ] || git clone https://github.com/HarryRandall/macarchy "$MACARCHY"
+# drop our local.yabairc include (re-added below) so Macarchy doesn't see yabairc as locally edited
+[ -f ~/.config/yabai/yabairc ] && perl -0777 -pi -e 's/\n# Personal overrides \(not managed by Macarchy\)\n\[ -f "\$CONFIG_ROOT\/local\.yabairc" \][^\n]*\n\z//' ~/.config/yabai/yabairc
 "$MACARCHY/install" window-manager terminal shell nvim utilities themes raycast
 brew trust --formula felixkratz/formulae/borders
 
@@ -61,6 +63,10 @@ defaults write com.apple.spaces spans-displays -bool false
 defaults write -g _HIHideMenuBar -bool false
 defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
+# darker dark mode: neutral (untinted) window backgrounds, solid instead of translucent menus/sidebars/Dock
+defaults write -g AppleReduceDesktopTinting -bool true
+defaults write com.apple.universalaccess reduceTransparency -bool true 2>/dev/null ||
+	echo "  (couldn't set Reduce transparency - turn it on in Accessibility > Display, or give the terminal Full Disk Access)"
 # ctrl+1..9 -> Desktop 1..9 (~/.local/bin/ws uses these while SIP is on)
 codes=(18 19 20 21 23 22 26 28 25)
 for i in 1 2 3 4 5 6 7 8 9; do
