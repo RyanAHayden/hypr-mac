@@ -65,6 +65,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+F, Cmd+T, Cmd+\ | fullscreen, float, toggle split |
 | Cmd+O | pop window out: float centered, on every Space, above tiled windows (again: put back) |
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
+| Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |
 | Cmd+-/= (+Shift, +Option, +Ctrl) | resize width (Shift: height; Option: a little, Ctrl: a lot) |
 | Cmd+Backspace, Option+Backspace / Shift+Option+Backspace | window transparency toggle, more / less |
 | Cmd+Shift+Backspace | toggle gaps on this Space |

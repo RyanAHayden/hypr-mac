@@ -16,12 +16,30 @@ helper_up() { kill -0 "$(cat ~/.cache/yabai-helper.pid 2>/dev/null)" 2>/dev/null
 # mid-switch and grab the wrong window, and queued ones lag; so one at a time, and
 # repeats that arrive while one is running are dropped instead of queued.
 [ -z "$WS_LOCKED" ] && WS_LOCKED=1 exec lockf -t 0 "${TMPDIR:-/tmp}/ws.lock" "$0" "$@" 2>/dev/null
-# prev/next go through 1..10 and wrap around at either end, skipping the scratchpad (11) and parked windows (12)
+# Native fullscreen Desktops belong to the workspace they came from (.local/bin/fs-origin records it):
+# {"<fullscreen space id>": <origin space id>}
+fs_map() { local f m="{}"; for f in ~/.cache/fs-origin/*; do [ -e "$f" ] && m=$(jq -c --arg k "${f##*/}" --argjson v "$(<"$f")" '. + {($k): $v}' <<<"$m"); done; echo "$m"; }
+# prev/next go through 1..10 and wrap around at either end, skipping the scratchpad (11) and parked windows (12);
+# a fullscreen Desktop comes right after its workspace (2, 2's fullscreen app, 3, ...)
 if [ "$target" = prev ] || [ "$target" = next ]; then
-	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson cur "$(yabai -m query --spaces --space | jq .index)" '
-		[.[].index | select(. < 11 or . == $cur)] | sort as $o
+	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson map "$(fs_map)" \
+		--argjson cur "$(yabai -m query --spaces --space | jq .index)" '
+		(map({key: (.id | tostring), value: .index}) | from_entries) as $at
+		| [.[] | select(."is-native-fullscreen") | {index, origin: ($at[($map[(.id | tostring)] // -1) | tostring] // null)}] as $fs
+		| [.[] | select(."is-native-fullscreen" | not) | .index | select(. < 11 or . == $cur)] | sort
+		| (reduce .[] as $n ([]; . + [$n] + [$fs[] | select(.origin == $n) | .index])) as $placed
+		| ($placed + [$fs[] | .index | select(. as $i | $placed | index($i) | not)]) as $o
 		| ($o | index($cur)) as $i
 		| $o[(($i + (if $dir == "next" then 1 else -1 end)) % ($o | length) + ($o | length)) % ($o | length)]') &&
+		[ -n "$resolved" ] && target=$resolved
+# SUPER+N: when workspace N's only window is fullscreen (or you're already on N), go to its fullscreen Desktop
+elif [ "$action" = focus ] && [[ $target =~ ^[0-9]+$ ]] && [ -n "$(ls -A ~/.cache/fs-origin 2>/dev/null)" ]; then
+	resolved=$(jq -rn --argjson n "$target" --argjson map "$(fs_map)" --argjson spaces "$(yabai -m query --spaces)" \
+		--argjson windows "$(yabai -m query --windows)" '
+		($spaces | map(select(.index == $n)) | first) as $ws
+		| [$spaces[] | select(."is-native-fullscreen" and ($map[(.id | tostring)] == $ws.id)) | .index] as $kids
+		| [$windows[] | select(.space == $n and ."is-sticky" == false and ."is-minimized" == false and ."is-hidden" == false)] as $own
+		| if ($kids | length) > 0 and (($own | length) == 0 or $ws."has-focus") then $kids[0] else empty end') &&
 		[ -n "$resolved" ] && target=$resolved
 fi
 fallback() {

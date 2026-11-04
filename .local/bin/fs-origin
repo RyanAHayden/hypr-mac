@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Native fullscreen Desktops belong to the workspace they were made from. yabai's space_changed runs this (yabairc):
+# landing on a fullscreen Desktop for the first time records the Space you came from, so `ws` cycles it right after
+# that workspace and yabai-helper shows it next to it in the bar. space_destroyed drops the record.
+#   ~/.cache/fs-origin/<fullscreen space id>  holds  <origin space id>   (ids are stable; indexes shift)
+export PATH="/opt/homebrew/bin:$PATH"
+dir=~/.cache/fs-origin
+case $1 in
+	gone) rm -f "$dir/${YABAI_SPACE_ID:?}"; exit 0 ;;
+esac
+id=${YABAI_SPACE_ID:?} from=${YABAI_RECENT_SPACE_ID:-}
+[ -e "$dir/$id" ] && exit 0
+[ "$(yabai -m query --spaces --space | jq '."is-native-fullscreen"')" = true ] || exit 0
+# came from another fullscreen Desktop: inherit its workspace
+[ -n "$from" ] && [ -e "$dir/$from" ] && from=$(<"$dir/$from")
+[ -n "$from" ] && mkdir -p "$dir" && echo "$from" >"$dir/$id"
+~/.local/bin/notify-post wm.bar 2>/dev/null

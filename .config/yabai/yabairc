@@ -43,6 +43,10 @@ for ev in window_destroyed window_minimized application_terminated; do
   signal "closed_$ev" "$ev" "$post wm.closed"
 done
 signal demin window_deminimized "$post wm.demin"
+# Native fullscreen Desktops remember the workspace they came from (.local/bin/fs-origin): ws cycles them right
+# after it, SUPER+its number reaches them, the bar shows them next to it
+signal fs_origin space_changed "[ -e $HOME/.cache/fs-origin/\$YABAI_SPACE_ID ] || $HOME/.local/bin/fs-origin"
+signal fs_origin_gone space_destroyed "$HOME/.local/bin/fs-origin gone"
 
 # --- Floating apps -----------------------------------------------------------
 rule float_settings app="^(System Settings|Calculator|Syncthing|Archive Utility|Installer|Raycast|AltTab|DaVinci Resolve|Safari|Tailscale|Karabiner-Elements)$" manage=off

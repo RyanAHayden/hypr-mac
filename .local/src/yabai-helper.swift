@@ -231,6 +231,8 @@ typealias Item = (label: String, state: Character) // a = shown on its display, 
 // 1-5 always, higher Spaces when occupied or shown; Space 11 is the scratchpad ("S") and goes first. Only real
 // windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
 // restarting), so the bar keeps what it shows instead of blinking off and uncovering the menus.
+var onFullscreen = false // a display shows a native fullscreen Desktop (set by workspaces())
+
 func workspaces() -> [String: [Item]]? {
 	guard let windows = query(["--windows"]) as? [[String: Any]], let displays = query(["--displays"]) as? [[String: Any]],
 		let spaces = query(["--spaces"]) as? [[String: Any]], !displays.isEmpty, !spaces.isEmpty else { return nil }
@@ -239,15 +241,34 @@ func workspaces() -> [String: [Item]]? {
 	}.compactMap { $0["id"] as? Int })
 	var uuidOf = [Int: String]()
 	for d in displays { if let i = d["index"] as? Int, let u = d["uuid"] as? String { uuidOf[i] = u } }
-	var rows = [String: [(Int, Item)]]()
+	// Native fullscreen Desktops belong to the workspace they came from (.local/bin/fs-origin): shown as "F" right after it
+	let dir = NSHomeDirectory() + "/.cache/fs-origin/"
+	var indexOf = [Int: Int]()
+	for s in spaces { if let id = s["id"] as? Int, let i = s["index"] as? Int { indexOf[id] = i } }
+	var originOf = [Int: Int]() // fullscreen space index -> its workspace's index
+	for f in (try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? [] {
+		guard let fs = Int(f), let o = (try? String(contentsOfFile: dir + f, encoding: .utf8)).flatMap({ Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }),
+			let fi = indexOf[fs], let oi = indexOf[o] else { continue }
+		originOf[fi] = oi
+	}
+	let parents = Set(originOf.values)
+	var rows = [String: [(Double, Item)]]()
+	var fullscreen = Set<String>() // displays showing a native fullscreen Space: no menu bar there, so no bar
 	for s in spaces {
 		guard let i = s["index"] as? Int, i != attic, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
-		let occupied = (s["windows"] as? [Int] ?? []).contains { real.contains($0) }
 		let shown = flag(s, "is-visible")
-		guard i <= 5 || shown || occupied else { continue }
+		if flag(s, "is-native-fullscreen") {
+			if shown { fullscreen.insert(uuid) }
+			rows[uuid, default: []].append((Double(originOf[i] ?? 100 + i) + 0.5, ("F", shown ? "a" : "o")))
+			continue
+		}
+		let occupied = (s["windows"] as? [Int] ?? []).contains { real.contains($0) }
+		guard i <= 5 || shown || occupied || parents.contains(i) else { continue }
 		let label = i == 11 ? "S" : String(i) // 11 = the scratchpad (.local/bin/scratchpad)
-		rows[uuid, default: []].append((i == 11 ? 0 : i, (label, shown ? "a" : occupied ? "o" : "e")))
+		rows[uuid, default: []].append((Double(i == 11 ? 0 : i), (label, shown ? "a" : occupied ? "o" : "e")))
 	}
+	for uuid in fullscreen { rows[uuid] = [] } // layout() orders out a display's bar with no items
+	onFullscreen = !fullscreen.isEmpty
 	return rows.mapValues { $0.sorted { $0.0 < $1.0 }.map(\.1) }
 }
 
@@ -330,7 +351,11 @@ final class Bar {
 		}
 	}
 
+	var leftFullscreen = false
 	func layout(_ rows: [String: [Item]]) {
+		// A panel ordered out on a native fullscreen Desktop comes back pinned to the one Space it's shown on again
+		// (canJoinAllSpaces lost, re-ordering doesn't help); fresh panels join all Spaces, so rebuild once on the way out.
+		if onFullscreen { leftFullscreen = true } else if leftFullscreen { leftFullscreen = false; rebuild(); return }
 		for (id, p) in panels {
 			let h = barHeight(p.screen)
 			let items = rows[id] ?? []
