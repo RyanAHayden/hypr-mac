@@ -93,6 +93,13 @@ hotkey 29 true 51 20 917504
 hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
+# macOS Dictation on, started by the hidden F19 key (keycode 80, no modifiers), which SUPER+Alt+Space sends
+# through skhd: there's no command or AppleScript to start Dictation, only its keyboard shortcut
+defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 1
+defaults write com.apple.assistant.support "Dictation Enabled" -bool true
+hotkey 164 true 65535 80 0
+# skip the one-time "Do you want to enable Dictation?" prompt
+defaults write com.apple.speech.recognition.AppleSpeechRecognition.prefs DictationIMIntroMessagePresented -bool true
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 # F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, reapplied at login by a LaunchAgent
 fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
@@ -141,11 +148,12 @@ if $sip_off; then
 		sudo sqlite3 "$1" "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,flags,last_modified)
 			VALUES ('$2','$3',${5:-0},2,3,1,X'$(csreq_hex "$4")',0,CAST(strftime('%s','now') AS INTEGER));"
 	}
-	tcc_automation() { # bundle-id app-path: let it script System Events (osascript below: login items, dark mode, wallpaper)
-		local se="/System/Library/CoreServices/System Events.app"
+	tcc_automation() { # client app-or-binary-path [client_type 0 bundle/1 path] [target-bundle-id target-path]: let it send
+		# Apple Events to the target without the "wants to control" prompt (default: System Events, for osascript below)
+		local tid=${4:-com.apple.systemevents} tpath=${5:-/System/Library/CoreServices/System Events.app}
 		sqlite3 "$userdb" "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,flags,
 			indirect_object_identifier_type,indirect_object_identifier,indirect_object_code_identity,last_modified)
-			VALUES ('kTCCServiceAppleEvents','$1',0,2,3,1,X'$(csreq_hex "$2")',0,0,'com.apple.systemevents',X'$(csreq_hex "$se")',
+			VALUES ('kTCCServiceAppleEvents','$1',${3:-0},2,3,1,X'$(csreq_hex "$2")',0,0,'$tid',X'$(csreq_hex "$tpath")',
 			CAST(strftime('%s','now') AS INTEGER));"
 	}
 	sysdb="/Library/Application Support/com.apple.TCC/TCC.db"
@@ -166,6 +174,11 @@ if $sip_off; then
 		b=$(readlink -f "$(command -v $bin)")
 		tcc_grant "$sysdb" kTCCServiceAccessibility "$b" "$b" 1
 	done
+	# skhd binds script Finder (SUPER+Shift+F opens a new window) and post keys (skhd -k: Dictation)
+	skhd_bin=$(readlink -f "$(command -v skhd)")
+	tcc_automation "$skhd_bin" "$skhd_bin" 1 com.apple.finder /System/Library/CoreServices/Finder.app
+	tcc_automation "$skhd_bin" "$skhd_bin" 1
+	tcc_grant "$sysdb" kTCCServicePostEvent "$skhd_bin" "$skhd_bin" 1
 	for svc in Accessibility ScreenCapture; do
 		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
 	done

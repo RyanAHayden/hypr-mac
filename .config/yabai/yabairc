@@ -31,6 +31,11 @@ yabai -m config mouse_drop_action swap
 # --- Floating apps -----------------------------------------------------------
 rule float_settings app="^(System Settings|Calculator|Syncthing|Archive Utility|Installer|Raycast|AltTab|DaVinci Resolve|Safari|Tailscale|Karabiner-Elements)$" manage=off
 rule float_finder_ops app="^Finder$" title="^(Copy|Move|Delete|Trash)$" manage=off
+# Spotify, Discord and KeePassXC live on workspace "0" (Space 11, SUPER+`). Their skhd binds go there;
+# the rules only place windows, so an app starting by itself (login) doesn't pull you over.
+# KeePassXC: only its main window (title ends "KeePassXC"), not browser-access popups over the browser.
+rule ws0_apps app="^(Spotify|Discord)$" space=11
+rule ws0_keepass app="^KeePassXC$" title="KeePassXC$" space=11
 
 # --- SwiftBar workspace indicator (~/.config/swiftbar/workspace.5s.sh) -------
 # Ask SwiftBar to rerun the plugin now instead of waiting for its 5s refresh

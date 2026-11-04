@@ -54,7 +54,9 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+Space | Raycast (its own hotkey, so it toggles) |
 | Option+Tab | AltTab (window switcher with previews) |
 | Cmd+Shift+B / Return / Option+B | Helium / new window / incognito |
-| Cmd+Shift+F, N, T, / | Finder, nvim, btop, KeePassXC |
+| Cmd+Shift+F, N, T | new Finder window, nvim, btop |
+| Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on workspace 0 (their windows always open there) |
+| Cmd+Option+Space | macOS Dictation (setup gives it a hidden F19 shortcut) |
 | Cmd+W / Cmd+Shift+W / Cmd+S | close / force kill / minimize |
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |

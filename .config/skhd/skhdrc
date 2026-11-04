@@ -12,11 +12,16 @@ lcmd + alt - return           : touch ~/.cache/yabai-new-window; open -na Ghostt
 lcmd + shift - b              : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
 lcmd + shift - return         : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
 lcmd + shift + alt - b        : touch ~/.cache/yabai-new-window; open -na Helium --args --incognito
-lcmd + shift - f              : open ~
+lcmd + shift - f              : touch ~/.cache/yabai-new-window; osascript -e 'tell application "Finder"' -e 'make new Finder window to home' -e 'activate' -e 'end tell'
 lcmd + shift - n              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim
 lcmd + shift - t              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop
 lcmd + shift - g              : open -a Steam
-lcmd + shift - 0x2C           : open -a KeePassXC
+# Discord, Spotify and KeePassXC live on workspace "0" (yabairc rules keep their windows there)
+lcmd + shift - c              : ~/.local/bin/ws focus 0; open -a Discord
+lcmd + shift - m              : ~/.local/bin/ws focus 0; open -a Spotify
+lcmd + shift - 0x2C           : ~/.local/bin/ws focus 0; open -a KeePassXC
+# macOS Dictation: setup.sh gives it the hidden F19 (0x50) shortcut, since it has no command to start it
+lcmd + alt - space            : skhd -k "0x50"
 lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
 lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
