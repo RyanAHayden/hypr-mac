@@ -22,7 +22,11 @@ lcmd + shift - m              : ~/.local/bin/scratchpad show; open -a Spotify
 lcmd + shift - 0x2C           : ~/.local/bin/scratchpad show; open -a KeePassXC
 # macOS Dictation: setup.sh gives it the hidden F19 (0x50) shortcut, since it has no command to start it
 lcmd + alt - space            : skhd -k "0x50"
-lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
+# Screenshot: select an area, copied to the clipboard (macOS's own Ctrl+Option+Shift+4, see setup.sh, so skhd needs no
+# Screen Recording permission). Ctrl+Shift+4 saves the area to a file instead, Ctrl+Shift+5 opens the screenshot toolbar.
+lcmd + shift - s              : skhd -k "ctrl + alt + shift - 4"
+# Sound panel from the menu bar (Control Center's Sound item, shown by setup.sh): output device, volume
+lcmd + ctrl - s               : osascript -e 'tell application "System Events" to tell process "ControlCenter" to click (first menu bar item of menu bar 1 whose description is "Sound")'
 lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
 lcmd + shift - q              : open -a Calculator

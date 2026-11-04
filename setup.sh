@@ -104,6 +104,8 @@ hotkey 29 true 51 20 917504
 hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
+# Sound in the menu bar (always), so SUPER+Ctrl+S can open its panel
+defaults -currentHost write com.apple.controlcenter Sound -int 18
 # macOS Dictation on, started by the hidden F19 key (keycode 80, no modifiers), which SUPER+Alt+Space sends
 # through skhd: there's no command or AppleScript to start Dictation, only its keyboard shortcut
 defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 1
