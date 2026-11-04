@@ -12,8 +12,15 @@ export PATH="/opt/homebrew/bin:$PATH"
 render() {
 	local spaces
 	spaces=$(yabai -m query --spaces 2>/dev/null) || return 1
+	# Only count real windows: a Space's window list also holds sticky windows (on every Space, e.g.
+	# minimized ones, see minimize_sticky.sh) and minimized/hidden ones, which would mark every
+	# Space occupied and widen the bar into the notch.
+	local real
+	real=$(yabai -m query --windows 2>/dev/null |
+		jq -c '[ .[] | select(."is-sticky" == false and ."is-minimized" == false and ."is-hidden" == false) | .id ]') || real='[]'
 	# Space 11 is workspace "0" (the ~ key, left of 1): label it 0 and draw it first
-	spaces=$(jq '[ .[] | .name = (if .index == 11 then "0" else (.index | tostring) end) ]
+	spaces=$(jq --argjson real "$real" '[ .[] | .windows |= map(select(. as $w | $real | index($w)))
+		| .name = (if .index == 11 then "0" else (.index | tostring) end) ]
 		| sort_by(if .index == 11 then 0 else .index end)' <<<"$spaces")
 	local args
 	args=$(jq -r '[ .[] | select(.index <= 5 or ."has-focus" or (.windows | length) > 0)

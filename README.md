@@ -72,7 +72,8 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 
 Workspaces 1-9 and 10 sit on SUPER+1..0; workspace "0" is the 11th Space on SUPER+` (move a window there:
 SUPER+Shift+`) and is drawn first in the bar, matching the key left of 1. SUPER+A/D cycle in that order
-(0, 1..10) and wrap around.
+(0, 1..10) and wrap around. Minimized windows don't keep their workspace: restoring one (Raycast, a bind, the Dock)
+brings it up on the current workspace (`.config/yabai/minimize_sticky.sh` keeps it sticky while minimized).
 `.config/swiftbar/workspace.5s.sh` (SwiftBar) shows 1-5 plus any occupied Space; current = white pill,
 occupied = white, empty = grey. Drawn by `.local/src/ws-render.swift` (built to `~/.local/bin/ws-render` by setup.sh).
 yabai signals in `.config/yabai/yabairc` call `swiftbar://refreshplugin?name=workspace` so it redraws instantly.
