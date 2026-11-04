@@ -1,3 +1,0 @@
-#!/bin/bash
-# SUPER+Escape: Raycast's Search Script Commands with "Power" typed, listing .config/raycast/scripts/power-*.sh
-open -g "raycast://extensions/raycast/raycast/search-script-commands?fallbackText=Power"

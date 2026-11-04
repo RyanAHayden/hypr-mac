@@ -8,6 +8,8 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "==> Homebrew packages"
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
 brew install stow tmux syncthing jq neovim ripgrep btop
+# sqlcipher writes Raycast's encrypted settings (see below)
+brew install sqlcipher
 brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/borders
 brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
@@ -31,9 +33,10 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> yabai-helper (workspace bar, focus fixes, alt-tab) and notify-post"
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post and power-menu"
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
+swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
 mkdir -p ~/.cache
 
 echo "==> dark mode and wallpaper"
@@ -151,6 +154,23 @@ fi
 defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool false
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
 defaults write com.raycast.macos showGettingStartedLink -bool false
+# minimal Raycast: compact window (no suggestions until you type), no favorites, and the deeplinks skhd uses
+# run without a "Request to run" prompt
+defaults write com.raycast.macos raycastPreferredWindowMode -string compact
+defaults write com.raycast.macos showFavoritesInCompactMode -bool false
+defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add builtin_command_clipboardHistory -bool true
+defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add builtin_command_searchEmoji -bool true
+# AI, upsells (Pro, affiliate, Wrapped, Store), Notes, Focus, Teams, MCP, Calendar, Translate, Window Management
+# etc. turned off, and the script folder added: .config/raycast/settings.sql, made by turning them off in Settings and
+# dumping raycastConfiguration. Raycast's database is SQLCipher, keyed by sha256(keychain key + a salt in the app).
+raydb="$HOME/Library/Application Support/com.raycast.macos/raycast-enc.sqlite"
+if raykey=$(security find-generic-password -s Raycast -a database_key -w 2>/dev/null) && [ -f "$raydb" ]; then
+	raykey=$(printf '%s' "${raykey}yvkwWXzxPPBAqY2tmaKrB*DvYjjMaeEf" | shasum -a 256 | cut -d' ' -f1)
+	{ echo "PRAGMA key = '$raykey';"; cat "$REPO/.config/raycast/settings.sql"; } |
+		"$(brew --prefix sqlcipher)/bin/sqlcipher" "$raydb" >/dev/null
+else
+	echo "  (Raycast hasn't made its database yet - open it once, then re-run setup for its settings)"
+fi
 defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
 killall Dock SystemUIServer 2>/dev/null || true
 # SIP off (see README): grant Ghostty/Terminal every permission in the TCC databases, drop the privacy

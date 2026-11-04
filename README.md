@@ -78,7 +78,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Ctrl+Option+Tab (+Shift) | focus next (previous) display |
 | Cmd+Shift+Option+arrows | move the whole Space to the display that way (renumbers Spaces) |
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
-| Cmd+Escape | Raycast listing the Power: commands: lock, sleep, toggle lid sleep, relaunch yabai/skhd, log out, restart, shut down |
+| Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, relaunch yabai/skhd, log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Cmd+Ctrl+N / D / P, Cmd+Shift+Q | Network / Displays / Battery settings, Calculator |
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |
@@ -119,8 +119,9 @@ workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won'
   Accessibility > Reduce motion makes it a fade), Desktops are created by hand, and window opacity, pop out (sticky/on top),
   scratchpad toggle-back, silent moves, previous Space and moving Spaces between displays don't work (they need the SA).
 - No pseudo-tiling, Quake console, notification binds, save/restore width, window labels.
-- Cmd+Escape needs Raycast to know the script folder once: Raycast Settings > Extensions > + > Add Script Directory >
-  `~/.config/raycast/scripts`.
+- Raycast is trimmed down by setup (compact window, AI and upsell commands off, script folder added):
+  `.config/raycast/settings.sql` is written into its encrypted settings database. Raycast has to have been opened
+  once first. To change it, flip things in Raycast Settings and re-dump its `raycastConfiguration` table.
 - Not ported (Linux/desktop only): gaming (stretched res, MangoHud caps, gamescope, crosshair, xpadneo), Sunshine,
   sddm/limine/plymouth, TPM2, reboot-to-windows, GPU toggle, monitor mirror/TV/pin, focus lock, window labels,
   per-window volume, SUPER+scroll zoom (use Accessibility > Zoom with a modifier), `clds` (Linux sudo wrapper). `c` runs `cld` (claude, bypass permissions, auto-trusts $PWD).

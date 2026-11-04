@@ -1,5 +1,5 @@
 #!/bin/bash
-# SUPER+Escape opens Raycast filtered to the "Power:" commands (~/.local/bin/power-menu)
+# Also in the SUPER+Escape system menu (.local/src/power-menu.swift)
 
 # @raycast.schemaVersion 1
 # @raycast.title Power: Sleep

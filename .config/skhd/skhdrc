@@ -26,7 +26,7 @@ lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-
 lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
 lcmd + shift - q              : open -a Calculator
-# Raycast: clipboard history, emoji picker, and the power commands (.local/bin/power-menu)
+# Raycast: clipboard history and emoji picker; SUPER+Escape: system menu (.local/src/power-menu.swift)
 lcmd + ctrl - v               : open -g "raycast://extensions/raycast/clipboard-history/clipboard-history"
 lcmd + ctrl - e               : open -g "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"
 lcmd - escape                 : ~/.local/bin/power-menu
