@@ -1,8 +1,9 @@
 #!/bin/bash
-# set-wallpaper IMAGE: desktop picture on every Space and display.
+# set-wallpaper IMAGE: desktop picture on every Space and display, including ones made later.
 # System Events sets it the supported way, which writes a store entry WallpaperAgent accepts (with a file
 # bookmark; a hand-written entry without one falls back to the default wallpaper) but only for the
-# current Space. Copy that entry to every other Space, then restart the agent so it re-reads the store.
+# current Space. Turn that entry into Wallpaper settings' "Show on all Spaces" (one AllSpacesAndDisplays
+# entry, no per-Space or per-display ones), then restart the agent so it re-reads the store.
 set -euo pipefail
 [ -f "${1:-}" ] || { echo "usage: set-wallpaper IMAGE" >&2; exit 1; }
 img="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
@@ -13,14 +14,16 @@ sleep 1
 import copy, pathlib, plistlib
 p = pathlib.Path.home() / "Library/Application Support/com.apple.wallpaper/Store/Index.plist"
 d = plistlib.loads(p.read_bytes())
-desk = d["SystemDefault"]["Desktop"]
+# the entry System Events just wrote: the most recently set one, wherever it landed
+entries = [d.get("AllSpacesAndDisplays"), d.get("SystemDefault")]
 for space in d.get("Spaces", {}).values():
-    if "Default" in space:
-        space["Default"]["Desktop"] = copy.deepcopy(desk)
-    for display in space.get("Displays", {}).values():
-        display["Desktop"] = copy.deepcopy(desk)
-for display in d.get("Displays", {}).values():
-    display["Desktop"] = copy.deepcopy(desk)
+    entries += [space.get("Default"), *space.get("Displays", {}).values()]
+entries += d.get("Displays", {}).values()
+new = max((e for e in entries if e and "Desktop" in e), key=lambda e: e["Desktop"].get("LastSet", 0))
+d["AllSpacesAndDisplays"] = copy.deepcopy(new)
+d["SystemDefault"] = copy.deepcopy(new)
+d["Spaces"] = {}
+d["Displays"] = {}
 p.write_bytes(plistlib.dumps(d, fmt=plistlib.FMT_BINARY))
 PY
 launchctl kickstart -k "gui/$(id -u)/com.apple.wallpaper.agent"

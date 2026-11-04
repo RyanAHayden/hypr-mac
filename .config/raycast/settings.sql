@@ -197,7 +197,7 @@ INSERT INTO raycastConfiguration (extensionId, configuration, updatedAt) VALUES 
 }', CURRENT_TIMESTAMP);
 INSERT INTO raycastConfiguration (extensionId, configuration, updatedAt) VALUES ('builtin_package_scriptCommands', '{
   "scriptCommandsDirectories" : [
-    "~\/macos-config\/.config\/raycast\/scripts"
+    "@SCRIPTS@"
   ]
 }', CURRENT_TIMESTAMP);
 INSERT INTO raycastConfiguration (extensionId, configuration, updatedAt) VALUES ('builtin_package_selected-text', '{

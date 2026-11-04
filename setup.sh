@@ -135,9 +135,32 @@ cat >~/Library/LaunchAgents/com.ryha.yabai-helper.plist <<PLIST
 PLIST
 launchctl bootout gui/$UID/com.ryha.yabai-helper 2>/dev/null || true
 launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.yabai-helper.plist
+# lid-sleep-watcher (.local/bin): blanks the screen when the lid shuts while sleep is disabled ("Keep Awake With Lid
+# Closed"). Disabled sleep survives a reboot, so start it at login too; it quits right away if sleep is on, and the
+# toggle kickstarts it.
+cat >~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.ryha.lid-sleep-watcher</string>
+	<key>ProgramArguments</key><array><string>$HOME/.local/bin/lid-sleep-watcher</string></array>
+	<key>RunAtLoad</key><true/>
+</dict>
+</plist>
+PLIST
+launchctl bootout gui/$UID/com.ryha.lid-sleep-watcher 2>/dev/null || true
+launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist
 # Default menu bar icon spacing (it was tightened to fit the old right-side workspace bar next to the notch)
 defaults -currentHost delete -globalDomain NSStatusItemSpacing 2>/dev/null || true
 defaults -currentHost delete -globalDomain NSStatusItemSelectionPadding 2>/dev/null || true
+raydb="$HOME/Library/Application Support/com.raycast.macos/raycast-enc.sqlite"
+# Raycast makes its settings database (written below) on first launch, so launch it once on a fresh Mac
+if [ ! -f "$raydb" ]; then
+	open -ga Raycast
+	for _ in $(seq 30); do [ -f "$raydb" ] && break; sleep 1; done
+	sleep 3
+fi
 # hide menu bar icons: AltTab, MiddleClick, Raycast, Spotlight (quit apps first or they overwrite this)
 for a in AltTab MiddleClick Raycast; do osascript -e "quit app \"$a\"" 2>/dev/null || true; done
 sleep 2
@@ -163,10 +186,10 @@ defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add builtin
 # AI, upsells (Pro, affiliate, Wrapped, Store), Notes, Focus, Teams, MCP, Calendar, Translate, Window Management
 # etc. turned off, and the script folder added: .config/raycast/settings.sql, made by turning them off in Settings and
 # dumping raycastConfiguration. Raycast's database is SQLCipher, keyed by sha256(keychain key + a salt in the app).
-raydb="$HOME/Library/Application Support/com.raycast.macos/raycast-enc.sqlite"
+# @SCRIPTS@ in it is the script folder, in this repo wherever it's cloned.
 if raykey=$(security find-generic-password -s Raycast -a database_key -w 2>/dev/null) && [ -f "$raydb" ]; then
 	raykey=$(printf '%s' "${raykey}yvkwWXzxPPBAqY2tmaKrB*DvYjjMaeEf" | shasum -a 256 | cut -d' ' -f1)
-	{ echo "PRAGMA key = '$raykey';"; cat "$REPO/.config/raycast/settings.sql"; } |
+	{ echo "PRAGMA key = '$raykey';"; sed "s|@SCRIPTS@|$REPO/.config/raycast/scripts|" "$REPO/.config/raycast/settings.sql"; } |
 		"$(brew --prefix sqlcipher)/bin/sqlcipher" "$raydb" >/dev/null
 else
 	echo "  (Raycast hasn't made its database yet - open it once, then re-run setup for its settings)"
@@ -240,7 +263,7 @@ sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownl
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate ConfigDataInstall -bool true
-# "Toggle Lid Sleep" in Raycast (.config/raycast/scripts/power-lid-sleep.sh) flips sleep without a password
+# "Keep Awake With Lid Closed" (.config/raycast/scripts/power-lid-sleep.sh) flips sleep without a password
 echo "$(whoami) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1" |
 	sudo tee /private/etc/sudoers.d/pmset >/dev/null
 sudo chmod 440 /private/etc/sudoers.d/pmset

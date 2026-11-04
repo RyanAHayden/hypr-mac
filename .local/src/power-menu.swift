@@ -42,20 +42,32 @@ add("Log Out", "o", "power-logout.sh", "rectangle.portrait.and.arrow.right")
 add("Restart", "r", "power-restart.sh", "restart")
 add("Shut Down", "p", "power-shutdown.sh", "power")
 
-let app = NSApplication.shared
-app.setActivationPolicy(.accessory)
-app.activate(ignoringOtherApps: true)
-let mouse = NSEvent.mouseLocation
-let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main!
-let size = menu.size
-let at = NSPoint(x: screen.frame.midX - size.width / 2, y: screen.frame.midY + size.height / 2)
-// popUp blocks until the menu closes; with no view the point is in screen coordinates
-menu.popUp(positioning: menu.items.first, at: at, in: nil)
-
-if let script = target.picked {
+func run(_ script: String) {
 	let p = Process()
 	p.executableURL = URL(fileURLWithPath: "/bin/bash")
 	p.arguments = [scripts + script]
 	try? p.run()
 	p.waitUntilExit()
 }
+
+// activate once launching has finished: before that macOS ignores the request and the menu gets no keys
+final class Delegate: NSObject, NSApplicationDelegate {
+	func applicationDidFinishLaunching(_ note: Notification) {
+		NSApp.activate(ignoringOtherApps: true)
+		DispatchQueue.main.async {
+			let mouse = NSEvent.mouseLocation
+			let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main!
+			let size = menu.size
+			let at = NSPoint(x: screen.frame.midX - size.width / 2, y: screen.frame.midY + size.height / 2)
+			// popUp blocks until the menu closes; with no view the point is in screen coordinates
+			menu.popUp(positioning: menu.items.first, at: at, in: nil)
+			if let script = target.picked { run(script) }
+			exit(0)
+		}
+	}
+}
+let app = NSApplication.shared
+let delegate = Delegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()
