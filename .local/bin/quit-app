@@ -5,4 +5,7 @@ pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
 [[ $pid =~ ^[0-9]+$ ]] || exit 0
 # Finder has no Quit (Cmd+Q does nothing there); keep it that way
 [ "$(ps -o comm= -p "$pid")" = /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder ] && exit 0
+# Closing/quitting makes macOS activate another app; tell the instant alt-tab helper that's not an
+# alt-tab, or it jumps to that app's workspace instead of staying on this (now empty) one
+touch ~/.cache/ws-switch
 osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate; ''" >/dev/null

@@ -47,9 +47,13 @@ if [ -n "$sa" ]; then
     killall Dock   # dock_did_restart reloads the SA
   fi
   signal instant_alttab application_activated "/bin/bash $CONFIG_ROOT/focus_app_space.sh"
+  # Closing a workspace's last window (red button, an app's own Cmd+W) also makes macOS activate another
+  # app; mark it so the helper stays put. Best effort: this can race the activation (SUPER+W/Q mark first).
+  signal stay_on_close window_destroyed "touch $HOME/.cache/ws-switch"
+  signal stay_on_quit application_terminated "touch $HOME/.cache/ws-switch"
 else
   # No SA: nothing could switch Spaces for us, so hand it back to macOS
-  yabai -m signal --remove instant_alttab 2>/dev/null
+  yabai -m signal --remove instant_alttab 2>/dev/null; yabai -m signal --remove stay_on_close 2>/dev/null; yabai -m signal --remove stay_on_quit 2>/dev/null
   if [ "$(defaults read -g AppleSpacesSwitchOnActivate 2>/dev/null)" = 0 ]; then
     defaults delete -g AppleSpacesSwitchOnActivate
     killall Dock
