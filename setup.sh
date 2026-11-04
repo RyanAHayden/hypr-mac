@@ -183,6 +183,12 @@ if $sip_off; then
 		echo "  (set boot-args for the scripting addition - reboot, then re-run setup)"
 	}
 fi
+# no automatic macOS updates (a new major breaks the yabai scripting addition until yabai catches up);
+# still check, and keep Rapid Security Responses / XProtect data. Update by hand in System Settings.
+sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool false
+sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
+sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true
+sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate ConfigDataInstall -bool true
 # AltTab: stop Sequoia's monthly "bypass the private window picker" screen recording prompt
 # (replayd's container is App Data, so this needs the terminal to have Full Disk Access)
 defaults write ~/Library/Group\ Containers/group.com.apple.replayd/ScreenCaptureApprovals \

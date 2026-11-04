@@ -21,7 +21,9 @@ config file stowed into `~`. Older setups are in git history.
    creates the 11 Desktops. `csrutil enable` in Recovery turns SIP back on.
 2. `./setup.sh` - installs packages, stows using --adopt so you can see git changes before discarding what you
    want to change, and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai or
-   skhd (the sudoers rule and permissions pin the binaries).
+   skhd (the sudoers rule and permissions pin the binaries). It also turns off automatic macOS update
+   downloads/installs (security responses still install): check yabai supports a new macOS before upgrading, and
+   install minor updates by hand from Software Update ("Other updates" lists same-major ones).
 3. Approve Karabiner-Elements' driver (General > Login Items & Extensions) and log out/in. With SIP on you also
    have to do the rest by hand: grant Accessibility (yabai, skhd, AltTab, MiddleClick), Input Monitoring
    (Karabiner-Core-Service), give Ghostty and Terminal every Privacy & Security permission (Full Disk Access,
