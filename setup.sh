@@ -9,17 +9,31 @@ MACARCHY="$HOME/macarchy"
 echo "==> Homebrew packages"
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
 brew install stow tmux syncthing jq
-brew install --cask keepassxc font-jetbrains-mono-nerd-font zen spotify discord alt-tab swiftbar middleclick
+# LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
+brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
+brew install --cask keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab swiftbar middleclick
 
 echo "==> Macarchy (everything except its SketchyBar; the native menu bar + SwiftBar is used instead)"
 [ -d "$MACARCHY" ] || git clone https://github.com/HarryRandall/macarchy "$MACARCHY"
-# drop our local.yabairc include (re-added below) so Macarchy doesn't see yabairc as locally edited
-[ -f ~/.config/yabai/yabairc ] && perl -0777 -pi -e 's/\n# Personal overrides \(not managed by Macarchy\)\n\[ -f "\$CONFIG_ROOT\/local\.yabairc" \][^\n]*\n\z//' ~/.config/yabai/yabairc
+# if yabairc is Macarchy's plus appended lines (the local.yabairc include, re-added below), restore
+# Macarchy's copy so it isn't seen as locally edited; any other edit is left for Macarchy to report
+yrc=~/.config/yabai/yabairc
+if [ -f "$yrc" ] && head -c "$(wc -c <"$MACARCHY/yabai/yabairc")" "$yrc" | cmp -s - "$MACARCHY/yabai/yabairc"; then
+	cp "$MACARCHY/yabai/yabairc" "$yrc"
+fi
+# files this repo overrides that Macarchy also installs (skhdrc, nvim config): Macarchy stops if they
+# differ from its copy, so move any local edits into the repo and let it reinstall; stow links ours back below
+overrides=$(cd "$REPO" && git ls-files .config | while read -r f; do if [ -e "$MACARCHY/${f#.config/}" ]; then echo "$f"; fi; done)
+for f in $overrides; do
+	if [ -f ~/"$f" ] && [ ! -L ~/"$f" ] && ! cmp -s ~/"$f" "$MACARCHY/${f#.config/}"; then cp ~/"$f" "$REPO/$f"; fi
+	rm -f ~/"$f"
+done
 "$MACARCHY/install" window-manager terminal shell nvim utilities themes raycast
 brew trust --formula felixkratz/formulae/borders
 
 echo "==> stow"
 cd "$REPO"
+for f in $overrides; do rm -f ~/"$f"; done
 stow . --adopt
 # Macarchy's yabairc has no local include; add one line for local.yabairc
 grep -q local.yabairc ~/.config/yabai/yabairc || printf '\n# Personal overrides (not managed by Macarchy)\n[ -f "$CONFIG_ROOT/local.yabairc" ] && source "$CONFIG_ROOT/local.yabairc"\n' >>~/.config/yabai/yabairc
@@ -29,6 +43,12 @@ mkdir -p ~/.config/tmux/plugins
 for p in tmux-resurrect tmux-continuum; do
 	[ -d ~/.config/tmux/plugins/$p ] || git clone -q --depth 1 https://github.com/tmux-plugins/$p ~/.config/tmux/plugins/$p
 done
+
+echo "==> LazyVim plugins and treesitter parsers"
+nvim --headless "+Lazy! sync" +qa
+# parsers snacks wants for rendering images/math in docs (norg isn't in nvim-treesitter anymore)
+nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
+echo
 
 echo "==> workspace bar renderer"
 swiftc -O ~/.local/src/ws-render.swift -o ~/.local/bin/ws-render

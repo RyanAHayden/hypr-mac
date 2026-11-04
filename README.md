@@ -20,9 +20,9 @@ Full list: `.config/skhd/local.skhdrc` (Option+I shows it).
 | Option+Return / Option+Cmd+Return | Ghostty / Ghostty in tmux `Work` |
 | Option+Space | Raycast |
 | Option+Tab | AltTab (window switcher with previews) |
-| Option+Shift+B / Return / Cmd+B | Zen / blank window / private |
-| Option+Shift+F, N, T | Finder, nvim, btop |
-| Option+W / Option+Shift+W | close / force kill |
+| Option+Shift+B / Return / Cmd+B | Helium / new window / incognito |
+| Option+Shift+F, N, T, / | Finder, nvim, btop, KeePassXC |
+| Option+W / Option+Shift+W / Option+S | close / force kill / minimize |
 | Option+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Option+1..0, Shift+1..0 | Space / move window to Space |
 | Option+A/D, Shift+A/D | prev/next Space / move window there |

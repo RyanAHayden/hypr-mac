@@ -1,4 +1,5 @@
---ignore='^/setup\.sh$'
---ignore='^/README\.md$'
---ignore='^/\.gitignore$'
---ignore='\.DS_Store'
+--ignore=^setup\.sh$
+--ignore=^README\.md$
+--ignore=^\.gitignore$
+--ignore=^\.stowrc$
+--ignore=\.DS_Store

@@ -12,3 +12,6 @@ quit-after-last-window-closed = true
 # Shift+Return / Alt+Shift+Return as CSI-u, so TUIs and tmux (M-S-Enter) can tell them apart
 keybind = shift+enter=text:\x1b[13;2u
 keybind = alt+shift+enter=text:\x1b[13;4u
+# over ssh, copy the xterm-ghostty terminfo to the host (or fall back to TERM=xterm-256color),
+# so tmux etc. on servers without it don't fail with "missing or unsuitable terminal"
+shell-integration-features = ssh-env,ssh-terminfo

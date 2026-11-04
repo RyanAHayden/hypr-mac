@@ -7,13 +7,14 @@
 lalt - return                 : /bin/bash ~/.config/yabai/launch_ghostty.sh
 lalt + cmd - return           : open -na Ghostty --args -e /opt/homebrew/bin/tmux new -A -s Work
 lalt - space                  : open -a Raycast
-lalt + shift - b              : open -na Zen
-lalt + shift - return         : open -na Zen --args --blank-window
-lalt + shift + cmd - b        : open -na Zen --args --private-window
+lalt + shift - b              : open -na Helium --args --new-window
+lalt + shift - return         : open -na Helium --args --new-window
+lalt + shift + cmd - b        : open -na Helium --args --incognito
 lalt + shift - f              : open ~
 lalt + shift - n              : open -na Ghostty --args -e /opt/homebrew/bin/nvim
 lalt + shift - t              : open -na Ghostty --args -e /opt/homebrew/bin/btop
 lalt + shift - g              : open -a Steam
+lalt + shift - 0x2C           : open -a KeePassXC
 lalt + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
 lalt + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lalt - i                      : open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/local.skhdrc
@@ -22,6 +23,7 @@ lalt - i                      : open -na Ghostty --args -e /usr/bin/less ~/.conf
 # --- Windows ---------------------------------------------------------------
 lalt - w                      : yabai -m window --close
 lalt + shift - w              : ~/.local/bin/force-kill-window
+lalt - s                      : yabai -m window --minimize
 lalt - f                      : yabai -m window --toggle zoom-fullscreen
 lalt + cmd - f                : yabai -m window --toggle native-fullscreen
 lalt - t                      : /bin/bash ~/.config/yabai/toggle_float_persist.sh
