@@ -39,7 +39,10 @@ lcmd + ctrl - p               : open "x-apple.systempreferences:com.apple.Batter
 lcmd - w                      : ~/.local/bin/close-window
 lcmd + shift - w              : ~/.local/bin/force-kill-window
 lcmd - q                      : ~/.local/bin/quit-app
-lcmd - m                      : yabai -m window --minimize
+# Minimize without the macOS animation: park the window on a hidden Space (yabai-helper); Option brings back the
+# latest (so does switching to its app, or picking it in AltTab)
+lcmd - m                      : ~/.local/bin/notify-post wm.hide
+lcmd + alt - m                : ~/.local/bin/notify-post wm.unhide
 lcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
 lcmd - f                      : yabai -m window --toggle zoom-fullscreen
 lcmd + ctrl - f               : yabai -m window --toggle zoom-parent   # tiled fullscreen: fill its split only

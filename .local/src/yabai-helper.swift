@@ -10,8 +10,13 @@
 //     on nothing, or on an app with no window here).
 //   - instant alt-tab across Spaces (scripting addition only): if the activated app has no window on this Space,
 //     jump to its most recent one (macOS's own "switch to a Space with open windows" is off, see yabairc).
-// yabai signals (yabairc) ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed (notifyutil takes
-// ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
+//   - SUPER+M "minimize" without the ~300 ms macOS animation: the window is parked on a hidden Space (12) and comes
+//     back to the Space you're on with SUPER+Option+M, by switching to its app (Dock, Cmd+Tab, Raycast) or by picking
+//     it (AltTab).
+//   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
+//     on the Space you're on rather than switching back to the one it was minimized on.
+// yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
+// wm.hide | wm.unhide (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
 import notify
 
@@ -60,12 +65,14 @@ func frame(_ w: [String: Any]) -> CGRect? { // yabai frames are in CG coordinate
 func flag(_ w: [String: Any], _ key: String) -> Bool { w[key] as? Bool ?? false }
 
 // A window you'd want focus on: not minimized, hidden or sticky (sticky = minimized ones parked on every Space, see
-// minimize_sticky.sh, and popped-out ones), and a normal window rather than a panel or dialog
+// syncMinimized, and popped-out ones), and a normal window rather than a panel or dialog
 func usable(_ w: [String: Any]) -> Bool {
 	!flag(w, "is-minimized") && !flag(w, "is-hidden") && !flag(w, "is-sticky") && w["role"] as? String == "AXWindow"
 }
 
 func currentSpace() -> Int? { one(["--spaces", "--space"])?["index"] as? Int }
+
+let attic = 12 // hidden Space SUPER+M parks windows on (not in the bar, skipped by SUPER+A/D)
 
 // MARK: - Focus
 
@@ -75,6 +82,8 @@ final class Focus {
 	var warpedTo = CGPoint.zero
 	var checkPending = false
 	var closedAt = Date.distantPast
+	var parked = [Int]() // SUPER+M'd window ids, oldest first (windows found on the attic without a record go last)
+	let stuckDir = NSHomeDirectory() + "/.cache/yabai-min-sticky" // windows made sticky while minimized, one file per id
 
 	// wm.focus: focus moved, or a window moved/resized. Opening several windows at once fires a burst of these,
 	// so coalesce them and act on wherever focus ends up.
@@ -91,6 +100,8 @@ final class Focus {
 		guard NSEvent.pressedMouseButtons == 0, // dragging a window: leave the mouse alone
 			let w = one(["--windows", "--window"]), let id = w["id"] as? Int, let f = frame(w),
 			let at = CGEvent(source: nil)?.location else { return }
+		// something focused a parked window (AltTab, Raycast's window search): bring it here instead
+		if w["space"] as? Int == attic, let space = currentSpace(), space != attic { bring(id, to: space); return }
 		let fresh = id != lastID
 		lastID = id
 		if f.contains(at) { return } // hover focused it, or the mouse is already there
@@ -108,6 +119,7 @@ final class Focus {
 	// wm.closed: macOS picks what gets focus a little after the close; check soon, and again in case it lands late
 	func closed() {
 		closedAt = Date()
+		syncMinimized()
 		for delay in [0.04, 0.15] { DispatchQueue.main.asyncAfter(deadline: .now() + delay) { self.refocus() } }
 	}
 
@@ -120,20 +132,75 @@ final class Focus {
 
 	// Instant alt-tab: macOS's own Space switch on activate is off (yabairc, scripting addition only), so do it here
 	func activated(_ app: NSRunningApplication) {
+		if Date().timeIntervalSince(closedAt) < 0.3 { return } // the activation a close/hide causes, not a switch
+		let pid = Int(app.processIdentifier)
+		guard let space = currentSpace(), space != attic else { return }
+		let windows = list(["--windows"])
+		let mine = windows.filter { $0["pid"] as? Int == pid && !flag($0, "is-minimized") && !flag($0, "is-hidden") }
+		if mine.contains(where: { $0["space"] as? Int == space }) { return } // already has a window here
+		// switching to an app whose windows are all parked (Dock, Cmd+Tab, Raycast) brings back its latest one
+		let atticIDs = mine.filter { $0["space"] as? Int == attic }.compactMap { $0["id"] as? Int }
+		if !atticIDs.isEmpty, !mine.contains(where: { $0["space"] as? Int != attic && !flag($0, "is-sticky") }) {
+			bring(parked.last(where: atticIDs.contains) ?? atticIDs[0], to: space)
+			return
+		}
 		guard let switchOnActivate = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleSpacesSwitchOnActivate"] as? NSNumber,
 			!switchOnActivate.boolValue else { return }
 		// skhd's "new window" binds touch this first: a window is on its way, so stay put
 		if age("yabai-new-window") < 2 { return }
 		// ws just switched Spaces, or a window just closed / an app quit (close binds, yabairc): this activation came
 		// from that, not from alt-tab. Those land 70-110 ms after; 300 ms covers them without eating a real alt-tab.
-		if age("ws-switch") < 0.3 || Date().timeIntervalSince(closedAt) < 0.3 { return }
-		let pid = Int(app.processIdentifier)
-		let windows = list(["--windows"])
-		guard let space = currentSpace() else { return }
-		let mine = windows.filter { $0["pid"] as? Int == pid && !flag($0, "is-minimized") && !flag($0, "is-hidden") }
-		if mine.contains(where: { $0["space"] as? Int == space }) { return } // already has a window here
+		if age("ws-switch") < 0.3 { return }
 		// front-to-back, so the first match is the app's most recently used window
-		if let id = mine.first(where: { !flag($0, "is-sticky") })?["id"] as? Int { focus(id) }
+		if let id = mine.first(where: { !flag($0, "is-sticky") && $0["space"] as? Int != attic })?["id"] as? Int { focus(id) }
+	}
+
+	// MARK: SUPER+M parking
+
+	func hide() {
+		guard let w = one(["--windows", "--window"]), let id = w["id"] as? Int, usable(w),
+			let space = currentSpace(), space != attic else { return }
+		closedAt = Date() // macOS activates another app after this; that's not a switch to it
+		parked.removeAll { $0 == id }
+		parked.append(id)
+		_ = yabai(["window", String(id), "--space", String(attic)])
+		refocus()
+	}
+
+	func unhide() {
+		guard let space = currentSpace(), space != attic else { return }
+		let here = list(["--windows", "--space", String(attic)]).filter(usable).compactMap { $0["id"] as? Int }
+		parked.removeAll { !here.contains($0) }
+		if let id = parked.last ?? here.first { bring(id, to: space) }
+	}
+
+	func bring(_ id: Int, to space: Int) {
+		parked.removeAll { $0 == id }
+		_ = yabai(["window", String(id), "--space", String(space)])
+		focus(id)
+	}
+
+	// MARK: real macOS minimize
+
+	// wm.closed (minimized, closed, quit) and wm.demin: minimized windows become sticky; ones restored since are
+	// un-stuck (re-tiled here) and focused; markers of windows that are gone are dropped (ids get reused)
+	func syncMinimized() {
+		try? FileManager.default.createDirectory(atPath: stuckDir, withIntermediateDirectories: true)
+		let windows = list(["--windows"])
+		guard !windows.isEmpty else { return }
+		let byID = Dictionary(windows.compactMap { w in (w["id"] as? Int).map { ($0, w) } }, uniquingKeysWith: { a, _ in a })
+		let stuck = Set((try? FileManager.default.contentsOfDirectory(atPath: stuckDir))?.compactMap(Int.init) ?? [])
+		for (id, w) in byID where flag(w, "is-minimized") && !flag(w, "is-sticky") && !stuck.contains(id) {
+			FileManager.default.createFile(atPath: "\(stuckDir)/\(id)", contents: nil)
+			_ = yabai(["window", String(id), "--toggle", "sticky"])
+		}
+		for id in stuck {
+			guard let w = byID[id] else { try? FileManager.default.removeItem(atPath: "\(stuckDir)/\(id)"); continue }
+			if flag(w, "is-minimized") { continue }
+			try? FileManager.default.removeItem(atPath: "\(stuckDir)/\(id)")
+			if flag(w, "is-sticky") { _ = yabai(["window", String(id), "--toggle", "sticky"]) }
+			focus(id)
+		}
 	}
 
 	func age(_ marker: String) -> TimeInterval {
@@ -150,16 +217,19 @@ let slotW: CGFloat = 24, pillH: CGFloat = 22, pad: CGFloat = 6
 typealias Item = (label: String, state: Character) // a = shown on its display, o = has windows, e = empty
 
 // 1-5 always, higher Spaces when occupied or shown; Space 11 is the scratchpad ("S") and goes first. Only real
-// windows count (not sticky, minimized or hidden ones). Keyed by display UUID.
-func workspaces() -> [String: [Item]] {
-	let real = Set(list(["--windows"]).filter {
+// windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
+// restarting), so the bar keeps what it shows instead of blinking off and uncovering the menus.
+func workspaces() -> [String: [Item]]? {
+	guard let windows = query(["--windows"]) as? [[String: Any]], let displays = query(["--displays"]) as? [[String: Any]],
+		let spaces = query(["--spaces"]) as? [[String: Any]], !displays.isEmpty, !spaces.isEmpty else { return nil }
+	let real = Set(windows.filter {
 		!flag($0, "is-sticky") && !flag($0, "is-minimized") && !flag($0, "is-hidden")
 	}.compactMap { $0["id"] as? Int })
 	var uuidOf = [Int: String]()
-	for d in list(["--displays"]) { if let i = d["index"] as? Int, let u = d["uuid"] as? String { uuidOf[i] = u } }
+	for d in displays { if let i = d["index"] as? Int, let u = d["uuid"] as? String { uuidOf[i] = u } }
 	var rows = [String: [(Int, Item)]]()
-	for s in list(["--spaces"]) {
-		guard let i = s["index"] as? Int, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
+	for s in spaces {
+		guard let i = s["index"] as? Int, i != attic, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
 		let occupied = (s["windows"] as? [Int] ?? []).contains { real.contains($0) }
 		let shown = flag(s, "is-visible")
 		guard i <= 5 || shown || occupied else { continue }
@@ -244,7 +314,7 @@ final class Bar {
 		refreshPending = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
 			self.refreshPending = false
-			self.layout(workspaces())
+			if let rows = workspaces() { self.layout(rows) }
 		}
 	}
 
@@ -252,12 +322,13 @@ final class Bar {
 		for (id, p) in panels {
 			let h = barHeight(p.screen)
 			let items = rows[id] ?? []
-			guard h > 0, !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or yabai down
+			guard h > 0, !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
 			if p.row.items.map(\.label) != items.map(\.label) || p.row.items.map(\.state) != items.map(\.state) { p.row.items = items }
 			let w = max(pad * 2 + slotW * CGFloat(items.count), leftWidth(p.screen))
-			p.panel.setFrame(NSRect(x: p.screen.frame.minX, y: p.screen.frame.maxY - h, width: w, height: h), display: true)
+			let f = NSRect(x: p.screen.frame.minX, y: p.screen.frame.maxY - h, width: w, height: h)
+			if p.panel.frame != f { p.panel.setFrame(f, display: true) }
 			p.panel.alphaValue = hidden ? 0 : 1
-			p.panel.orderFrontRegardless()
+			if !p.panel.isVisible { p.panel.orderFrontRegardless() }
 		}
 	}
 
@@ -291,10 +362,13 @@ let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 let bar = Bar()
 let focuser = Focus()
-var tokens = [Int32](repeating: 0, count: 3)
+var tokens = [Int32](repeating: 0, count: 6)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
 notify_register_dispatch("wm.closed", &tokens[2], .main) { _ in focuser.closed(); bar.refresh() }
+notify_register_dispatch("wm.demin", &tokens[3], .main) { _ in focuser.syncMinimized(); bar.refresh() }
+notify_register_dispatch("wm.hide", &tokens[4], .main) { _ in focuser.hide(); bar.refresh() }
+notify_register_dispatch("wm.unhide", &tokens[5], .main) { _ in focuser.unhide(); bar.refresh() }
 let ws = NSWorkspace.shared.notificationCenter
 ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in

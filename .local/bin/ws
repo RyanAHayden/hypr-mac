@@ -5,16 +5,16 @@ export USER="${USER:-$(id -un)}"
 # (move-silent sends the window there and stays put; recent = the Space you were on before)
 # Focusing a Space needs yabai's scripting addition (SIP off); without it, fall back
 # to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
-# The 11th Space is the scratchpad (.local/bin/scratchpad).
+# The 11th Space is the scratchpad (.local/bin/scratchpad), the 12th where SUPER+M parks windows (yabai-helper).
 action=$1 target=$2
 # Holding a bind fires a run every key repeat (~30ms). Runs that overlap read focus
 # mid-switch and grab the wrong window, and queued ones lag; so one at a time, and
 # repeats that arrive while one is running are dropped instead of queued.
 [ -z "$WS_LOCKED" ] && WS_LOCKED=1 exec lockf -t 0 "${TMPDIR:-/tmp}/ws.lock" "$0" "$@" 2>/dev/null
-# prev/next go through 1..10 and wrap around at either end, skipping the scratchpad (11)
+# prev/next go through 1..10 and wrap around at either end, skipping the scratchpad (11) and parked windows (12)
 if [ "$target" = prev ] || [ "$target" = next ]; then
 	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson cur "$(yabai -m query --spaces --space | jq .index)" '
-		[.[].index | select(. != 11 or . == $cur)] | sort as $o
+		[.[].index | select(. < 11 or . == $cur)] | sort as $o
 		| ($o | index($cur)) as $i
 		| $o[(($i + (if $dir == "next" then 1 else -1 end)) % ($o | length) + ($o | length)) % ($o | length)]') &&
 		[ -n "$resolved" ] && target=$resolved

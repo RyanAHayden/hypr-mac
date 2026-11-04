@@ -57,7 +57,8 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+Shift+F, N, T | new Finder window, nvim, btop |
 | Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |
 | Cmd+Option+Space | macOS Dictation (setup gives it a hidden F19 shortcut) |
-| Cmd+W / Cmd+Shift+W / Cmd+M | close / force kill / minimize |
+| Cmd+W / Cmd+Shift+W | close / force kill |
+| Cmd+M / Cmd+Option+M | minimize (instant: parked on hidden Space 12) / bring back the latest |
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |
 | Cmd+A/D, Shift+A/D | prev/next Space / move window there |
@@ -100,8 +101,10 @@ so hover focus doesn't hand focus back; after a close, minimize or quit it focus
 (macOS leaves focus on nothing); and it does the instant alt-tab jump across Spaces (scripting addition only).
 yabai signals ping it with `notify-post` (`.local/src/notify-post.c`; `notifyutil` takes ~100 ms).
 
-Workspaces 1-9 and 10 sit on SUPER+1..0; SUPER+A/D cycle through them and wrap around. Minimized windows don't keep their workspace: restoring one (Raycast, a bind, the Dock)
-brings it up on the current workspace (`.config/yabai/minimize_sticky.sh` keeps it sticky while minimized).
+Workspaces 1-9 and 10 sit on SUPER+1..0; SUPER+A/D cycle through them and wrap around. SUPER+M doesn't use macOS minimize (its ~300 ms animation can't be turned off): yabai-helper parks the window on
+hidden Space 12 instantly, and it comes back to the workspace you're on with SUPER+Option+M, by switching to its app
+(Dock, Cmd+Tab, Raycast) or by picking it in AltTab. Real minimize (yellow button) still works: the window is kept sticky while
+minimized, so restoring it brings it up on the current workspace.
 The scratchpad is the 11th Space (`.local/bin/scratchpad`): a normal tiled workspace where Discord, Spotify and
 KeePassXC live, drawn as "S" first in the bar (while you're on it or it has windows) and skipped by SUPER+A/D.
 Workspaces 1-5 always show, higher ones when occupied; current = white pill, occupied = white, empty = grey.

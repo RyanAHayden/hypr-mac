@@ -32,16 +32,17 @@ yabai -m config mouse_drop_action swap
 # --- yabai-helper (~/.local/src/yabai-helper.swift): workspace bar, mouse follows focus, focus after close ---
 # It does the work natively and talks to yabai over its socket; these just ping it (notify-post takes ~1 ms).
 post="$HOME/.local/bin/notify-post"
-for ev in space_changed display_changed space_created space_destroyed window_created window_deminimized; do
+for ev in space_changed display_changed space_created space_destroyed window_created; do
   signal "bar_$ev" "$ev" "$post wm.bar"
 done
 for ev in window_focused window_moved window_resized; do
   signal "focus_$ev" "$ev" "$post wm.focus"
 done
-# also redraws the bar
+# these also redraw the bar; minimize/restore also keep minimized windows sticky (restore lands on this Space)
 for ev in window_destroyed window_minimized application_terminated; do
   signal "closed_$ev" "$ev" "$post wm.closed"
 done
+signal demin window_deminimized "$post wm.demin"
 
 # --- Floating apps -----------------------------------------------------------
 rule float_settings app="^(System Settings|Calculator|Syncthing|Archive Utility|Installer|Raycast|AltTab|DaVinci Resolve|Safari|Tailscale|Karabiner-Elements)$" manage=off
@@ -64,15 +65,11 @@ if [ -n "$sa" ]; then
   # app; mark it so yabai-helper's alt-tab jump stays put. Best effort: this can race the activation (SUPER+W/Q mark first).
   signal stay_on_close window_destroyed "touch $HOME/.cache/ws-switch"
   signal stay_on_quit application_terminated "touch $HOME/.cache/ws-switch"
-  # Minimized windows don't keep their Space: restoring one brings it up on the current Space
-  signal min_sticky window_minimized "/bin/bash $CONFIG_ROOT/minimize_sticky.sh min"
-  signal min_unsticky window_deminimized "/bin/bash $CONFIG_ROOT/minimize_sticky.sh restore"
-  signal min_gone window_destroyed "/bin/bash $CONFIG_ROOT/minimize_sticky.sh gone"
   # SUPER+O (.local/bin/window-pop) marks popped windows; drop the marker so a reused id starts unpopped
   signal pop_gone window_destroyed "rm -f $HOME/.cache/yabai-pop/\$YABAI_WINDOW_ID"
 else
   # No SA: nothing could switch Spaces for us, so hand it back to macOS
-  yabai -m signal --remove stay_on_close 2>/dev/null; yabai -m signal --remove stay_on_quit 2>/dev/null; yabai -m signal --remove min_sticky 2>/dev/null; yabai -m signal --remove min_unsticky 2>/dev/null; yabai -m signal --remove min_gone 2>/dev/null; yabai -m signal --remove pop_gone 2>/dev/null
+  yabai -m signal --remove stay_on_close 2>/dev/null; yabai -m signal --remove stay_on_quit 2>/dev/null; yabai -m signal --remove pop_gone 2>/dev/null
   if [ "$(defaults read -g AppleSpacesSwitchOnActivate 2>/dev/null)" = 0 ]; then
     defaults delete -g AppleSpacesSwitchOnActivate
     killall Dock
