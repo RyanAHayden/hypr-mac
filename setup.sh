@@ -94,6 +94,21 @@ for i in 1 2 3 4 5 6 7 8 9; do
 		"<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>$((48 + i))</integer><integer>${codes[$((i - 1))]}</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
 done
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+# F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, reapplied at login by a LaunchAgent
+fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
+hidutil property --set "$fnmap" >/dev/null
+cat >~/Library/LaunchAgents/com.ryha.keyboard-brightness-keys.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.ryha.keyboard-brightness-keys</string>
+	<key>ProgramArguments</key>
+	<array><string>/usr/bin/hidutil</string><string>property</string><string>--set</string><string>$fnmap</string></array>
+	<key>RunAtLoad</key><true/>
+</dict>
+</plist>
+PLIST
 # SwiftBar workspace plugin, leftmost of the status items
 defaults write com.ameba.SwiftBar PluginDirectory -string "$HOME/.config/swiftbar"
 defaults write com.ameba.SwiftBar SUEnableAutomaticChecks -bool false
@@ -107,6 +122,14 @@ defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool fals
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
 defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
 killall Dock SystemUIServer 2>/dev/null || true
+# AltTab: stop Sequoia's monthly "bypass the private window picker" screen recording prompt
+# (replayd's container is App Data, so this needs the terminal to have Full Disk Access)
+defaults write ~/Library/Group\ Containers/group.com.apple.replayd/ScreenCaptureApprovals \
+	/Applications/AltTab.app/Contents/MacOS/AltTab -date "3024-01-01 00:00:00 +0000" 2>/dev/null ||
+	echo "  (couldn't silence AltTab's screen recording prompt - give the terminal Full Disk Access and re-run)"
+
+# list Terminal under Privacy & Security > Developer Tools (Ghostty is added there with the + button)
+spctl developer-mode enable-terminal 2>/dev/null || true
 
 echo "==> services and login items"
 yabai --start-service 2>/dev/null || yabai --restart-service
@@ -124,6 +147,9 @@ Done - check `git diff` (stow --adopt pulled existing files into the repo) and `
 Manual steps:
   1. Privacy & Security > Accessibility: allow yabai, skhd, AltTab, MiddleClick (+ Screen Recording for AltTab),
      then: yabai --restart-service; skhd --restart-service
+     Ghostty and Terminal get everything, so nothing run in them prompts: turn both on in Full Disk Access
+     (covers "access data from other apps"), Accessibility, Input Monitoring, Screen & System Audio Recording,
+     App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Mission Control (ctrl+up): add Desktops until there are 10
   3. Log out and back in (key repeat, trackpad)
   4. Syncthing: http://127.0.0.1:8384

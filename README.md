@@ -6,7 +6,10 @@ The previous yabai/SketchyBar setup is in git history.
 
 `./setup.sh` - installs packages and Macarchy, stows using --adopt so you can see git changes before
 discarding what you want to change, applies the macOS settings and the `ryha-silver` theme.
-Then grant Accessibility (yabai, skhd, AltTab, MiddleClick), add 10 Desktops in Mission Control and log out/in.
+Then grant Accessibility (yabai, skhd, AltTab, MiddleClick), give Ghostty and Terminal every Privacy & Security
+permission (Full Disk Access, Accessibility, Input Monitoring, Screen Recording, App Management, Developer Tools)
+so they never prompt, re-run setup.sh from Ghostty (silences AltTab's monthly screen recording prompt),
+add 10 Desktops in Mission Control and log out/in.
 
 Re-running Macarchy's `./install` stops at files stowed from here (`skhdrc`, nvim); use `--force`, then re-run `stow . --adopt` and `git checkout .`.
 
@@ -31,6 +34,7 @@ Full list: `.config/skhd/local.skhdrc` (Option+I shows it).
 | Option+Cmd+G | quadrant mode (no gaps, no borders) |
 | Option+Shift+Space | toggle menu bar auto-hide |
 | Option+drag / right-drag | move / resize window |
+| F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
 
 ## Workspace bar
 
