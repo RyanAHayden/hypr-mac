@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 export PATH="/opt/homebrew/bin:$PATH"
 export USER="${USER:-$(id -un)}"
-# Omarchy-style workspace actions on yabai. Usage: ws focus|move <N|prev|next>
+# Omarchy-style workspace actions on yabai. Usage: ws focus|move|move-silent <N|prev|next>, ws focus recent
+# (move-silent sends the window there and stays put; recent = the Space you were on before)
 # Focusing a Space needs yabai's scripting addition (SIP off); without it, fall back
 # to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
-# Workspace "0" (SUPER+~, left of 1) is the 11th Space.
+# The 11th Space is the scratchpad (.local/bin/scratchpad).
 action=$1 target=$2
-[ "$target" = 0 ] && target=11
 # Holding a bind fires a run every key repeat (~30ms). Runs that overlap read focus
 # mid-switch and grab the wrong window, and queued ones lag; so one at a time, and
 # repeats that arrive while one is running are dropped instead of queued.
 [ -z "$WS_LOCKED" ] && WS_LOCKED=1 exec lockf -t 0 "${TMPDIR:-/tmp}/ws.lock" "$0" "$@" 2>/dev/null
-# prev/next follow the bar's order (0, 1..10) and wrap around at either end
+# prev/next go through 1..10 and wrap around at either end, skipping the scratchpad (11)
 if [ "$target" = prev ] || [ "$target" = next ]; then
 	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson cur "$(yabai -m query --spaces --space | jq .index)" '
-		[.[].index] | sort_by(if . == 11 then 0 else . end) as $o
+		[.[].index | select(. != 11 or . == $cur)] | sort as $o
 		| ($o | index($cur)) as $i
 		| $o[(($i + (if $dir == "next" then 1 else -1 end)) % ($o | length) + ($o | length)) % ($o | length)]') &&
 		[ -n "$resolved" ] && target=$resolved
@@ -22,6 +22,7 @@ fi
 fallback() {
 	case $target in
 		prev) skhd -k "ctrl - left" ;;
+		recent) ;; # no macOS shortcut for the previous Desktop; needs the scripting addition
 		next) skhd -k "ctrl - right" ;;
 		10) skhd -k "ctrl - 0" ;;
 		11) ;; # no macOS Desktop shortcut for 11; needs the scripting addition
@@ -41,5 +42,11 @@ case $action in
 		yabai -m window "$id" --space "$target" || exit 1
 		yabai -m space --focus "$target" 2>/dev/null || fallback
 		yabai -m window --focus "$id" 2>/dev/null
+		;;
+	move-silent)
+		yabai -m window --space "$target" || exit 1
+		# focus a window left on this Space (not the moved one, which would pull us over to it)
+		next=$(yabai -m query --windows --space | jq -r 'first(.[] | select(."is-visible" and ."is-minimized" == false and ."has-focus" == false)) | .id')
+		[ -n "$next" ] && yabai -m window --focus "$next" 2>/dev/null
 		;;
 esac

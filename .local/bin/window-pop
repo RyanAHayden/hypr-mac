@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Pop the focused window out (Omarchy SUPER+O): float it centered, sticky on every Space and above tiled
+# windows. Run again on a popped window to put it back (re-tiled unless it was floating before).
+# sticky/layer need the yabai scripting addition.
+export PATH="/opt/homebrew/bin:$PATH"
+win=$(yabai -m query --windows --window) || exit 0
+id=$(jq -r .id <<<"$win")
+dir=~/.cache/yabai-pop
+mkdir -p "$dir"
+if [ -e "$dir/$id" ]; then
+	[ "$(jq '."is-sticky"' <<<"$win")" = true ] && yabai -m window "$id" --toggle sticky
+	yabai -m window "$id" --sub-layer auto 2>/dev/null || yabai -m window "$id" --layer normal
+	[ "$(cat "$dir/$id")" = tiled ] && [ "$(jq '."is-floating"' <<<"$win")" = true ] && yabai -m window "$id" --toggle float
+	rm -f "$dir/$id"
+else
+	if [ "$(jq '."is-floating"' <<<"$win")" = false ]; then
+		echo tiled >"$dir/$id"
+		yabai -m window "$id" --toggle float
+	else
+		echo floating >"$dir/$id"
+	fi
+	yabai -m window "$id" --grid 6:6:1:1:4:4
+	[ "$(jq '."is-sticky"' <<<"$win")" = false ] && yabai -m window "$id" --toggle sticky
+	yabai -m window "$id" --sub-layer above 2>/dev/null || yabai -m window "$id" --layer above
+fi

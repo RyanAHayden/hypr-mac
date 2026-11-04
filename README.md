@@ -55,30 +55,56 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Option+Tab | AltTab (window switcher with previews) |
 | Cmd+Shift+B / Return / Option+B | Helium / new window / incognito |
 | Cmd+Shift+F, N, T | new Finder window, nvim, btop |
-| Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on workspace 0 (their windows always open there) |
+| Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |
 | Cmd+Option+Space | macOS Dictation (setup gives it a hidden F19 shortcut) |
-| Cmd+W / Cmd+Shift+W / Cmd+S | close / force kill / minimize |
+| Cmd+W / Cmd+Shift+W / Cmd+M | close / force kill / minimize |
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |
 | Cmd+A/D, Shift+A/D | prev/next Space / move window there |
 | Cmd+F, Cmd+T, Cmd+\ | fullscreen, float, toggle split |
+| Cmd+O | pop window out: float centered, on every Space, above tiled windows (again: put back) |
+| Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
+| Cmd+-/= (+Shift, +Option, +Ctrl) | resize width (Shift: height; Option: a little, Ctrl: a lot) |
+| Cmd+Backspace, Option+Backspace / Shift+Option+Backspace | window transparency toggle, more / less |
+| Cmd+Shift+Backspace | toggle gaps on this Space |
+| Cmd+Option+L / Shift+Option+L | cycle Space layout bsp -> stack -> float / back |
+| Cmd+G, Cmd+Option+arrows | group (yabai stack) with neighbour / ungroup, move window into the group that way |
+| Cmd+Option+Tab, Cmd+Ctrl+Left/Right | next/prev window in the group |
+| Cmd+S / Cmd+Option+S | scratchpad (11th Space, "S" in the bar): go there and back / send window there (from it: back) |
+| Cmd+Shift+Option+1..0 | move window to that Space without following it |
+| Cmd+Ctrl+Tab | back to the previous Space |
+| Cmd+Ctrl+Shift+H/J/K/L or arrows | move window to the display that way |
+| Ctrl+Option+Tab (+Shift) | focus next (previous) display |
+| Cmd+Shift+Option+arrows | move the whole Space to the display that way (renumbers Spaces) |
+| Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
+| Cmd+Escape | system menu in Raycast: lock, sleep, relaunch yabai/skhd, log out, restart, shut down |
+| Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
+| Cmd+Ctrl+N / D / P, Cmd+Shift+Q | Network / Displays / Battery settings, Calculator |
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |
 | Cmd+Option+G | quadrant mode (no gaps, no borders) |
 | Cmd+Shift+Space | toggle menu bar auto-hide |
+| Hover | focuses the window under the mouse (yabai `focus_follows_mouse autofocus`, no raise) |
 | Cmd+drag / right-drag | move / resize window (yabai takes Cmd+click; three-finger middle click opens links in a new tab) |
 | F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
 
 ## Workspace bar
 
-Workspaces 1-9 and 10 sit on SUPER+1..0; workspace "0" is the 11th Space on SUPER+` (move a window there:
-SUPER+Shift+`) and is drawn first in the bar, matching the key left of 1. SUPER+A/D cycle in that order
-(0, 1..10) and wrap around. Minimized windows don't keep their workspace: restoring one (Raycast, a bind, the Dock)
+The workspaces are drawn over the left side of the menu bar (Apple and app menus, up to the notch; on every display)
+by `yabai-helper` (`.local/src/yabai-helper.swift`, built to `~/.local/bin/yabai-helper`, run by the
+`com.ryha.yabai-helper` LaunchAgent). Clicks pass through it, and it disappears while the mouse is over it or a menu
+opened from the bar is showing, so the Apple and app menus stay usable.
+
+yabai-helper also does the focus fixes, natively and over yabai's socket (no bash/jq per event, so a few ms):
+when focus moves to another window (new window, alt-tab, close) and the mouse isn't in it, it moves the mouse there,
+so hover focus doesn't hand focus back; after a close, minimize or quit it focuses the next window on the Space
+(macOS leaves focus on nothing); and it does the instant alt-tab jump across Spaces (scripting addition only).
+yabai signals ping it with `notify-post` (`.local/src/notify-post.c`; `notifyutil` takes ~100 ms).
+
+Workspaces 1-9 and 10 sit on SUPER+1..0; SUPER+A/D cycle through them and wrap around. Minimized windows don't keep their workspace: restoring one (Raycast, a bind, the Dock)
 brings it up on the current workspace (`.config/yabai/minimize_sticky.sh` keeps it sticky while minimized).
-`.config/swiftbar/workspace.5s.sh` (SwiftBar) shows 1-5 plus any occupied Space; current = white pill,
-occupied = white, empty = grey. Drawn by `.local/src/ws-render.swift` (built to `~/.local/bin/ws-render` by setup.sh).
-yabai signals in `.config/yabai/yabairc` call `swiftbar://refreshplugin?name=workspace` so it redraws instantly.
-It is deliberately not a streamable plugin: those reset their menu bar position on every SwiftBar start
-(swiftbar/SwiftBar#458). To move it: SUPER+Shift+P (pause yabai), Cmd-drag it, SUPER+Shift+P again.
+The scratchpad is the 11th Space (`.local/bin/scratchpad`): a normal tiled workspace where Discord, Spotify and
+KeePassXC live, drawn as "S" first in the bar (while you're on it or it has windows) and skipped by SUPER+A/D.
+Workspaces 1-5 always show, higher ones when occupied; current = white pill, occupied = white, empty = grey.
 
 SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai owns SUPER(Cmd)+drag and can't tell
 left Cmd from right, so this is how Cmd-drag reaches macOS. While paused nothing tiles, the bar stops updating,
@@ -87,13 +113,16 @@ workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won'
 ## Sacrifices vs Omarchy
 
 - With SIP on (see above for turning it off), no yabai scripting addition: Space switching goes through macOS ctrl+N (slide animation;
-  Accessibility > Reduce motion makes it a fade), Desktops are created by hand, no window opacity, no Space swapping,
-  no scratchpad (yabai's needs the SA).
+  Accessibility > Reduce motion makes it a fade), Desktops are created by hand, and window opacity, pop out (sticky/on top),
+  scratchpad toggle-back, silent moves, previous Space and moving Spaces between displays don't work (they need the SA).
+- No pseudo-tiling, Quake console, notification binds, save/restore width, window labels.
+- Cmd+Escape needs Raycast to know the script folder once: Raycast Settings > Extensions > + > Add Script Directory >
+  `~/.config/raycast/scripts`.
 - Not ported (Linux/desktop only): gaming (stretched res, MangoHud caps, gamescope, crosshair, xpadneo), Sunshine,
   sddm/limine/plymouth, TPM2, reboot-to-windows, GPU toggle, monitor mirror/TV/pin, focus lock, window labels,
   per-window volume, SUPER+scroll zoom (use Accessibility > Zoom with a modifier), `clds` (Linux sudo wrapper). `c` runs `cld` (claude, bypass permissions, auto-trusts $PWD).
 - Substitutes: Dolphin -> Finder, wiremix/bluetui -> System Settings, quickshell switcher -> AltTab,
-  voxtype -> macOS Dictation, bash -> zsh (`.zshrc`), Waybar -> native menu bar + SwiftBar.
+  voxtype -> macOS Dictation, bash -> zsh (`.zshrc`), Waybar -> native menu bar + top-left workspace overlay.
 - Menu bar is pitch black because Reduce transparency is off and the wallpaper's top edge is black (macOS 15 has
   no menu bar colour setting; Reduce transparency makes it solid grey). A wallpaper with a lighter top shows through.
 - Syncthing runs always (brew service) instead of being bound to a mount.

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Cycle this Space's layout bsp -> stack -> float (Omarchy SUPER+L). Usage: space-layout [back]
+export PATH="/opt/homebrew/bin:$PATH"
+order=(bsp stack float)
+cur=$(yabai -m query --spaces --space | jq -r .type)
+for i in 0 1 2; do [ "${order[$i]}" = "$cur" ] && break; done
+step=1; [ "$1" = back ] && step=2
+yabai -m space --layout "${order[$(((i + step) % 3))]}"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Omarchy window groups as yabai stacks (windows sharing one tile, one shown at a time).
+#   window-group toggle      ungroup the focused window, or group it with its nearest neighbour
+#   window-group into <dir>  move the focused window into the window/group to west|east|north|south
+#   window-group next|prev   cycle the windows in the focused group (wraps)
+export PATH="/opt/homebrew/bin:$PATH"
+win=$(yabai -m query --windows --window) || exit 0
+id=$(jq .id <<<"$win")
+unstack() { yabai -m window "$id" --toggle float && yabai -m window "$id" --toggle float; } # floating drops it out of the stack, unfloating re-tiles it
+case $1 in
+	toggle)
+		if [ "$(jq '."stack-index"' <<<"$win")" -gt 0 ]; then unstack; exit; fi
+		for dir in east west south north; do yabai -m window "$dir" --stack "$id" 2>/dev/null && exit; done
+		;;
+	into)
+		[ "$(jq '."stack-index"' <<<"$win")" -gt 0 ] && unstack
+		yabai -m window "$2" --stack "$id"
+		;;
+	next) yabai -m window --focus stack.next 2>/dev/null || yabai -m window --focus stack.first ;;
+	prev) yabai -m window --focus stack.prev 2>/dev/null || yabai -m window --focus stack.last ;;
+esac

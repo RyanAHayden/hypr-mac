@@ -12,7 +12,7 @@ brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/bord
 brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
-brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab swiftbar middleclick
+brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab middleclick
 brew install --cask karabiner-elements
 
 echo "==> stow"
@@ -31,8 +31,9 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> workspace bar renderer"
-swiftc -O ~/.local/src/ws-render.swift -o ~/.local/bin/ws-render
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab) and notify-post"
+swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
+clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 mkdir -p ~/.cache
 
 echo "==> dark mode and wallpaper"
@@ -116,16 +117,23 @@ cat >~/Library/LaunchAgents/com.ryha.keyboard-brightness-keys.plist <<PLIST
 </dict>
 </plist>
 PLIST
-# SwiftBar workspace plugin
-defaults write com.ameba.SwiftBar PluginDirectory -string "$HOME/.config/swiftbar"
-defaults write com.ameba.SwiftBar SUEnableAutomaticChecks -bool false
-# Workspace bar position (Cmd-dragged with yabai paused, SUPER+Shift+P). macOS keys it by the plugin's
-# real path, and only keeps it because the plugin isn't streamable (swiftbar/SwiftBar#458).
+# yabai-helper (.local/src/yabai-helper.swift): workspace bar, mouse follows focus, focus after close, alt-tab
+cat >~/Library/LaunchAgents/com.ryha.yabai-helper.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.ryha.yabai-helper</string>
+	<key>ProgramArguments</key><array><string>$HOME/.local/bin/yabai-helper</string></array>
+	<key>RunAtLoad</key><true/>
+	<key>KeepAlive</key><true/>
+</dict>
+</plist>
+PLIST
+launchctl bootout gui/$UID/com.ryha.yabai-helper 2>/dev/null || true
+launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.yabai-helper.plist
 # Notch: when the menu bar is full, macOS hides the icons nearest the notch first; tighter icon
 # spacing leaves more room before anything hides.
-osascript -e 'quit app "SwiftBar"' 2>/dev/null; while pgrep -q SwiftBar; do sleep 0.3; done
-defaults delete com.ameba.SwiftBar "NSStatusItem Preferred Position workspace.sh" 2>/dev/null || true
-defaults write com.ameba.SwiftBar "NSStatusItem Preferred Position $REPO/.config/swiftbar/workspace.5s.sh" -float 359
 defaults -currentHost write -globalDomain NSStatusItemSpacing -int 8
 defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 6
 # hide menu bar icons: AltTab, MiddleClick, Raycast, Spotlight (quit apps first or they overwrite this)
@@ -222,7 +230,7 @@ brew services start syncthing
 mkdir -p ~/Applications
 osacompile -o ~/Applications/Fix\ Keyboard.app -e "do shell script \"$HOME/.local/bin/fixkeys\"" 2>/dev/null
 if $sip_off; then
-	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 11 (1-9, 10 on 0, workspace "0" on ~)
+	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 11 (1-9, 10 on 0, 11 = scratchpad on SUPER+S)
 	yabai --restart-service
 	sleep 2
 	# yabai >= 7.1.16 builds the SA loader with arm64e PAC ABI v1 but Sequoia's Dock is v0, so injection fails
@@ -240,7 +248,7 @@ if $sip_off; then
 	while [ "$(yabai -m query --spaces --display | jq length)" -lt 11 ]; do yabai -m space --create || break; done
 fi
 open -a Karabiner-Elements   # first launch activates its keyboard driver (approve it, see below)
-for a in AltTab MiddleClick SwiftBar Raycast Tailscale; do
+for a in AltTab MiddleClick Raycast Tailscale; do
 	open -a "$a"
 	osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"/Applications/$a.app\", hidden:true}" >/dev/null 2>&1 || true
 done
@@ -257,7 +265,7 @@ Manual steps:
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
      for Karabiner-Core-Service (SIP off: done above). Until then the Ctrl shortcuts and Caps Lock -> Ctrl don't work (SUPER binds do: skhd binds left Cmd itself)
-  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 11
+  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 11 (11 = scratchpad)
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384
 EOF

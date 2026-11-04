@@ -16,34 +16,76 @@ lcmd + shift - f              : touch ~/.cache/yabai-new-window; osascript -e 't
 lcmd + shift - n              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim
 lcmd + shift - t              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop
 lcmd + shift - g              : open -a Steam
-# Discord, Spotify and KeePassXC live on workspace "0" (yabairc rules keep their windows there)
-lcmd + shift - c              : ~/.local/bin/ws focus 0; open -a Discord
-lcmd + shift - m              : ~/.local/bin/ws focus 0; open -a Spotify
-lcmd + shift - 0x2C           : ~/.local/bin/ws focus 0; open -a KeePassXC
+# Discord, Spotify and KeePassXC live on the scratchpad (yabairc rules keep their windows there)
+lcmd + shift - c              : ~/.local/bin/scratchpad show; open -a Discord
+lcmd + shift - m              : ~/.local/bin/scratchpad show; open -a Spotify
+lcmd + shift - 0x2C           : ~/.local/bin/scratchpad show; open -a KeePassXC
 # macOS Dictation: setup.sh gives it the hidden F19 (0x50) shortcut, since it has no command to start it
 lcmd + alt - space            : skhd -k "0x50"
 lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
 lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
+lcmd + shift - q              : open -a Calculator
+# Raycast: clipboard history, emoji picker, and the system menu (Script Command in .config/raycast/scripts)
+lcmd + ctrl - v               : open -g "raycast://extensions/raycast/clipboard-history/clipboard-history"
+lcmd + ctrl - e               : open -g "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"
+lcmd - escape                 : open -g "raycast://script-commands/system-menu"
+lcmd + ctrl - n               : open "x-apple.systempreferences:com.apple.Network-Settings.extension"
+lcmd + ctrl - d               : open "x-apple.systempreferences:com.apple.Displays-Settings.extension"
+lcmd + ctrl - p               : open "x-apple.systempreferences:com.apple.Battery-Settings.extension"
 
 
 # --- Windows ---------------------------------------------------------------
 lcmd - w                      : ~/.local/bin/close-window
 lcmd + shift - w              : ~/.local/bin/force-kill-window
 lcmd - q                      : ~/.local/bin/quit-app
-lcmd - s                      : yabai -m window --minimize
+lcmd - m                      : yabai -m window --minimize
 lcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
 lcmd - f                      : yabai -m window --toggle zoom-fullscreen
+lcmd + ctrl - f               : yabai -m window --toggle zoom-parent   # tiled fullscreen: fill its split only
 lcmd + alt - f                : yabai -m window --toggle native-fullscreen
 lcmd - t                      : yabai -m window --toggle float --grid 6:6:1:1:4:4
+lcmd - o                      : ~/.local/bin/window-pop   # pop out: float centered, sticky, on top (again: put back)
 lcmd - 0x2A                   : yabai -m window --toggle split
 lcmd + shift - i              : yabai -m window --swap largest
 lcmd + ctrl + shift - i       : yabai -m space --mirror y-axis
 lcmd - 0x1B                   : yabai -m window --ratio rel:-0.05
 lcmd - 0x18                   : yabai -m window --ratio rel:0.05
+# Resize by px like Omarchy: Shift = height, Option = a little (25), Ctrl = a lot (300)
+lcmd + shift - 0x1B           : ~/.local/bin/window-resize h -100
+lcmd + shift - 0x18           : ~/.local/bin/window-resize h 100
+lcmd + alt - 0x1B             : ~/.local/bin/window-resize w -25
+lcmd + alt - 0x18             : ~/.local/bin/window-resize w 25
+lcmd + shift + alt - 0x1B     : ~/.local/bin/window-resize h -25
+lcmd + shift + alt - 0x18     : ~/.local/bin/window-resize h 25
+lcmd + ctrl - 0x1B            : ~/.local/bin/window-resize w -300
+lcmd + ctrl - 0x18            : ~/.local/bin/window-resize w 300
+lcmd + ctrl + shift - 0x1B    : ~/.local/bin/window-resize h -300
+lcmd + ctrl + shift - 0x18    : ~/.local/bin/window-resize h 300
 lcmd + shift - r              : yabai -m space --balance
 lcmd + alt - g                : ~/.local/bin/quadrant-tile
 lcmd + shift - space          : ~/.local/bin/toggle-menubar
+lcmd - 0x33                   : ~/.local/bin/window-opacity toggle   # Backspace: transparent/opaque
+lcmd + alt - 0x33             : ~/.local/bin/window-opacity -0.05
+lcmd + shift + alt - 0x33     : ~/.local/bin/window-opacity +0.05
+lcmd + shift - 0x33           : yabai -m space --toggle padding; yabai -m space --toggle gap   # gaps on this Space
+lcmd + alt - l                : ~/.local/bin/space-layout        # bsp -> stack -> float
+lcmd + alt + shift - l        : ~/.local/bin/space-layout back
+
+# Groups (Omarchy tabs) = yabai stacks
+lcmd - g                      : ~/.local/bin/window-group toggle
+lcmd + alt - left             : ~/.local/bin/window-group into west
+lcmd + alt - right            : ~/.local/bin/window-group into east
+lcmd + alt - up               : ~/.local/bin/window-group into north
+lcmd + alt - down             : ~/.local/bin/window-group into south
+lcmd + alt - tab              : ~/.local/bin/window-group next
+lcmd + alt + shift - tab      : ~/.local/bin/window-group prev
+lcmd + ctrl - left            : ~/.local/bin/window-group prev
+lcmd + ctrl - right           : ~/.local/bin/window-group next
+
+# Scratchpad = 11th Space: SUPER+S goes there and back, +Option sends the window there (from it: back)
+lcmd - s                      : ~/.local/bin/scratchpad toggle
+lcmd + alt - s                : ~/.local/bin/scratchpad move
 
 # Focus (vim keys + arrows)
 lcmd - h                      : yabai -m window --focus west
@@ -93,13 +135,39 @@ lcmd + shift - 8 : ~/.local/bin/ws move 8
 lcmd + shift - 9 : ~/.local/bin/ws move 9
 lcmd + shift - 0 : ~/.local/bin/ws move 10
 
-# Workspace "0" = 11th Space on the ` key, left of 1 (like the number row: SUPER to go, +Shift to move)
-lcmd - 0x32         : ~/.local/bin/ws focus 0
-lcmd + shift - 0x32 : ~/.local/bin/ws move 0
+
+# SUPER+Shift+Option+N: move window there silently (stay here)
+lcmd + shift + alt - 1 : ~/.local/bin/ws move-silent 1
+lcmd + shift + alt - 2 : ~/.local/bin/ws move-silent 2
+lcmd + shift + alt - 3 : ~/.local/bin/ws move-silent 3
+lcmd + shift + alt - 4 : ~/.local/bin/ws move-silent 4
+lcmd + shift + alt - 5 : ~/.local/bin/ws move-silent 5
+lcmd + shift + alt - 6 : ~/.local/bin/ws move-silent 6
+lcmd + shift + alt - 7 : ~/.local/bin/ws move-silent 7
+lcmd + shift + alt - 8 : ~/.local/bin/ws move-silent 8
+lcmd + shift + alt - 9 : ~/.local/bin/ws move-silent 9
+lcmd + shift + alt - 0 : ~/.local/bin/ws move-silent 10
+
+lcmd + ctrl - tab   : ~/.local/bin/ws focus recent   # the Space you were on before
 
 # Move window to the other display
 lcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west
 lcmd + ctrl + shift - l             : yabai -m window --display east; yabai -m display --focus east
+lcmd + ctrl + shift - k                : yabai -m window --display north; yabai -m display --focus north
+lcmd + ctrl + shift - j                : yabai -m window --display south; yabai -m display --focus south
+lcmd + ctrl + shift - left             : yabai -m window --display west; yabai -m display --focus west
+lcmd + ctrl + shift - right            : yabai -m window --display east; yabai -m display --focus east
+lcmd + ctrl + shift - up               : yabai -m window --display north; yabai -m display --focus north
+lcmd + ctrl + shift - down             : yabai -m window --display south; yabai -m display --focus south
+ctrl + alt - tab                    : yabai -m display --focus next || yabai -m display --focus first
+ctrl + alt + shift - tab            : yabai -m display --focus prev || yabai -m display --focus last
+# Move this whole Space to the other display (renumbers Spaces: workspace numbers follow display order)
+lcmd + shift + alt - left           : yabai -m space --display west; yabai -m display --focus west
+lcmd + shift + alt - right          : yabai -m space --display east; yabai -m display --focus east
+lcmd + shift + alt - up             : yabai -m space --display north; yabai -m display --focus north
+lcmd + shift + alt - down           : yabai -m space --display south; yabai -m display --focus south
+# Mirror displays: macOS's own Cmd+F1 (Cmd+brightness-down) shortcut
+lcmd + ctrl - m                     : skhd -k "cmd - f1"
 
 # --- System ----------------------------------------------------------------
 lcmd + ctrl - l               : pmset displaysleepnow
