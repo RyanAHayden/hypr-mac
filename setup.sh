@@ -65,10 +65,12 @@ defaults write com.apple.spaces spans-displays -bool false
 defaults write -g _HIHideMenuBar -bool false
 defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
-# darker dark mode: neutral (untinted) window backgrounds, solid instead of translucent menus/sidebars/Dock
+# darker dark mode: neutral (untinted) window backgrounds
 defaults write -g AppleReduceDesktopTinting -bool true
-defaults write com.apple.universalaccess reduceTransparency -bool true 2>/dev/null ||
-	echo "  (couldn't set Reduce transparency - turn it on in Accessibility > Display, or give the terminal Full Disk Access)"
+# Pitch-black menu bar: macOS 15 has no menu bar colour setting; with Reduce transparency on it's solid grey,
+# with it off it shows the wallpaper, whose top edge is black. (Menus, sidebars and the Dock go translucent too.)
+defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null ||
+	echo "  (couldn't turn off Reduce transparency - do it in Accessibility > Display, or give the terminal Full Disk Access)"
 # ctrl+1..9 -> Desktop 1..9 (~/.local/bin/ws uses these while SIP is on)
 codes=(18 19 20 21 23 22 26 28 25)
 for i in 1 2 3 4 5 6 7 8 9; do

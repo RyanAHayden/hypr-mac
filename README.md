@@ -89,4 +89,6 @@ workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won'
   per-window volume, SUPER+scroll zoom (use Accessibility > Zoom with a modifier), `clds` (Linux sudo wrapper). `c` runs `cld` (claude, bypass permissions, auto-trusts $PWD).
 - Substitutes: Dolphin -> Finder, wiremix/bluetui -> System Settings, quickshell switcher -> AltTab,
   voxtype -> macOS Dictation, bash -> zsh (`.zshrc`), Waybar -> native menu bar + SwiftBar.
+- Menu bar is pitch black because Reduce transparency is off and the wallpaper's top edge is black (macOS 15 has
+  no menu bar colour setting; Reduce transparency makes it solid grey). A wallpaper with a lighter top shows through.
 - Syncthing runs always (brew service) instead of being bound to a mount.
