@@ -69,6 +69,13 @@ defaults write com.apple.spaces spans-displays -bool false
 defaults write -g _HIHideMenuBar -bool false
 defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
+# Finder: list view by default, in folders and search/Recents. Folders that remember their own view
+# (a .DS_Store) override the default, so clear those (not the Desktop's, which holds icon positions).
+defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
+defaults write com.apple.finder FXPreferredSearchViewStyle -string Nlsv
+find "$HOME" -name .DS_Store -not -path "$HOME/Library/*" -not -path "$HOME/Desktop/.DS_Store" -delete 2>/dev/null || true
+rm -f /Applications/.DS_Store
+killall Finder 2>/dev/null || true
 # darker dark mode: neutral (untinted) window backgrounds
 defaults write -g AppleReduceDesktopTinting -bool true
 # Pitch-black menu bar: macOS 15 has no menu bar colour setting; with Reduce transparency on it's solid grey,
