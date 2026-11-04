@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
-# Toggle native menu bar auto-hide (Omarchy SUPER+SHIFT+SPACE toggles the bar).
-osascript -e 'tell application "System Events" to tell dock preferences to set autohide menu bar to not autohide menu bar'
+# Toggle native menu bar auto-hide (Omarchy SUPER+SHIFT+SPACE toggles the bar); the workspace bar hides with it.
+hidden=$(osascript -e 'tell application "System Events" to tell dock preferences
+	set autohide menu bar to not autohide menu bar
+	return autohide menu bar
+end tell')
+~/.local/bin/notify-post wm.menubar "$([ "$hidden" = true ] && echo 1 || echo 0)"

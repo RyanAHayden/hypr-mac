@@ -17,7 +17,7 @@
 //     on the Space you're on rather than switching back to the one it was minimized on.
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
 // yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
-// wm.hide | wm.unhide | wm.move <space> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
+// wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
 import notify
 
@@ -232,6 +232,13 @@ typealias Item = (label: String, state: Character) // a = shown on its display, 
 // windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
 // restarting), so the bar keeps what it shows instead of blinking off and uncovering the menus.
 var onFullscreen = false // a display shows a native fullscreen Desktop (set by workspaces())
+// Menu bar set to auto-hide (SUPER+Shift+Space, .local/bin/toggle-menubar): no bar. toggle-menubar posts wm.menubar with
+// the new state (1 = hidden); read once at launch. Not re-read from preferences each time: a long-running process can
+// keep a stale cached value.
+var menuBarHidden: Bool = {
+	CFPreferencesAppSynchronize(kCFPreferencesAnyApplication)
+	return CFPreferencesGetAppBooleanValue("_HIHideMenuBar" as CFString, kCFPreferencesAnyApplication, nil)
+}()
 
 func workspaces() -> [String: [Item]]? {
 	guard let windows = query(["--windows"]) as? [[String: Any]], let displays = query(["--displays"]) as? [[String: Any]],
@@ -359,7 +366,7 @@ final class Bar {
 		for (id, p) in panels {
 			let h = barHeight(p.screen)
 			let items = rows[id] ?? []
-			guard h > 0, !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
+			guard h > 0, !menuBarHidden, !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
 			if p.row.items.map(\.label) != items.map(\.label) || p.row.items.map(\.state) != items.map(\.state) { p.row.items = items }
 			let w = max(pad * 2 + slotW * CGFloat(items.count), leftWidth(p.screen))
 			let f = NSRect(x: p.screen.frame.minX, y: p.screen.frame.maxY - h, width: w, height: h)
@@ -401,13 +408,19 @@ app.setActivationPolicy(.accessory)
 try? String(getpid()).write(toFile: NSHomeDirectory() + "/.cache/yabai-helper.pid", atomically: true, encoding: .utf8)
 let bar = Bar()
 let focuser = Focus()
-var tokens = [Int32](repeating: 0, count: 7)
+var tokens = [Int32](repeating: 0, count: 8)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
 notify_register_dispatch("wm.closed", &tokens[2], .main) { _ in focuser.closed(); bar.refresh() }
 notify_register_dispatch("wm.demin", &tokens[3], .main) { _ in focuser.syncMinimized(); bar.refresh() }
 notify_register_dispatch("wm.hide", &tokens[4], .main) { _ in focuser.hide(); bar.refresh() }
 notify_register_dispatch("wm.unhide", &tokens[5], .main) { _ in focuser.unhide(); bar.refresh() }
+notify_register_dispatch("wm.menubar", &tokens[7], .main) { token in
+	var state: UInt64 = 0
+	notify_get_state(token, &state)
+	menuBarHidden = state == 1
+	bar.refresh()
+}
 notify_register_dispatch("wm.move", &tokens[6], .main) { token in
 	var space: UInt64 = 0
 	notify_get_state(token, &space)
