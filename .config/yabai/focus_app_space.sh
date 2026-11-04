@@ -9,6 +9,9 @@ pid=${YABAI_PROCESS_ID:?}
 # skhd's "new window" binds touch this first: a window is on its way, so stay put.
 marker=~/.cache/yabai-new-window
 [ -n "$(find "$marker" -mtime -2s 2>/dev/null)" ] && exit 0
+# ~/.local/bin/ws just switched Spaces: this activation came from that, not from alt-tab.
+# Those land 70-110ms after the switch; 300ms covers them without eating a real alt-tab.
+perl -MTime::HiRes=time,stat -e 'my $m = (stat shift)[9]; exit !($m && time - $m < 0.3)' ~/.cache/ws-switch 2>/dev/null && exit 0
 # Otherwise jump right away: if the app sees no window on this Space when it handles
 # the reopen event (Raycast, Dock click, `open -a`), it creates a new one.
 

@@ -40,8 +40,8 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q, Cmd+Tab |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
 
-Karabiner sends left Cmd for the Ctrl shortcuts and turns the physical Cmd keys into right Cmd; skhd binds only
-`rcmd`, so Ctrl+S saves instead of firing SUPER+S. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
+Karabiner swaps the Cmd keys: physical left Cmd sends right Cmd (SUPER), physical right Cmd sends left Cmd (a
+normal Cmd), and the Ctrl shortcuts send left Cmd too. skhd binds only `rcmd`, so right Cmd and Ctrl+S stay normal. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
 the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/skhd/skhdrc` (Cmd+I shows it).
 
 | Key | Action |
@@ -64,12 +64,18 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 
 ## Workspace bar
 
-Workspaces 1-9 and 10 sit on SUPER+1..0; workspace "0" is the 11th Space on SUPER+Shift+~ (move a window there:
-SUPER+Ctrl+Shift+~) and is drawn first in the bar, matching the key left of 1. SUPER+A/D cycle in that order
+Workspaces 1-9 and 10 sit on SUPER+1..0; workspace "0" is the 11th Space on SUPER+` (move a window there:
+SUPER+Shift+`) and is drawn first in the bar, matching the key left of 1. SUPER+A/D cycle in that order
 (0, 1..10) and wrap around.
-`.config/swiftbar/workspace.sh` (SwiftBar, streamable) shows 1-5 plus any occupied Space; current = white pill,
+`.config/swiftbar/workspace.5s.sh` (SwiftBar) shows 1-5 plus any occupied Space; current = white pill,
 occupied = white, empty = grey. Drawn by `.local/src/ws-render.swift` (built to `~/.local/bin/ws-render` by setup.sh).
-yabai signals in `.config/yabai/yabairc` poke `~/.cache/ryha-workspace.fifo` so it redraws instantly.
+yabai signals in `.config/yabai/yabairc` call `swiftbar://refreshplugin?name=workspace` so it redraws instantly.
+It is deliberately not a streamable plugin: those reset their menu bar position on every SwiftBar start
+(swiftbar/SwiftBar#458). To move it: SUPER+Shift+P (pause yabai), Cmd-drag it, SUPER+Shift+P again.
+
+SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai owns SUPER(Cmd)+drag and can't tell
+left Cmd from right, so this is how Cmd-drag reaches macOS. While paused nothing tiles, the bar stops updating,
+workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won't jump to other Spaces.
 
 ## Sacrifices vs Omarchy
 

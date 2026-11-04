@@ -25,6 +25,7 @@ rcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostt
 rcmd - w                      : ~/.local/bin/close-window
 rcmd + shift - w              : ~/.local/bin/force-kill-window
 rcmd - s                      : yabai -m window --minimize
+rcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
 rcmd - f                      : yabai -m window --toggle zoom-fullscreen
 rcmd + alt - f                : yabai -m window --toggle native-fullscreen
 rcmd - t                      : yabai -m window --toggle float --grid 6:6:1:1:4:4
@@ -85,9 +86,9 @@ rcmd + shift - 8 : ~/.local/bin/ws move 8
 rcmd + shift - 9 : ~/.local/bin/ws move 9
 rcmd + shift - 0 : ~/.local/bin/ws move 10
 
-# Workspace "0" = 11th Space on the ~ key (plain SUPER+` stays macOS window cycling)
-rcmd + shift - 0x32        : ~/.local/bin/ws focus 0
-rcmd + ctrl + shift - 0x32 : ~/.local/bin/ws move 0
+# Workspace "0" = 11th Space on the ` key, left of 1 (like the number row: SUPER to go, +Shift to move)
+rcmd - 0x32         : ~/.local/bin/ws focus 0
+rcmd + shift - 0x32 : ~/.local/bin/ws move 0
 
 # Move window to the other display
 rcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west

@@ -23,7 +23,7 @@ yabai -m config top_padding 8 bottom_padding 8 left_padding 8 right_padding 8 wi
 
 # --- Mouse: SUPER(Cmd)+drag moves, SUPER+right-drag resizes ------------------
 yabai -m config mouse_follows_focus off
-yabai -m config mouse_modifier cmd
+yabai -m config mouse_modifier cmd   # SUPER+Shift+P pauses yabai so Cmd-drag reaches macOS (menu bar icons)
 yabai -m config mouse_action1 move
 yabai -m config mouse_action2 resize
 yabai -m config mouse_drop_action swap
@@ -32,10 +32,10 @@ yabai -m config mouse_drop_action swap
 rule float_settings app="^(System Settings|Calculator|Syncthing|Archive Utility|Installer|Raycast|AltTab|DaVinci Resolve|Safari|Tailscale|Karabiner-Elements)$" manage=off
 rule float_finder_ops app="^Finder$" title="^(Copy|Move|Delete|Trash)$" manage=off
 
-# --- SwiftBar workspace indicator (~/.config/swiftbar/workspace.sh) ----------
-poke='f="$HOME/.cache/ryha-workspace.fifo"; [ -p "$f" ] && { exec 3<>"$f"; echo >&3; }'
+# --- SwiftBar workspace indicator (~/.config/swiftbar/workspace.5s.sh) -------
+# Ask SwiftBar to rerun the plugin now instead of waiting for its 5s refresh
 for ev in space_changed display_changed space_created space_destroyed window_created window_destroyed; do
-  signal "ws_$ev" "$ev" "/bin/bash -c '$poke'"
+  signal "ws_$ev" "$ev" "open -g 'swiftbar://refreshplugin?name=workspace'"
 done
 
 # --- With the scripting addition: instant alt-tab (no yabai animations) ------

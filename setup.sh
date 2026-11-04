@@ -107,10 +107,18 @@ cat >~/Library/LaunchAgents/com.ryha.keyboard-brightness-keys.plist <<PLIST
 </dict>
 </plist>
 PLIST
-# SwiftBar workspace plugin, leftmost of the status items
+# SwiftBar workspace plugin
 defaults write com.ameba.SwiftBar PluginDirectory -string "$HOME/.config/swiftbar"
 defaults write com.ameba.SwiftBar SUEnableAutomaticChecks -bool false
-defaults write com.ameba.SwiftBar "NSStatusItem Preferred Position workspace.sh" -float 9000
+# Workspace bar position (Cmd-dragged with yabai paused, SUPER+Shift+P). macOS keys it by the plugin's
+# real path, and only keeps it because the plugin isn't streamable (swiftbar/SwiftBar#458).
+# Notch: when the menu bar is full, macOS hides the icons nearest the notch first; tighter icon
+# spacing leaves more room before anything hides.
+osascript -e 'quit app "SwiftBar"' 2>/dev/null; while pgrep -q SwiftBar; do sleep 0.3; done
+defaults delete com.ameba.SwiftBar "NSStatusItem Preferred Position workspace.sh" 2>/dev/null || true
+defaults write com.ameba.SwiftBar "NSStatusItem Preferred Position $REPO/.config/swiftbar/workspace.5s.sh" -float 359
+defaults -currentHost write -globalDomain NSStatusItemSpacing -int 8
+defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 6
 # hide menu bar icons: AltTab, MiddleClick, Raycast, Spotlight (quit apps first or they overwrite this)
 for a in AltTab MiddleClick Raycast; do osascript -e "quit app \"$a\"" 2>/dev/null || true; done
 sleep 2

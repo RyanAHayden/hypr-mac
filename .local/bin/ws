@@ -7,6 +7,10 @@ export USER="${USER:-$(id -un)}"
 # Workspace "0" (SUPER+~, left of 1) is the 11th Space.
 action=$1 target=$2
 [ "$target" = 0 ] && target=11
+# Holding a bind fires a run every key repeat (~30ms). Runs that overlap read focus
+# mid-switch and grab the wrong window, and queued ones lag; so one at a time, and
+# repeats that arrive while one is running are dropped instead of queued.
+[ -z "$WS_LOCKED" ] && WS_LOCKED=1 exec lockf -t 0 "${TMPDIR:-/tmp}/ws.lock" "$0" "$@" 2>/dev/null
 # prev/next follow the bar's order (0, 1..10) and wrap around at either end
 if [ "$target" = prev ] || [ "$target" = next ]; then
 	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson cur "$(yabai -m query --spaces --space | jq .index)" '
@@ -24,11 +28,17 @@ fallback() {
 		*) skhd -k "ctrl - $target" ;;
 	esac
 }
+# Switching Spaces makes macOS activate an app (landing on an empty Space hands focus
+# to e.g. Finder; a move re-activates the moved window's app before yabai sees it
+# there). Tell the instant alt-tab helper those aren't alt-tabs, or it jumps to that
+# app's window on another Space.
+touch ~/.cache/ws-switch
 case $action in
 	focus) yabai -m space --focus "$target" 2>/dev/null || fallback ;;
 	move)
 		id=$(yabai -m query --windows --window | jq -r .id)
-		yabai -m window --space "$target" || exit 1
+		[ -n "$id" ] && [ "$id" != null ] || exit 1
+		yabai -m window "$id" --space "$target" || exit 1
 		yabai -m space --focus "$target" 2>/dev/null || fallback
 		yabai -m window --focus "$id" 2>/dev/null
 		;;

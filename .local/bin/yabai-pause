@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# SUPER+Shift+P: pause/resume yabai entirely. While paused, windows stay where they are,
+# nothing tiles, and SUPER(Cmd)+drag reaches macOS (e.g. Cmd-drag to rearrange menu bar icons).
+export PATH="/opt/homebrew/bin:$PATH"
+notify() { osascript -e "display notification \"$1\" with title \"yabai\"" >/dev/null 2>&1; }
+
+if pgrep -xq yabai; then
+	yabai --stop-service
+	notify "Paused - SUPER+Shift+P to resume"
+else
+	yabai --start-service
+	notify "Resumed"
+fi
