@@ -85,7 +85,8 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |
 | Cmd+Option+G | quadrant mode (no gaps, no borders) |
 | Cmd+Shift+Space | toggle menu bar auto-hide |
-| Hover | focuses the window under the mouse (yabai `focus_follows_mouse autofocus`, no raise) |
+| Option+Tab / Option+Shift+Tab | cycle focus through the windows on this workspace, floating ones too (Cmd+Tab is AltTab, all windows) |
+| Hover | focuses the window under the mouse and brings it to the front (yabai `focus_follows_mouse autoraise`) |
 | Cmd+drag / right-drag | move / resize window (yabai takes Cmd+click; three-finger middle click opens links in a new tab) |
 | F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
 

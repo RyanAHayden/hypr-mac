@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Option+Tab / Option+Shift+Tab: focus the next/previous window on this workspace, tiled and floating alike
+# (yabai's own --focus next/prev only walks the tiling tree), left to right then top to bottom, wrapping around.
+export PATH="/opt/homebrew/bin:$PATH"
+id=$(yabai -m query --windows --space | jq -r --arg dir "${1:-next}" '
+	[.[] | select(."is-visible" and ."is-minimized" == false and ."is-hidden" == false)]
+	| sort_by(.frame.x, .frame.y) as $w | ($w | length) as $n
+	| if $n < 2 then empty else
+		($w | map(."has-focus") | index(true) // -1) as $i
+		| $w[(($i + (if $dir == "prev" then -1 else 1 end)) % $n + $n) % $n].id end')
+[ -n "$id" ] && yabai -m window --focus "$id"

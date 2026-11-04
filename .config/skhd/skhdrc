@@ -81,6 +81,9 @@ lcmd + alt - left             : ~/.local/bin/window-group into west
 lcmd + alt - right            : ~/.local/bin/window-group into east
 lcmd + alt - up               : ~/.local/bin/window-group into north
 lcmd + alt - down             : ~/.local/bin/window-group into south
+# Option+Tab cycles focus through the windows on this workspace (Cmd+Tab = SUPER+Tab is AltTab, all windows)
+alt - tab                     : ~/.local/bin/window-cycle next
+shift + alt - tab             : ~/.local/bin/window-cycle prev
 lcmd + alt - tab              : ~/.local/bin/window-group next
 lcmd + alt + shift - tab      : ~/.local/bin/window-group prev
 lcmd + ctrl - left            : ~/.local/bin/window-group prev
