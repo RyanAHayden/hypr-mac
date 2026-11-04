@@ -1,0 +1,14 @@
+# Personal Ghostty overrides (loaded after Macarchy's ~/.config/ghostty/config.ghostty).
+# Ported from the Alacritty config in github.com/RyanAHayden/dotfiles.
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 13
+# Option acts as Meta so tmux M-* binds work (left Option combos bound in skhd never reach here)
+macos-option-as-alt = true
+copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
+confirm-close-surface = false
+quit-after-last-window-closed = true
+# Shift+Return / Alt+Shift+Return as CSI-u, so TUIs and tmux (M-S-Enter) can tell them apart
+keybind = shift+enter=text:\x1b[13;2u
+keybind = alt+shift+enter=text:\x1b[13;4u

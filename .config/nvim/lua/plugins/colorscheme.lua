@@ -1,3 +1,5 @@
+local theme = require("config.theme")
+
 return {
-  { "LazyVim/LazyVim", opts = { colorscheme = "kanagawa-wave" } },
+  { "LazyVim/LazyVim", opts = { colorscheme = theme.colorscheme() } },
 }

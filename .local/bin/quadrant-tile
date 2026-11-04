@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:$PATH"
+export USER="${USER:-$(id -un)}"
+# Toggle "quadrant tile" look: no gaps, no borders (and back).
+STATE_FILE="${TMPDIR:-/tmp}/yabai-quadrant-active"
+if [[ -f $STATE_FILE ]]; then
+	rm "$STATE_FILE"
+	for p in top_padding bottom_padding left_padding right_padding window_gap; do yabai -m config $p 8; done
+	brew services start borders >/dev/null 2>&1
+else
+	touch "$STATE_FILE"
+	for p in top_padding bottom_padding left_padding right_padding window_gap; do yabai -m config $p 0; done
+	brew services stop borders >/dev/null 2>&1
+fi

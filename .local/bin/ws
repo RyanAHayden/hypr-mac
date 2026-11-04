@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:$PATH"
+export USER="${USER:-$(id -un)}"
+# Omarchy-style workspace actions on yabai. Usage: ws focus|move <N|prev|next>
+# Focusing a Space needs yabai's scripting addition (SIP off); without it, fall back
+# to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
+action=$1 target=$2
+fallback() {
+	case $target in
+		prev) skhd -k "ctrl - left" ;;
+		next) skhd -k "ctrl - right" ;;
+		10) skhd -k "ctrl - 0" ;;
+		*) skhd -k "ctrl - $target" ;;
+	esac
+}
+case $action in
+	focus) yabai -m space --focus "$target" 2>/dev/null || fallback ;;
+	move)
+		id=$(yabai -m query --windows --window | jq -r .id)
+		yabai -m window --space "$target" || exit 1
+		yabai -m space --focus "$target" 2>/dev/null || fallback
+		yabai -m window --focus "$id" 2>/dev/null
+		;;
+esac

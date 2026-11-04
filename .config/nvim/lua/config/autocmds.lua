@@ -42,3 +42,77 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 clear_backgrounds()
+
+local theme_group = vim.api.nvim_create_augroup("macarchy_theme_refresh", { clear = true })
+local theme = require("config.theme")
+local last_colorscheme_stamp = theme.stamp()
+
+local function refresh_configured_colorscheme()
+  vim.schedule(function()
+    local stamp = theme.stamp()
+    if stamp == last_colorscheme_stamp then
+      return
+    end
+    last_colorscheme_stamp = stamp
+
+    local colorscheme = theme.colorscheme()
+    if not colorscheme or colorscheme == vim.g.colors_name then
+      clear_backgrounds()
+      return
+    end
+
+    local ok, err = theme.apply(colorscheme)
+    if ok then
+      clear_backgrounds()
+    else
+      vim.g.macarchy_colorscheme_error = err
+    end
+  end)
+end
+
+-- theme-switch sends WINCH to running Neovim processes. VimResized handles
+-- that signal, while the other events cover ordinary focus changes.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "VimResized" }, {
+  group = theme_group,
+  callback = refresh_configured_colorscheme,
+})
+
+local dashboard_filetypes = {
+  alpha = true,
+  dashboard = true,
+  ministarter = true,
+  snacks_dashboard = true,
+}
+
+local function clean_dashboard_window()
+  if not dashboard_filetypes[vim.bo.filetype] then
+    return
+  end
+
+  vim.schedule(function()
+    vim.wo.cursorline = false
+    vim.wo.foldcolumn = "0"
+    vim.wo.number = false
+    vim.wo.relativenumber = false
+    vim.wo.scrolloff = 0
+    vim.wo.sidescrolloff = 0
+    vim.wo.signcolumn = "no"
+    vim.wo.statuscolumn = ""
+    vim.wo.winbar = ""
+  end)
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = theme_group,
+  pattern = vim.tbl_keys(dashboard_filetypes),
+  callback = clean_dashboard_window,
+})
+
+clean_dashboard_window()
+
+-- ponytail: drop shada oldfiles entries like "~./bashrc" (tilde-user syntax).
+-- fnamemodify(":p") on these spawns a shell from the projects picker's async
+-- callback, which nvim can't wait() on there and aborts (SIGABRT). Filter, don't shell out.
+vim.v.oldfiles = vim.tbl_filter(function(f)
+  return not f:match("^~[^/]")
+end, vim.v.oldfiles)
