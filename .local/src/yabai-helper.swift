@@ -15,8 +15,9 @@
 //     it (AltTab).
 //   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
 //     on the Space you're on rather than switching back to the one it was minimized on.
+//   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
 // yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
-// wm.hide | wm.unhide (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
+// wm.hide | wm.unhide | wm.move <space> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
 import notify
 
@@ -153,6 +154,17 @@ final class Focus {
 		if age("ws-switch") < 0.3 { return }
 		// front-to-back, so the first match is the app's most recently used window
 		if let id = mine.first(where: { !flag($0, "is-sticky") && $0["space"] as? Int != attic })?["id"] as? Int { focus(id) }
+	}
+
+	// wm.move (state = Space), from `ws move`: take the focused window to that Space and follow it. Switch first, then
+	// move it onto the now-visible Space (yabai only tiles visible Spaces, so moving first shows it at its old size
+	// for a moment), and send both over the socket back to back so the empty Space shows for under a frame.
+	func move(to space: Int) {
+		guard let id = one(["--windows", "--window"])?["id"] as? Int, space != currentSpace() else { return }
+		closedAt = Date() // the switch makes macOS activate an app; that's not an alt-tab
+		let switched = yabai(["space", "--focus", String(space)]).map { $0.first != 0x07 } ?? false // 0x07 = yabai error
+		_ = yabai(["window", String(id), "--space", String(space)])
+		if switched { focus(id) } // without the scripting addition it can't switch Spaces; the window still moves
 	}
 
 	// MARK: SUPER+M parking
@@ -360,15 +372,22 @@ final class Bar {
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
+// `ws` checks this (kill -0) before handing moves over; cheaper than pgrep
+try? String(getpid()).write(toFile: NSHomeDirectory() + "/.cache/yabai-helper.pid", atomically: true, encoding: .utf8)
 let bar = Bar()
 let focuser = Focus()
-var tokens = [Int32](repeating: 0, count: 6)
+var tokens = [Int32](repeating: 0, count: 7)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
 notify_register_dispatch("wm.closed", &tokens[2], .main) { _ in focuser.closed(); bar.refresh() }
 notify_register_dispatch("wm.demin", &tokens[3], .main) { _ in focuser.syncMinimized(); bar.refresh() }
 notify_register_dispatch("wm.hide", &tokens[4], .main) { _ in focuser.hide(); bar.refresh() }
 notify_register_dispatch("wm.unhide", &tokens[5], .main) { _ in focuser.unhide(); bar.refresh() }
+notify_register_dispatch("wm.move", &tokens[6], .main) { token in
+	var space: UInt64 = 0
+	notify_get_state(token, &space)
+	focuser.move(to: Int(space))
+}
 let ws = NSWorkspace.shared.notificationCenter
 ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in

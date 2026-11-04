@@ -78,7 +78,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Ctrl+Option+Tab (+Shift) | focus next (previous) display |
 | Cmd+Shift+Option+arrows | move the whole Space to the display that way (renumbers Spaces) |
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
-| Cmd+Escape | system menu in Raycast: lock, sleep, relaunch yabai/skhd, log out, restart, shut down |
+| Cmd+Escape | Raycast listing the Power: commands: lock, sleep, toggle lid sleep, relaunch yabai/skhd, log out, restart, shut down |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Cmd+Ctrl+N / D / P, Cmd+Shift+Q | Network / Displays / Battery settings, Calculator |
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |

@@ -132,10 +132,9 @@ cat >~/Library/LaunchAgents/com.ryha.yabai-helper.plist <<PLIST
 PLIST
 launchctl bootout gui/$UID/com.ryha.yabai-helper 2>/dev/null || true
 launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.yabai-helper.plist
-# Notch: when the menu bar is full, macOS hides the icons nearest the notch first; tighter icon
-# spacing leaves more room before anything hides.
-defaults -currentHost write -globalDomain NSStatusItemSpacing -int 8
-defaults -currentHost write -globalDomain NSStatusItemSelectionPadding -int 6
+# Default menu bar icon spacing (it was tightened to fit the old right-side workspace bar next to the notch)
+defaults -currentHost delete -globalDomain NSStatusItemSpacing 2>/dev/null || true
+defaults -currentHost delete -globalDomain NSStatusItemSelectionPadding 2>/dev/null || true
 # hide menu bar icons: AltTab, MiddleClick, Raycast, Spotlight (quit apps first or they overwrite this)
 for a in AltTab MiddleClick Raycast; do osascript -e "quit app \"$a\"" 2>/dev/null || true; done
 sleep 2
@@ -151,6 +150,7 @@ if ! defaults read com.lwouis.alt-tab-macos holdShortcut 2>/dev/null | grep -q '
 fi
 defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool false
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
+defaults write com.raycast.macos showGettingStartedLink -bool false
 defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
 killall Dock SystemUIServer 2>/dev/null || true
 # SIP off (see README): grant Ghostty/Terminal every permission in the TCC databases, drop the privacy
@@ -220,6 +220,10 @@ sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownl
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate ConfigDataInstall -bool true
+# "Toggle Lid Sleep" in Raycast (.config/raycast/scripts/power-lid-sleep.sh) flips sleep without a password
+echo "$(whoami) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1" |
+	sudo tee /private/etc/sudoers.d/pmset >/dev/null
+sudo chmod 440 /private/etc/sudoers.d/pmset
 # AltTab: stop Sequoia's monthly "bypass the private window picker" screen recording prompt
 # (replayd's container is App Data, so this needs the terminal to have Full Disk Access)
 defaults write ~/Library/Group\ Containers/group.com.apple.replayd/ScreenCaptureApprovals \

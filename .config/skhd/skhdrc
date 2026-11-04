@@ -26,10 +26,10 @@ lcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-
 lcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
 lcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
 lcmd + shift - q              : open -a Calculator
-# Raycast: clipboard history, emoji picker, and the system menu (Script Command in .config/raycast/scripts)
+# Raycast: clipboard history, emoji picker, and the power commands (.local/bin/power-menu)
 lcmd + ctrl - v               : open -g "raycast://extensions/raycast/clipboard-history/clipboard-history"
 lcmd + ctrl - e               : open -g "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"
-lcmd - escape                 : open -g "raycast://script-commands/system-menu"
+lcmd - escape                 : ~/.local/bin/power-menu
 lcmd + ctrl - n               : open "x-apple.systempreferences:com.apple.Network-Settings.extension"
 lcmd + ctrl - d               : open "x-apple.systempreferences:com.apple.Displays-Settings.extension"
 lcmd + ctrl - p               : open "x-apple.systempreferences:com.apple.Battery-Settings.extension"
@@ -127,16 +127,17 @@ lcmd - 8 : ~/.local/bin/ws focus 8
 lcmd - 9 : ~/.local/bin/ws focus 9
 lcmd - 0 : ~/.local/bin/ws focus 10
 
-lcmd + shift - 1 : ~/.local/bin/ws move 1
-lcmd + shift - 2 : ~/.local/bin/ws move 2
-lcmd + shift - 3 : ~/.local/bin/ws move 3
-lcmd + shift - 4 : ~/.local/bin/ws move 4
-lcmd + shift - 5 : ~/.local/bin/ws move 5
-lcmd + shift - 6 : ~/.local/bin/ws move 6
-lcmd + shift - 7 : ~/.local/bin/ws move 7
-lcmd + shift - 8 : ~/.local/bin/ws move 8
-lcmd + shift - 9 : ~/.local/bin/ws move 9
-lcmd + shift - 0 : ~/.local/bin/ws move 10
+# Move window to Space N and follow: yabai-helper switches and moves over yabai's socket (no flash, ~1 ms to send)
+lcmd + shift - 1 : ~/.local/bin/notify-post wm.move 1
+lcmd + shift - 2 : ~/.local/bin/notify-post wm.move 2
+lcmd + shift - 3 : ~/.local/bin/notify-post wm.move 3
+lcmd + shift - 4 : ~/.local/bin/notify-post wm.move 4
+lcmd + shift - 5 : ~/.local/bin/notify-post wm.move 5
+lcmd + shift - 6 : ~/.local/bin/notify-post wm.move 6
+lcmd + shift - 7 : ~/.local/bin/notify-post wm.move 7
+lcmd + shift - 8 : ~/.local/bin/notify-post wm.move 8
+lcmd + shift - 9 : ~/.local/bin/notify-post wm.move 9
+lcmd + shift - 0 : ~/.local/bin/notify-post wm.move 10
 
 
 # SUPER+Shift+Option+N: move window there silently (stay here)

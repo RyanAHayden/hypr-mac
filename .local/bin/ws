@@ -7,6 +7,11 @@ export USER="${USER:-$(id -un)}"
 # to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
 # The 11th Space is the scratchpad (.local/bin/scratchpad), the 12th where SUPER+M parks windows (yabai-helper).
 action=$1 target=$2
+# SUPER+Shift+N: yabai-helper switches and moves over yabai's socket, back to back, so the move doesn't flash (yabai only
+# tiles visible Spaces: moving first shows the window at its old size; two yabai commands from here leave the empty
+# Space showing for ~10 ms). Straight away, before the lock and queries below, for the fastest key press.
+helper_up() { kill -0 "$(cat ~/.cache/yabai-helper.pid 2>/dev/null)" 2>/dev/null; }
+[ "$action" = move ] && [[ $target =~ ^[0-9]+$ ]] && helper_up && exec ~/.local/bin/notify-post wm.move "$target"
 # Holding a bind fires a run every key repeat (~30ms). Runs that overlap read focus
 # mid-switch and grab the wrong window, and queued ones lag; so one at a time, and
 # repeats that arrive while one is running are dropped instead of queued.
@@ -37,10 +42,10 @@ touch ~/.cache/ws-switch
 case $action in
 	focus) yabai -m space --focus "$target" 2>/dev/null || fallback ;;
 	move)
+		helper_up && exec ~/.local/bin/notify-post wm.move "$target" # prev/next, now resolved (see the top)
+		# Without the helper: switch first, then move the window onto the now-visible Space
 		id=$(yabai -m query --windows --window | jq -r .id)
 		[ -n "$id" ] && [ "$id" != null ] || exit 1
-		# Switch first, then move the window onto the now-visible Space: yabai only tiles visible Spaces, so moving it
-		# first would show it at its old size for a moment after the switch before snapping into place
 		if yabai -m space --focus "$target" 2>/dev/null; then
 			yabai -m window "$id" --space "$target" || exit 1
 		else
