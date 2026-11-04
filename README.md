@@ -11,6 +11,21 @@ permission (Full Disk Access, Accessibility, Input Monitoring, Screen Recording,
 so they never prompt, re-run setup.sh from Ghostty (silences AltTab's monthly screen recording prompt),
 add 10 Desktops in Mission Control and log out/in.
 
+## SIP off (optional, recommended)
+
+Recovery (hold power at boot > Options > Utilities > Terminal):
+
+```sh
+csrutil disable
+```
+
+Then back in macOS: `sudo nvram boot-args=-arm64e_preview_abi`, reboot, re-run `./setup.sh`.
+With SIP off it also grants Ghostty and Terminal every privacy permission directly in the TCC databases,
+disables `systemstatusd` (the purple/orange privacy dots, e.g. AltTab's screen recording one), adds a sudoers
+rule so yabai loads its scripting addition (instant Space switching, Space creation, swapping, opacity), and
+creates the 10 Desktops. Re-run setup after a yabai upgrade (the sudoers rule pins the binary's hash).
+`csrutil enable` in Recovery turns SIP back on.
+
 Re-running Macarchy's `./install` stops at files stowed from here (`skhdrc`, nvim); use `--force`, then re-run `stow . --adopt` and `git checkout .`.
 
 ## Keys (left Option = SUPER, Option+Cmd = SUPER+ALT)
@@ -44,7 +59,7 @@ yabai signals in `.config/yabai/local.yabairc` poke `~/.cache/ryha-workspace.fif
 
 ## Sacrifices vs Omarchy
 
-- SIP stays on, so no yabai scripting addition: Space switching goes through macOS ctrl+N (slide animation;
+- With SIP on (see above for turning it off), no yabai scripting addition: Space switching goes through macOS ctrl+N (slide animation;
   Accessibility > Reduce motion makes it a fade), Desktops are created by hand, no window opacity, no Space swapping,
   no scratchpad (yabai's needs the SA).
 - No real SUPER key: left Option combos bound in skhd can't type special characters.

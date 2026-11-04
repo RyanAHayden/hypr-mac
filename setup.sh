@@ -122,6 +122,41 @@ defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool fals
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
 defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
 killall Dock SystemUIServer 2>/dev/null || true
+# SIP off (see README): grant Ghostty/Terminal every permission in the TCC databases, drop the privacy
+# indicator dots (systemstatusd draws them), and let yabai load its scripting addition without a password
+sip_off=false
+csrutil status | grep -q disabled && sip_off=true
+if $sip_off; then
+	echo "==> SIP is off: TCC grants, no privacy dots, yabai scripting addition (sudo)"
+	csreq_hex() { codesign -d -r- "$1" 2>/dev/null | sed -n 's/^designated => //p' | csreq -r- -b /dev/stdout | xxd -p | tr -d '\n'; }
+	tcc_grant() { # db service bundle-id app-path
+		sudo sqlite3 "$1" "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,flags,last_modified)
+			VALUES ('$2','$3',0,2,3,1,X'$(csreq_hex "$4")',0,CAST(strftime('%s','now') AS INTEGER));"
+	}
+	sysdb="/Library/Application Support/com.apple.TCC/TCC.db"
+	userdb="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
+	for app in "com.mitchellh.ghostty:/Applications/Ghostty.app" "com.apple.Terminal:/System/Applications/Utilities/Terminal.app"; do
+		id=${app%%:*} path=${app#*:}
+		for svc in SystemPolicyAllFiles Accessibility ListenEvent PostEvent ScreenCapture SystemPolicyAppBundles DeveloperTool; do
+			tcc_grant "$sysdb" "kTCCService$svc" "$id" "$path"
+		done
+		for svc in SystemPolicyAppData SystemPolicyDocumentsFolder SystemPolicyDesktopFolder SystemPolicyDownloadsFolder \
+			SystemPolicyNetworkVolumes SystemPolicyRemovableVolumes; do
+			tcc_grant "$userdb" "kTCCService$svc" "$id" "$path"
+		done
+	done
+	sudo killall tccd 2>/dev/null || true
+	launchctl disable "gui/$(id -u)/com.apple.systemstatusd"
+	launchctl bootout "gui/$(id -u)/com.apple.systemstatusd" 2>/dev/null || true
+	# the hash pins the rule to this yabai binary, so re-run setup after a yabai upgrade
+	echo "$(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 "$(readlink -f "$(command -v yabai)")" | cut -d' ' -f1) $(command -v yabai) --load-sa" |
+		sudo tee /private/etc/sudoers.d/yabai >/dev/null
+	sudo chmod 440 /private/etc/sudoers.d/yabai
+	nvram boot-args 2>/dev/null | grep -q arm64e_preview_abi || {
+		sudo nvram boot-args=-arm64e_preview_abi
+		echo "  (set boot-args for the scripting addition - reboot, then re-run setup)"
+	}
+fi
 # AltTab: stop Sequoia's monthly "bypass the private window picker" screen recording prompt
 # (replayd's container is App Data, so this needs the terminal to have Full Disk Access)
 defaults write ~/Library/Group\ Containers/group.com.apple.replayd/ScreenCaptureApprovals \
@@ -136,6 +171,13 @@ yabai --start-service 2>/dev/null || yabai --restart-service
 skhd --start-service 2>/dev/null || skhd --restart-service
 brew services start borders
 brew services start syncthing
+if $sip_off; then
+	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 10
+	yabai --restart-service
+	sleep 2
+	sudo -n yabai --load-sa || true
+	while [ "$(yabai -m query --spaces --display | jq length)" -lt 10 ]; do yabai -m space --create || break; done
+fi
 for a in AltTab MiddleClick SwiftBar Raycast; do
 	open -a "$a"
 	osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"/Applications/$a.app\", hidden:true}" >/dev/null 2>&1 || true
@@ -147,10 +189,11 @@ Done - check `git diff` (stow --adopt pulled existing files into the repo) and `
 Manual steps:
   1. Privacy & Security > Accessibility: allow yabai, skhd, AltTab, MiddleClick (+ Screen Recording for AltTab),
      then: yabai --restart-service; skhd --restart-service
+     SIP on only (with SIP off setup grants these and makes the Desktops itself):
      Ghostty and Terminal get everything, so nothing run in them prompts: turn both on in Full Disk Access
      (covers "access data from other apps"), Accessibility, Input Monitoring, Screen & System Audio Recording,
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
-  2. Mission Control (ctrl+up): add Desktops until there are 10
+  2. SIP on only: Mission Control (ctrl+up): add Desktops until there are 10
   3. Log out and back in (key repeat, trackpad)
   4. Syncthing: http://127.0.0.1:8384
 EOF
