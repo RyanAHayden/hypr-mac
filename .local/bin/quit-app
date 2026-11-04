@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# SUPER+Q: quit the frontmost app (a normal quit, so it can still ask to save). Bound in skhd rather
+# than left to the app's own Cmd+Q, which some players swallow (Infuse during playback).
+pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
+[[ $pid =~ ^[0-9]+$ ]] || exit 0
+# Finder has no Quit (Cmd+Q does nothing there); keep it that way
+[ "$(ps -o comm= -p "$pid")" = /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder ] && exit 0
+osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate; ''" >/dev/null

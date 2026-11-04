@@ -3,9 +3,17 @@ export PATH="/opt/homebrew/bin:$PATH"
 export USER="${USER:-$(id -un)}"
 # Close the focused window. Apps that only order their window out on close (Spotify, Discord) keep
 # running with a blank tile in yabai, so quit those instead (AppKit terminate via JXA, a normal quit).
-read -r id pid app < <(yabai -m query --windows --window | jq -r '"\(.id) \(.pid) \(.app)"') || exit 0
+# yabai sometimes loses track of focus (e.g. Infuse/Catalyst video players), so fall back to the
+# frontmost app as macOS sees it and close its frontmost window.
+terminate() { osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($1).terminate; ''" >/dev/null; }
+read -r id pid app < <(yabai -m query --windows --window 2>/dev/null | jq -r '"\(.id) \(.pid) \(.app)"')
+if [ -z "$id" ]; then
+	pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
+	[[ $pid =~ ^[0-9]+$ ]] || exit 0
+	read -r id app < <(yabai -m query --windows | jq -r --argjson p "$pid" 'first(.[] | select(.pid == $p and ."is-minimized" == false)) | "\(.id) \(.app)"')
+	[ -n "$id" ] || { terminate "$pid"; exit 0; }
+fi
 case $app in
-	Spotify | Discord)
-		osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate; ''" >/dev/null ;;
-	*) yabai -m window "$id" --close ;;
+	Spotify | Discord) terminate "$pid" ;;
+	*) yabai -m window "$id" --close || terminate "$pid" ;;
 esac

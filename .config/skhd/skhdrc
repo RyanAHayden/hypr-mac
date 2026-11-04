@@ -24,6 +24,7 @@ rcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostt
 # --- Windows ---------------------------------------------------------------
 rcmd - w                      : ~/.local/bin/close-window
 rcmd + shift - w              : ~/.local/bin/force-kill-window
+rcmd - q                      : ~/.local/bin/quit-app
 rcmd - s                      : yabai -m window --minimize
 rcmd + shift - p              : ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)
 rcmd - f                      : yabai -m window --toggle zoom-fullscreen
