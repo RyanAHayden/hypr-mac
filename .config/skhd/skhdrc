@@ -85,6 +85,10 @@ rcmd + shift - 8 : ~/.local/bin/ws move 8
 rcmd + shift - 9 : ~/.local/bin/ws move 9
 rcmd + shift - 0 : ~/.local/bin/ws move 10
 
+# Workspace "0" = 11th Space on the ~ key (plain SUPER+` stays macOS window cycling)
+rcmd + shift - 0x32        : ~/.local/bin/ws focus 0
+rcmd + ctrl + shift - 0x32 : ~/.local/bin/ws move 0
+
 # Move window to the other display
 rcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west
 rcmd + ctrl + shift - l             : yabai -m window --display east; yabai -m display --focus east

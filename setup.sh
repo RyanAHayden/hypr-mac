@@ -190,7 +190,7 @@ skhd --start-service 2>/dev/null || skhd --restart-service
 brew services start borders 2>/dev/null || brew services restart borders
 brew services start syncthing
 if $sip_off; then
-	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 10
+	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 11 (1-9, 10 on 0, workspace "0" on ~)
 	yabai --restart-service
 	sleep 2
 	# yabai >= 7.1.16 builds the SA loader with arm64e PAC ABI v1 but Sequoia's Dock is v0, so injection fails
@@ -205,7 +205,7 @@ if $sip_off; then
 		fi
 		sudo -n yabai --load-sa || echo "  (yabai scripting addition still failing to load)"
 	fi
-	while [ "$(yabai -m query --spaces --display | jq length)" -lt 10 ]; do yabai -m space --create || break; done
+	while [ "$(yabai -m query --spaces --display | jq length)" -lt 11 ]; do yabai -m space --create || break; done
 fi
 open -a Karabiner-Elements   # first launch activates its keyboard driver (approve it, see below)
 for a in AltTab MiddleClick SwiftBar Raycast Tailscale; do
@@ -225,7 +225,7 @@ Manual steps:
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
      for Karabiner-Core-Service (SIP off: done above). Until then, SUPER (Cmd) binds don't fire: skhd only listens for right Cmd
-  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 10
+  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 11
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384
 EOF

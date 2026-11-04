@@ -18,7 +18,7 @@ config file stowed into `~`. Older setups are in git history.
    get everything, plus yabai, skhd, AltTab, MiddleClick, Karabiner and scripting System Events), so you don't
    click through Allow prompts. It also disables `systemstatusd` (the purple/orange privacy dots), adds a sudoers
    rule so yabai loads its scripting addition (instant Space switching, Space creation, swapping, opacity), and
-   creates the 10 Desktops. `csrutil enable` in Recovery turns SIP back on.
+   creates the 11 Desktops. `csrutil enable` in Recovery turns SIP back on.
 2. `./setup.sh` - installs packages, stows using --adopt so you can see git changes before discarding what you
    want to change, and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai or
    skhd (the sudoers rule and permissions pin the binaries).
@@ -26,7 +26,7 @@ config file stowed into `~`. Older setups are in git history.
    have to do the rest by hand: grant Accessibility (yabai, skhd, AltTab, MiddleClick), Input Monitoring
    (Karabiner-Core-Service), give Ghostty and Terminal every Privacy & Security permission (Full Disk Access,
    Accessibility, Input Monitoring, Screen Recording, App Management, Developer Tools), re-run setup.sh from
-   Ghostty (silences AltTab's monthly screen recording prompt) and add 10 Desktops in Mission Control.
+   Ghostty (silences AltTab's monthly screen recording prompt) and add 11 Desktops in Mission Control.
 
 ## Keys (Cmd = SUPER, Cmd+Option = SUPER+ALT)
 
@@ -64,6 +64,9 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 
 ## Workspace bar
 
+Workspaces 1-9 and 10 sit on SUPER+1..0; workspace "0" is the 11th Space on SUPER+Shift+~ (move a window there:
+SUPER+Ctrl+Shift+~) and is drawn first in the bar, matching the key left of 1. SUPER+A/D cycle in that order
+(0, 1..10) and wrap around.
 `.config/swiftbar/workspace.sh` (SwiftBar, streamable) shows 1-5 plus any occupied Space; current = white pill,
 occupied = white, empty = grey. Drawn by `.local/src/ws-render.swift` (built to `~/.local/bin/ws-render` by setup.sh).
 yabai signals in `.config/yabai/yabairc` poke `~/.cache/ryha-workspace.fifo` so it redraws instantly.

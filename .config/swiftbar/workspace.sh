@@ -14,15 +14,18 @@ exec 3<>"$FIFO" # read-write open never blocks, and keeps writers from blocking
 render() {
 	local spaces
 	spaces=$(yabai -m query --spaces 2>/dev/null) || return 1
+	# Space 11 is workspace "0" (the ~ key, left of 1): label it 0 and draw it first
+	spaces=$(jq '[ .[] | .name = (if .index == 11 then "0" else (.index | tostring) end) ]
+		| sort_by(if .index == 11 then 0 else .index end)' <<<"$spaces")
 	local args
 	args=$(jq -r '[ .[] | select(.index <= 5 or ."has-focus" or (.windows | length) > 0)
-		| "\(.index):\(if ."has-focus" then "a" elif (.windows | length) > 0 then "o" else "e" end)" ] | join(" ")' <<<"$spaces")
+		| "\(.name):\(if ."has-focus" then "a" elif (.windows | length) > 0 then "o" else "e" end)" ] | join(" ")' <<<"$spaces")
 	echo "~~~"
 	# shellcheck disable=SC2086
 	echo "| image=$("$HOME/.local/bin/ws-render" $args)"
 	echo "---"
 	jq -r --arg ws "$HOME/.local/bin/ws" '.[] |
-		"\(if ."has-focus" then "• " else "" end)\(.index)\(if (.windows|length) > 0 then "  (\(.windows|length))" else "" end) | bash=\($ws) param1=focus param2=\(.index) terminal=false"' <<<"$spaces"
+		"\(if ."has-focus" then "• " else "" end)\(.name)\(if (.windows|length) > 0 then "  (\(.windows|length))" else "" end) | bash=\($ws) param1=focus param2=\(.name) terminal=false"' <<<"$spaces"
 }
 
 last=""

@@ -4,12 +4,23 @@ export USER="${USER:-$(id -un)}"
 # Omarchy-style workspace actions on yabai. Usage: ws focus|move <N|prev|next>
 # Focusing a Space needs yabai's scripting addition (SIP off); without it, fall back
 # to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
+# Workspace "0" (SUPER+~, left of 1) is the 11th Space.
 action=$1 target=$2
+[ "$target" = 0 ] && target=11
+# prev/next follow the bar's order (0, 1..10) and wrap around at either end
+if [ "$target" = prev ] || [ "$target" = next ]; then
+	resolved=$(yabai -m query --spaces --display | jq -r --arg dir "$target" --argjson cur "$(yabai -m query --spaces --space | jq .index)" '
+		[.[].index] | sort_by(if . == 11 then 0 else . end) as $o
+		| ($o | index($cur)) as $i
+		| $o[(($i + (if $dir == "next" then 1 else -1 end)) % ($o | length) + ($o | length)) % ($o | length)]') &&
+		[ -n "$resolved" ] && target=$resolved
+fi
 fallback() {
 	case $target in
 		prev) skhd -k "ctrl - left" ;;
 		next) skhd -k "ctrl - right" ;;
 		10) skhd -k "ctrl - 0" ;;
+		11) ;; # no macOS Desktop shortcut for 11; needs the scripting addition
 		*) skhd -k "ctrl - $target" ;;
 	esac
 }
