@@ -39,8 +39,14 @@ case $action in
 	move)
 		id=$(yabai -m query --windows --window | jq -r .id)
 		[ -n "$id" ] && [ "$id" != null ] || exit 1
-		yabai -m window "$id" --space "$target" || exit 1
-		yabai -m space --focus "$target" 2>/dev/null || fallback
+		# Switch first, then move the window onto the now-visible Space: yabai only tiles visible Spaces, so moving it
+		# first would show it at its old size for a moment after the switch before snapping into place
+		if yabai -m space --focus "$target" 2>/dev/null; then
+			yabai -m window "$id" --space "$target" || exit 1
+		else
+			yabai -m window "$id" --space "$target" || exit 1
+			fallback
+		fi
 		yabai -m window --focus "$id" 2>/dev/null
 		;;
 	move-silent)

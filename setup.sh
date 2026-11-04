@@ -141,6 +141,14 @@ for a in AltTab MiddleClick Raycast; do osascript -e "quit app \"$a\"" 2>/dev/nu
 sleep 2
 defaults write com.lwouis.alt-tab-macos menubarIconShown -string false
 defaults write com.lwouis.alt-tab-macos "NSStatusItem Visible Item-0" -bool false
+# AltTab takes over Cmd+Tab = SUPER+Tab (it turns off the macOS app switcher while it holds that shortcut). AltTab 11
+# stores shortcuts as archived objects and drops plain strings, but converts strings when upgrading settings from
+# before 10.4, so write them as strings and mark the settings that old (AltTab is quit here; it converts on launch).
+if ! defaults read com.lwouis.alt-tab-macos holdShortcut 2>/dev/null | grep -q 'U2318'; then
+	defaults write com.lwouis.alt-tab-macos holdShortcut -string "⌘"
+	defaults write com.lwouis.alt-tab-macos nextWindowShortcut -string "⇥"
+	defaults write com.lwouis.alt-tab-macos preferencesVersion -string "10.4.0"
+fi
 defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool false
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
 defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1

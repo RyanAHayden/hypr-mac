@@ -39,7 +39,7 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Caps Lock | Ctrl | Same as Ctrl |
 | Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps, Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) |
 | Option | Alt | Never bound by skhd, so nvim/tmux get Meta (M-h, M-1..9, M-Enter) from either side |
-| Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q, Cmd+Tab |
+| Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
 
 SUPER is physical left Cmd, bound natively by skhd (`lcmd`), so binds keep working when Karabiner isn't running
@@ -52,7 +52,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 |---|---|
 | Cmd+Return / Cmd+Option+Return | Ghostty / Ghostty in tmux `Work` |
 | Cmd+Space | Raycast (its own hotkey, so it toggles) |
-| Option+Tab | AltTab (window switcher with previews) |
+| Cmd+Tab / Cmd+Shift+Tab | AltTab (window switcher with previews), replacing the macOS app switcher |
 | Cmd+Shift+B / Return / Option+B | Helium / new window / incognito |
 | Cmd+Shift+F, N, T | new Finder window, nvim, btop |
 | Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |
