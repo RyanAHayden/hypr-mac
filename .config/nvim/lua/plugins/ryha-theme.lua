@@ -1,5 +1,6 @@
--- ryha theme (github.com/RyanAHayden/ryha-omarchy-theme). Selected by theme-switch via NVIM_COLORSCHEME=aether.
+-- ryha theme (github.com/RyanAHayden/ryha-omarchy-theme), same colors as Ghostty's palette
 return {
+  { "LazyVim/LazyVim", opts = { colorscheme = "aether" } },
   {
     "bjarneo/aether.nvim",
     branch = "v3",

@@ -1,4 +1,95 @@
-# Macarchy's default ctrl+alt bindings are disabled: they collide with the tmux
-# C-M-h/j/k/l and C-M-arrow pane binds. Original saved in the macarchy repo (skhd/skhdrc).
-# All personal (Omarchy-style) bindings live in local.skhdrc.
-.load "local.skhdrc"
+# skhd bindings, Omarchy-style, ported from github.com/RyanAHayden/dotfiles (.config/hypr/bindings.lua)
+# SUPER = Cmd. Karabiner turns left Cmd into right Cmd, and only rcmd is bound here, so the
+# left Cmd it sends for Linux-style ctrl shortcuts (ctrl+c -> cmd+c) never hits these.
+# SUPER+ALT = Cmd + Option. Unbound Cmd combos (cmd+c/v/q/tab) still reach macOS apps.
+# Option is never bound alone, so it reaches nvim/tmux as Meta (M-h, M-1..9, M-Enter, ...).
+# Reload: skhd --restart-service
+
+# --- Apps ------------------------------------------------------------------
+rcmd - return                 : touch ~/.cache/yabai-new-window; open -na Ghostty
+rcmd + alt - return           : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/tmux new -A -s Work
+rcmd + shift - b              : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
+rcmd + shift - return         : touch ~/.cache/yabai-new-window; open -na Helium --args --new-window
+rcmd + shift + alt - b        : touch ~/.cache/yabai-new-window; open -na Helium --args --incognito
+rcmd + shift - f              : open ~
+rcmd + shift - n              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim
+rcmd + shift - t              : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop
+rcmd + shift - g              : open -a Steam
+rcmd + shift - 0x2C           : open -a KeePassXC
+rcmd + shift - s              : open "x-apple.systempreferences:com.apple.Sound-Settings.extension"
+rcmd + ctrl - b               : open "x-apple.systempreferences:com.apple.BluetoothSettings"
+rcmd - i                      : touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/skhd/skhdrc
+
+
+# --- Windows ---------------------------------------------------------------
+rcmd - w                      : ~/.local/bin/close-window
+rcmd + shift - w              : ~/.local/bin/force-kill-window
+rcmd - s                      : yabai -m window --minimize
+rcmd - f                      : yabai -m window --toggle zoom-fullscreen
+rcmd + alt - f                : yabai -m window --toggle native-fullscreen
+rcmd - t                      : yabai -m window --toggle float --grid 6:6:1:1:4:4
+rcmd - 0x2A                   : yabai -m window --toggle split
+rcmd + shift - i              : yabai -m window --swap largest
+rcmd + ctrl + shift - i       : yabai -m space --mirror y-axis
+rcmd - 0x1B                   : yabai -m window --ratio rel:-0.05
+rcmd - 0x18                   : yabai -m window --ratio rel:0.05
+rcmd + shift - r              : yabai -m space --balance
+rcmd + alt - g                : ~/.local/bin/quadrant-tile
+rcmd + shift - space          : ~/.local/bin/toggle-menubar
+
+# Focus (vim keys + arrows)
+rcmd - h                      : yabai -m window --focus west
+rcmd - j                      : yabai -m window --focus south
+rcmd - k                      : yabai -m window --focus north
+rcmd - l                      : yabai -m window --focus east
+rcmd - left                   : yabai -m window --focus west
+rcmd - down                   : yabai -m window --focus south
+rcmd - up                     : yabai -m window --focus north
+rcmd - right                  : yabai -m window --focus east
+
+# Move (like Hyprland movewindow: re-split into that side)
+rcmd + shift - h              : yabai -m window --warp west
+rcmd + shift - j              : yabai -m window --warp south
+rcmd + shift - k              : yabai -m window --warp north
+rcmd + shift - l              : yabai -m window --warp east
+rcmd + shift - left           : yabai -m window --swap west
+rcmd + shift - down           : yabai -m window --swap south
+rcmd + shift - up             : yabai -m window --swap north
+rcmd + shift - right          : yabai -m window --swap east
+
+# --- Workspaces (Spaces) ---------------------------------------------------
+rcmd - a                      : ~/.local/bin/ws focus prev
+rcmd - d                      : ~/.local/bin/ws focus next
+rcmd + shift - a              : ~/.local/bin/ws move prev
+rcmd + shift - d              : ~/.local/bin/ws move next
+
+rcmd - 1 : ~/.local/bin/ws focus 1
+rcmd - 2 : ~/.local/bin/ws focus 2
+rcmd - 3 : ~/.local/bin/ws focus 3
+rcmd - 4 : ~/.local/bin/ws focus 4
+rcmd - 5 : ~/.local/bin/ws focus 5
+rcmd - 6 : ~/.local/bin/ws focus 6
+rcmd - 7 : ~/.local/bin/ws focus 7
+rcmd - 8 : ~/.local/bin/ws focus 8
+rcmd - 9 : ~/.local/bin/ws focus 9
+rcmd - 0 : ~/.local/bin/ws focus 10
+
+rcmd + shift - 1 : ~/.local/bin/ws move 1
+rcmd + shift - 2 : ~/.local/bin/ws move 2
+rcmd + shift - 3 : ~/.local/bin/ws move 3
+rcmd + shift - 4 : ~/.local/bin/ws move 4
+rcmd + shift - 5 : ~/.local/bin/ws move 5
+rcmd + shift - 6 : ~/.local/bin/ws move 6
+rcmd + shift - 7 : ~/.local/bin/ws move 7
+rcmd + shift - 8 : ~/.local/bin/ws move 8
+rcmd + shift - 9 : ~/.local/bin/ws move 9
+rcmd + shift - 0 : ~/.local/bin/ws move 10
+
+# Move window to the other display
+rcmd + ctrl + shift - h             : yabai -m window --display west; yabai -m display --focus west
+rcmd + ctrl + shift - l             : yabai -m window --display east; yabai -m display --focus east
+
+# --- System ----------------------------------------------------------------
+rcmd + ctrl - l               : pmset displaysleepnow
+rcmd + alt - y                : yabai --restart-service; skhd --restart-service
+

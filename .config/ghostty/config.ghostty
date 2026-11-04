@@ -1,0 +1,49 @@
+# Ghostty config. Ported from the Alacritty config in github.com/RyanAHayden/dotfiles.
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 13
+window-decoration = true
+macos-titlebar-style = hidden
+macos-window-buttons = hidden
+window-padding-x = 14
+window-padding-y = 14
+window-padding-balance = true
+background-opacity = 0.92
+# Option acts as Meta so nvim/tmux M-* binds work (skhd leaves Option alone; SUPER is Cmd)
+macos-option-as-alt = true
+# Linux-style terminal copy/paste (Karabiner leaves ctrl as real ctrl in here); cmd+c/v still work too
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+copy-on-select = clipboard
+clipboard-read = allow
+clipboard-write = allow
+confirm-close-surface = false
+quit-after-last-window-closed = true
+# Shift+Return / Alt+Shift+Return as CSI-u, so TUIs and tmux (M-S-Enter) can tell them apart
+keybind = shift+enter=text:\x1b[13;2u
+keybind = alt+shift+enter=text:\x1b[13;4u
+# over ssh, copy the xterm-ghostty terminfo to the host (or fall back to TERM=xterm-256color),
+# so tmux etc. on servers without it don't fail with "missing or unsuitable terminal"
+shell-integration-features = ssh-env,ssh-terminfo
+
+# ryha-silver colors (github.com/RyanAHayden/ryha-omarchy-theme)
+background = #000000
+foreground = #e5e5e5
+cursor-color = #e5e5e5
+selection-background = #3a3a3a
+selection-foreground = #ffffff
+palette = 0=#000000
+palette = 1=#ef4444
+palette = 2=#22c55e
+palette = 3=#f59e0b
+palette = 4=#3b82f6
+palette = 5=#a855f7
+palette = 6=#06b6d4
+palette = 7=#e5e5e5
+palette = 8=#737373
+palette = 9=#f87171
+palette = 10=#4ade80
+palette = 11=#fbbf24
+palette = 12=#60a5fa
+palette = 13=#c084fc
+palette = 14=#22d3ee
+palette = 15=#ffffff

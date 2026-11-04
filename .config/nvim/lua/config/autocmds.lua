@@ -7,7 +7,7 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
-local transparent_group = vim.api.nvim_create_augroup("macarchy_transparent_background", { clear = true })
+local transparent_group = vim.api.nvim_create_augroup("ryha_transparent_background", { clear = true })
 
 local function clear_backgrounds()
   local highlights = {
@@ -43,39 +43,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 
 clear_backgrounds()
 
-local theme_group = vim.api.nvim_create_augroup("macarchy_theme_refresh", { clear = true })
-local theme = require("config.theme")
-local last_colorscheme_stamp = theme.stamp()
-
-local function refresh_configured_colorscheme()
-  vim.schedule(function()
-    local stamp = theme.stamp()
-    if stamp == last_colorscheme_stamp then
-      return
-    end
-    last_colorscheme_stamp = stamp
-
-    local colorscheme = theme.colorscheme()
-    if not colorscheme or colorscheme == vim.g.colors_name then
-      clear_backgrounds()
-      return
-    end
-
-    local ok, err = theme.apply(colorscheme)
-    if ok then
-      clear_backgrounds()
-    else
-      vim.g.macarchy_colorscheme_error = err
-    end
-  end)
-end
-
--- theme-switch sends WINCH to running Neovim processes. VimResized handles
--- that signal, while the other events cover ordinary focus changes.
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "VimResized" }, {
-  group = theme_group,
-  callback = refresh_configured_colorscheme,
-})
+local dashboard_group = vim.api.nvim_create_augroup("ryha_dashboard", { clear = true })
 
 local dashboard_filetypes = {
   alpha = true,
@@ -103,7 +71,7 @@ local function clean_dashboard_window()
 end
 
 vim.api.nvim_create_autocmd("FileType", {
-  group = theme_group,
+  group = dashboard_group,
   pattern = vim.tbl_keys(dashboard_filetypes),
   callback = clean_dashboard_window,
 })

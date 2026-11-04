@@ -1,0 +1,26 @@
+#!/bin/bash
+# set-wallpaper IMAGE: desktop picture on every Space and display.
+# System Events sets it the supported way, which writes a store entry WallpaperAgent accepts (with a file
+# bookmark; a hand-written entry without one falls back to the default wallpaper) but only for the
+# current Space. Copy that entry to every other Space, then restart the agent so it re-reads the store.
+set -euo pipefail
+[ -f "${1:-}" ] || { echo "usage: set-wallpaper IMAGE" >&2; exit 1; }
+img="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+
+osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$img\""
+sleep 1
+/usr/bin/python3 -I - <<'PY'
+import copy, pathlib, plistlib
+p = pathlib.Path.home() / "Library/Application Support/com.apple.wallpaper/Store/Index.plist"
+d = plistlib.loads(p.read_bytes())
+desk = d["SystemDefault"]["Desktop"]
+for space in d.get("Spaces", {}).values():
+    if "Default" in space:
+        space["Default"]["Desktop"] = copy.deepcopy(desk)
+    for display in space.get("Displays", {}).values():
+        display["Desktop"] = copy.deepcopy(desk)
+for display in d.get("Displays", {}).values():
+    display["Desktop"] = copy.deepcopy(desk)
+p.write_bytes(plistlib.dumps(d, fmt=plistlib.FMT_BINARY))
+PY
+launchctl kickstart -k "gui/$(id -u)/com.apple.wallpaper.agent"

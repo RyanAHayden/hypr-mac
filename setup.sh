@@ -1,42 +1,23 @@
 #!/usr/bin/env bash
-# Sets up this Mac like github.com/RyanAHayden/dotfiles (Omarchy), on top of Macarchy.
+# Sets up this Mac like github.com/RyanAHayden/dotfiles (Omarchy).
 # Safe to re-run. Stows with --adopt, so check `git diff` afterwards and discard what you don't want.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MACARCHY="$HOME/macarchy"
 
 echo "==> Homebrew packages"
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
-brew install stow tmux syncthing jq
+brew install stow tmux syncthing jq neovim ripgrep btop
+brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/borders
+brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
-brew install --cask keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab swiftbar middleclick
-
-echo "==> Macarchy (everything except its SketchyBar; the native menu bar + SwiftBar is used instead)"
-[ -d "$MACARCHY" ] || git clone https://github.com/HarryRandall/macarchy "$MACARCHY"
-# if yabairc is Macarchy's plus appended lines (the local.yabairc include, re-added below), restore
-# Macarchy's copy so it isn't seen as locally edited; any other edit is left for Macarchy to report
-yrc=~/.config/yabai/yabairc
-if [ -f "$yrc" ] && head -c "$(wc -c <"$MACARCHY/yabai/yabairc")" "$yrc" | cmp -s - "$MACARCHY/yabai/yabairc"; then
-	cp "$MACARCHY/yabai/yabairc" "$yrc"
-fi
-# files this repo overrides that Macarchy also installs (skhdrc, nvim config): Macarchy stops if they
-# differ from its copy, so move any local edits into the repo and let it reinstall; stow links ours back below
-overrides=$(cd "$REPO" && git ls-files .config | while read -r f; do if [ -e "$MACARCHY/${f#.config/}" ]; then echo "$f"; fi; done)
-for f in $overrides; do
-	if [ -f ~/"$f" ] && [ ! -L ~/"$f" ] && ! cmp -s ~/"$f" "$MACARCHY/${f#.config/}"; then cp ~/"$f" "$REPO/$f"; fi
-	rm -f ~/"$f"
-done
-"$MACARCHY/install" window-manager terminal shell nvim utilities themes raycast
-brew trust --formula felixkratz/formulae/borders
+brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab swiftbar middleclick
+brew install --cask karabiner-elements
 
 echo "==> stow"
 cd "$REPO"
-for f in $overrides; do rm -f ~/"$f"; done
 stow . --adopt
-# Macarchy's yabairc has no local include; add one line for local.yabairc
-grep -q local.yabairc ~/.config/yabai/yabairc || printf '\n# Personal overrides (not managed by Macarchy)\n[ -f "$CONFIG_ROOT/local.yabairc" ] && source "$CONFIG_ROOT/local.yabairc"\n' >>~/.config/yabai/yabairc
 
 echo "==> tmux plugins (no TPM)"
 mkdir -p ~/.config/tmux/plugins
@@ -54,8 +35,9 @@ echo "==> workspace bar renderer"
 swiftc -O ~/.local/src/ws-render.swift -o ~/.local/bin/ws-render
 mkdir -p ~/.cache
 
-echo "==> theme"
-~/.local/bin/theme-switch ryha-silver
+echo "==> dark mode and wallpaper"
+osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'
+~/.local/bin/set-wallpaper ~/.local/share/wallpapers/0-dot-hands.jpg
 
 echo "==> macOS settings"
 # input (hypr/input.lua): fast repeat, flat mouse, natural scroll; three fingers = middle click only
@@ -93,6 +75,22 @@ for i in 1 2 3 4 5 6 7 8 9; do
 	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add $((117 + i)) \
 		"<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>$((48 + i))</integer><integer>${codes[$((i - 1))]}</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
 done
+# SUPER is Cmd (Karabiner + skhd): free cmd+space for Raycast, and move screenshots off cmd+shift+3/4/5
+# (SUPER+shift+N moves windows) to ctrl+shift+3/4/5, ctrl+option+shift+3/4 = to clipboard
+hotkey() { # id enabled ascii keycode modmask
+	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$1" \
+		"<dict><key>enabled</key><$2/><key>value</key><dict><key>parameters</key><array><integer>$3</integer><integer>$4</integer><integer>$5</integer></array><key>type</key><string>standard</string></dict></dict>"
+}
+hotkey 64 false 32 49 1048576
+# fn/Globe alone does nothing (fn+h/j/k/l are arrows via Karabiner; it kept popping the emoji picker - use Raycast)
+defaults write com.apple.HIToolbox AppleFnUsageType -int 0
+# Raycast toggles itself on its own hotkey (skhd could only open it): cmd+space (49 = space)
+defaults write com.raycast.macos raycastGlobalHotkey -string "Command-49"
+hotkey 28 true 51 20 393216
+hotkey 29 true 51 20 917504
+hotkey 30 true 52 21 393216
+hotkey 31 true 52 21 917504
+hotkey 184 true 53 23 393216
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 # F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, reapplied at login by a LaunchAgent
 fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
@@ -128,10 +126,17 @@ sip_off=false
 csrutil status | grep -q disabled && sip_off=true
 if $sip_off; then
 	echo "==> SIP is off: TCC grants, no privacy dots, yabai scripting addition (sudo)"
-	csreq_hex() { codesign -d -r- "$1" 2>/dev/null | sed -n 's/^designated => //p' | csreq -r- -b /dev/stdout | xxd -p | tr -d '\n'; }
-	tcc_grant() { # db service bundle-id app-path
+	csreq_hex() { codesign -d -r- "$1" 2>/dev/null | sed -n 's/^\(# \)\{0,1\}designated => //p' | csreq -r- -b /dev/stdout | xxd -p | tr -d '\n'; }
+	tcc_grant() { # db service client(bundle-id, or path for a bare binary) app-or-binary-path [client_type: 0 bundle, 1 path]
 		sudo sqlite3 "$1" "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,flags,last_modified)
-			VALUES ('$2','$3',0,2,3,1,X'$(csreq_hex "$4")',0,CAST(strftime('%s','now') AS INTEGER));"
+			VALUES ('$2','$3',${5:-0},2,3,1,X'$(csreq_hex "$4")',0,CAST(strftime('%s','now') AS INTEGER));"
+	}
+	tcc_automation() { # bundle-id app-path: let it script System Events (osascript below: login items, dark mode, wallpaper)
+		local se="/System/Library/CoreServices/System Events.app"
+		sqlite3 "$userdb" "INSERT OR REPLACE INTO access (service,client,client_type,auth_value,auth_reason,auth_version,csreq,flags,
+			indirect_object_identifier_type,indirect_object_identifier,indirect_object_code_identity,last_modified)
+			VALUES ('kTCCServiceAppleEvents','$1',0,2,3,1,X'$(csreq_hex "$2")',0,0,'com.apple.systemevents',X'$(csreq_hex "$se")',
+			CAST(strftime('%s','now') AS INTEGER));"
 	}
 	sysdb="/Library/Application Support/com.apple.TCC/TCC.db"
 	userdb="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
@@ -144,11 +149,24 @@ if $sip_off; then
 			SystemPolicyNetworkVolumes SystemPolicyRemovableVolumes; do
 			tcc_grant "$userdb" "kTCCService$svc" "$id" "$path"
 		done
+		tcc_automation "$id" "$path"
 	done
+	# everything else that would otherwise prompt or need switching on by hand
+	for bin in yabai skhd; do
+		b=$(readlink -f "$(command -v $bin)")
+		tcc_grant "$sysdb" kTCCServiceAccessibility "$b" "$b" 1
+	done
+	for svc in Accessibility ScreenCapture; do
+		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
+	done
+	tcc_grant "$sysdb" kTCCServiceAccessibility art.ginzburg.MiddleClick /Applications/MiddleClick.app
+	# Karabiner needs Input Monitoring or it never grabs the keyboard (no SUPER, caps lock stays caps lock)
+	tcc_grant "$sysdb" kTCCServiceListenEvent org.pqrs.Karabiner-Core-Service \
+		"/Library/Application Support/org.pqrs/Karabiner-Elements/Karabiner-Core-Service.app"
 	sudo killall tccd 2>/dev/null || true
 	launchctl disable "gui/$(id -u)/com.apple.systemstatusd"
 	launchctl bootout "gui/$(id -u)/com.apple.systemstatusd" 2>/dev/null || true
-	# the hash pins the rule to this yabai binary, so re-run setup after a yabai upgrade
+	# the hash pins the rule (and the yabai/skhd grants above) to these binaries, so re-run setup after upgrading them
 	echo "$(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 "$(readlink -f "$(command -v yabai)")" | cut -d' ' -f1) $(command -v yabai) --load-sa" |
 		sudo tee /private/etc/sudoers.d/yabai >/dev/null
 	sudo chmod 440 /private/etc/sudoers.d/yabai
@@ -169,16 +187,28 @@ spctl developer-mode enable-terminal 2>/dev/null || true
 echo "==> services and login items"
 yabai --start-service 2>/dev/null || yabai --restart-service
 skhd --start-service 2>/dev/null || skhd --restart-service
-brew services start borders
+brew services start borders 2>/dev/null || brew services restart borders
 brew services start syncthing
 if $sip_off; then
 	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 10
 	yabai --restart-service
 	sleep 2
-	sudo -n yabai --load-sa || true
+	# yabai >= 7.1.16 builds the SA loader with arm64e PAC ABI v1 but Sequoia's Dock is v0, so injection fails
+	# ("could not spawn remote thread"): flip the loader back to v0 and ad-hoc re-sign (asmvik/yabai#2686)
+	if ! sudo -n yabai --load-sa 2>/dev/null; then
+		loader=/Library/ScriptingAdditions/yabai.osax/Contents/MacOS/loader
+		read -r arch off <<<"$(otool -f "$loader" | awk '/architecture/{i=$2} /capabilities 0x81/{f=1} f&&/offset/{print i, $2; exit}')"
+		if [ -n "$off" ]; then
+			printf '\x80' | sudo dd of="$loader" bs=1 seek=$((8 + arch * 20 + 4)) count=1 conv=notrunc 2>/dev/null
+			printf '\x80' | sudo dd of="$loader" bs=1 seek=$((off + 11)) count=1 conv=notrunc 2>/dev/null
+			sudo codesign -f -s - "$loader" >/dev/null 2>&1
+		fi
+		sudo -n yabai --load-sa || echo "  (yabai scripting addition still failing to load)"
+	fi
 	while [ "$(yabai -m query --spaces --display | jq length)" -lt 10 ]; do yabai -m space --create || break; done
 fi
-for a in AltTab MiddleClick SwiftBar Raycast; do
+open -a Karabiner-Elements   # first launch activates its keyboard driver (approve it, see below)
+for a in AltTab MiddleClick SwiftBar Raycast Tailscale; do
 	open -a "$a"
 	osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"/Applications/$a.app\", hidden:true}" >/dev/null 2>&1 || true
 done
@@ -193,7 +223,9 @@ Manual steps:
      Ghostty and Terminal get everything, so nothing run in them prompts: turn both on in Full Disk Access
      (covers "access data from other apps"), Accessibility, Input Monitoring, Screen & System Audio Recording,
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
-  2. SIP on only: Mission Control (ctrl+up): add Desktops until there are 10
-  3. Log out and back in (key repeat, trackpad)
-  4. Syncthing: http://127.0.0.1:8384
+  2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
+     for Karabiner-Core-Service (SIP off: done above). Until then, SUPER (Cmd) binds don't fire: skhd only listens for right Cmd
+  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 10
+  4. Log out and back in (key repeat, trackpad)
+  5. Syncthing: http://127.0.0.1:8384
 EOF

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+export PATH="/opt/homebrew/bin:$PATH"
+export USER="${USER:-$(id -un)}"
+# Close the focused window. Apps that only order their window out on close (Spotify, Discord) keep
+# running with a blank tile in yabai, so quit those instead (AppKit terminate via JXA, a normal quit).
+read -r id pid app < <(yabai -m query --windows --window | jq -r '"\(.id) \(.pid) \(.app)"') || exit 0
+case $app in
+	Spotify | Discord)
+		osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate; ''" >/dev/null ;;
+	*) yabai -m window "$id" --close ;;
+esac

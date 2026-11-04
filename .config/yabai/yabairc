@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# yabai config. Mirrors github.com/RyanAHayden/dotfiles (Omarchy/Hyprland) where macOS allows.
+# Reload: yabai --restart-service (or SUPER+Option+Y)
+export PATH="/opt/homebrew/bin:$PATH"
+CONFIG_ROOT="$HOME/.config/yabai"
+signal() { yabai -m signal --remove "$1" 2>/dev/null; yabai -m signal --add label="$1" event="$2" action="$3"; }
+rule()   { local l=$1; shift; yabai -m rule --remove "$l" 2>/dev/null; yabai -m rule --add label="$l" "$@"; }
+
+# --- Scripting addition ------------------------------------------------------
+# Needs SIP off + the sudoers rule setup.sh writes (see README).
+# The Dock loses it whenever it restarts, so reload on dock_did_restart.
+signal load_sa dock_did_restart "sudo -n $(command -v yabai) --load-sa"
+if sudo -n "$(command -v yabai)" --load-sa 2>/dev/null || yabai -m window --opacity 1.0 2>/dev/null; then
+  sa=1
+fi
+
+# --- Layout ------------------------------------------------------------------
+yabai -m config layout bsp
+yabai -m config window_placement second_child
+yabai -m config split_type auto
+yabai -m config auto_balance off
+yabai -m config top_padding 8 bottom_padding 8 left_padding 8 right_padding 8 window_gap 8
+
+# --- Mouse: SUPER(Cmd)+drag moves, SUPER+right-drag resizes ------------------
+yabai -m config mouse_follows_focus off
+yabai -m config mouse_modifier cmd
+yabai -m config mouse_action1 move
+yabai -m config mouse_action2 resize
+yabai -m config mouse_drop_action swap
+
+# --- Floating apps -----------------------------------------------------------
+rule float_settings app="^(System Settings|Calculator|Syncthing|Archive Utility|Installer|Raycast|AltTab|DaVinci Resolve|Safari|Tailscale|Karabiner-Elements)$" manage=off
+rule float_finder_ops app="^Finder$" title="^(Copy|Move|Delete|Trash)$" manage=off
+
+# --- SwiftBar workspace indicator (~/.config/swiftbar/workspace.sh) ----------
+poke='f="$HOME/.cache/ryha-workspace.fifo"; [ -p "$f" ] && { exec 3<>"$f"; echo >&3; }'
+for ev in space_changed display_changed space_created space_destroyed window_created window_destroyed; do
+  signal "ws_$ev" "$ev" "/bin/bash -c '$poke'"
+done
+
+# --- With the scripting addition: instant alt-tab (no yabai animations) ------
+yabai -m config window_animation_duration 0.0
+if [ -n "$sa" ]; then
+  # Stop macOS fading to the app's Space on alt-tab; focus_app_space.sh jumps instantly
+  if [ "$(defaults read -g AppleSpacesSwitchOnActivate 2>/dev/null)" != 0 ]; then
+    defaults write -g AppleSpacesSwitchOnActivate -bool false
+    killall Dock   # dock_did_restart reloads the SA
+  fi
+  signal instant_alttab application_activated "/bin/bash $CONFIG_ROOT/focus_app_space.sh"
+else
+  # No SA: nothing could switch Spaces for us, so hand it back to macOS
+  yabai -m signal --remove instant_alttab 2>/dev/null
+  if [ "$(defaults read -g AppleSpacesSwitchOnActivate 2>/dev/null)" = 0 ]; then
+    defaults delete -g AppleSpacesSwitchOnActivate
+    killall Dock
+  fi
+fi

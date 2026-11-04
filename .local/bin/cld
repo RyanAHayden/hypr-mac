@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# claude, bypass permissions (ported from github.com/RyanAHayden/dotfiles .local/bin/cld)
+# No CLI flag skips the workspace trust dialog, so pre-mark $PWD trusted in ~/.claude.json.
+f=~/.claude.json
+if [[ -f $f ]] && ! jq -e --arg d "$PWD" '.projects[$d].hasTrustDialogAccepted' "$f" >/dev/null; then
+  tmp=$(mktemp "$f.XXXXXX") && jq --arg d "$PWD" '.projects[$d].hasTrustDialogAccepted = true' "$f" >"$tmp" \
+    && chmod "$(stat -f %Lp "$f")" "$tmp" && mv "$tmp" "$f" || rm -f "$tmp"
+fi
+exec claude --dangerously-skip-permissions ${*:+"$*"}
