@@ -22,7 +22,7 @@ yabai -m config auto_balance off
 yabai -m config top_padding 8 bottom_padding 8 left_padding 8 right_padding 8 window_gap 8
 
 # --- Mouse: SUPER(Cmd)+drag moves, SUPER+right-drag resizes ------------------
-yabai -m config mouse_follows_focus off
+yabai -m config mouse_follows_focus on
 yabai -m config mouse_modifier cmd   # SUPER+Shift+P pauses yabai so Cmd-drag reaches macOS (menu bar icons)
 yabai -m config mouse_action1 move
 yabai -m config mouse_action2 resize
