@@ -35,7 +35,8 @@ lcmd + shift - q              : open -a Calculator
 lcmd + ctrl - v               : open -g "raycast://extensions/raycast/clipboard-history/clipboard-history"
 lcmd + ctrl - e               : open -g "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"
 lcmd - escape                 : ~/.local/bin/power-menu
-lcmd + ctrl - n               : osascript -e 'tell application "System Events" to tell process "ControlCenter" to click (first menu bar item of menu bar 1 whose description starts with "Wi")'   # Wi-Fi menu (its name includes the connection state)
+lcmd + ctrl - w               : osascript -e 'tell application "System Events" to tell process "ControlCenter" to click (first menu bar item of menu bar 1 whose description starts with "Wi")'   # Wi-Fi menu (its name includes the connection state)
+lcmd + ctrl - n               : ~/.local/bin/night-shift   # toggle Night Shift (Omarchy nightlight)
 lcmd + ctrl - d               : open "x-apple.systempreferences:com.apple.Displays-Settings.extension"
 lcmd + ctrl - p               : osascript -e 'tell application "System Events" to tell process "ControlCenter" to click (first menu bar item of menu bar 1 whose description is "Battery")'   # Battery menu
 
