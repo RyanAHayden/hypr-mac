@@ -139,6 +139,26 @@ SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai ow
 left Cmd from right, so this is how Cmd-drag reaches macOS. While paused nothing tiles, the bar stops updating,
 workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won't jump to other Spaces.
 
+## Shell
+
+`.zshrc` ports Omarchy's `default/bash` (emacs keys like readline) plus the Linux `.bashrc`:
+
+| | |
+| --- | --- |
+| Up / Down | history matching what's typed so far (`ssh`↑ → `ssh rycs`) |
+| Tab / Shift+Tab | case-insensitive completion menu, forward / back; `**`Tab = fzf picker (`vim **`, `cd **`) |
+| Ctrl+R / Ctrl+T / Alt+C | fzf history / insert file / cd into dir |
+| `cd x` | normal cd, falls back to zoxide (most used dir matching `x`); `z`, `zi` work too |
+| `ls` `lsa` `lt` `lta` | eza long / all / tree / tree all |
+| `ff` `eff` `sff host:dir` | fzf with bat preview / open pick in nvim / scp pick |
+| `n` `g` `d` `c` `t` | nvim (`.` with no args), git, docker, claude, tmux attach-or-new `Work` |
+| `gcm` `gcam` `gcad` `ga` `gd` | git commit -m / -a -m / -a --amend, new worktree+branch / remove it |
+| `fip host port…` `dip port…` `lip` | ssh port forwards: start / stop / list |
+| `compress dir` `decompress f` | tar.gz |
+| `ssh` | resets mouse/alt-screen junk after a drop and reconnects sessions that were up 30s+ |
+
+Ctrl+G (or Ctrl+X Ctrl+E) opens the command line in nvim. Prompt is starship with the Linux `.config/starship.toml`, in silver (#e5e5e5, the border colour) instead of cyan.
+
 ## Sacrifices vs Omarchy
 
 - With SIP on (see above for turning it off), no yabai scripting addition: Space switching goes through macOS ctrl+N (slide animation;

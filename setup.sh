@@ -8,6 +8,8 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "==> Homebrew packages"
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
 brew install stow tmux syncthing jq neovim ripgrep btop
+# shell helpers like Omarchy: zoxide (cd), eza (ls), bat (ff previews), starship (prompt); fzf below
+brew install zoxide eza bat starship
 # sqlcipher writes Raycast's encrypted settings (see below)
 brew install sqlcipher
 brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/borders
