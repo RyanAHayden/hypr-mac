@@ -186,3 +186,16 @@ lcmd + ctrl - m                     : skhd -k "cmd - f1"
 lcmd + ctrl - l               : pmset displaysleepnow
 lcmd + alt - y                : yabai --restart-service; skhd --restart-service
 
+
+# --- Omarchy utilities -------------------------------------------------------
+# Capture menu: macOS's screenshot/recording toolbar (its own Ctrl+Shift+5, see setup.sh)
+lcmd + ctrl - c                     : skhd -k "ctrl + shift - 5"
+# Notifications (SUPER+comma family). Left Cmd+, is taken from apps' Settings; right Cmd+, still opens them.
+lcmd - 0x2B                         : ~/.local/bin/notifications dismiss
+lcmd + alt - 0x2B                   : ~/.local/bin/notifications dismiss
+lcmd + shift - 0x2B                 : ~/.local/bin/notifications dismiss-all
+lcmd + ctrl - 0x2B                  : ~/.local/bin/notifications center
+lcmd + shift + alt - 0x2B           : ~/.local/bin/notifications center
+# Display scaling: step through the Retina "Looks like" sizes. Right Cmd+/ still reaches apps (comment toggle).
+lcmd - 0x2C                         : ~/.local/bin/display-scale up
+lcmd + alt - 0x2C                   : ~/.local/bin/display-scale down

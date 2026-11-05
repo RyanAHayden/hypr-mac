@@ -97,6 +97,10 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
 | Cmd+Ctrl+N | toggle Night Shift (`.local/src/night-shift.swift`) |
+| Cmd+Ctrl+C | capture menu: macOS screenshot/recording toolbar |
+| Cmd+, / Cmd+Shift+, | dismiss the newest notification / clear all (`.local/bin/notifications`) |
+| Cmd+Ctrl+, , Cmd+Shift+Option+, | Notification Center (history) |
+| Cmd+/ , Cmd+Option+/ | display scaling: bigger / more space, through the Retina "Looks like" sizes (`.local/src/display-scale.swift`) |
 | Cmd+Ctrl+D, Cmd+Shift+Q | Displays settings, Calculator |
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |
 | Cmd+Option+G | quadrant mode (no gaps, no borders) |
@@ -107,6 +111,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Hover | focuses the window under the mouse and brings it to the front (yabai `focus_follows_mouse autoraise`) |
 | Cmd+drag / right-drag | move / resize window (yabai takes Cmd+click; three-finger middle click opens links in a new tab) |
 | F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
+| Option+F1/F2, Option+F4/F5 | screen / keyboard brightness in quarter steps (Karabiner sends macOS's Option+Shift) |
 | Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts. Ctrl+F1…F8 are still macOS keyboard navigation |
 
 ## Workspace bar

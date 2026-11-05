@@ -38,6 +38,7 @@ swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
 swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
+swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
 mkdir -p ~/.cache
 
 echo "==> dark mode and wallpaper"
