@@ -16,6 +16,7 @@
 //   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
 //     on the Space you're on rather than switching back to the one it was minimized on.
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
+//   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border.
 // yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
 // wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
@@ -93,8 +94,24 @@ final class Focus {
 		checkPending = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
 			self.checkPending = false
+			self.syncZoom()
 			self.followFocus()
 		}
+	}
+
+	// SUPER+F (zoom-fullscreen): the border turns blue while a zoomed window has focus. Toggling zoom fires
+	// window_resized, so wm.focus lands here.
+	var zoomColor = false
+
+	func syncZoom() {
+		guard let w = one(["--windows", "--window"]) else { return }
+		let zoomed = flag(w, "has-fullscreen-zoom")
+		guard zoomed != zoomColor else { return }
+		zoomColor = zoomed
+		let borders = Process()
+		borders.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/borders")
+		borders.arguments = ["active_color=\(zoomed ? "0xff3b82f6" : "0xffe8ddd0")"] // updates the running instance (bordersrc)
+		try? borders.run()
 	}
 
 	func followFocus() {
