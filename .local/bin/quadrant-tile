@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 export PATH="/opt/homebrew/bin:$PATH"
 export USER="${USER:-$(id -un)}"
-# Toggle "quadrant tile" look: no gaps, no borders (and back).
-STATE_FILE="${TMPDIR:-/tmp}/yabai-quadrant-active"
-if [[ -f $STATE_FILE ]]; then
-	rm "$STATE_FILE"
-	for p in top_padding bottom_padding left_padding right_padding window_gap; do yabai -m config $p 8; done
-	brew services start borders >/dev/null 2>&1
-else
-	touch "$STATE_FILE"
-	for p in top_padding bottom_padding left_padding right_padding window_gap; do yabai -m config $p 0; done
-	brew services stop borders >/dev/null 2>&1
-fi
+# Toggle "quadrant tile" look on every Space: no gaps, no borders (and back).
+# State is yabai's own gap, so a restart (yabairc 8, bordersrc width 6) always lands back in sync.
+# Window corners stay rounded: macOS draws those and offers no way to square them.
+if [ "$(yabai -m config window_gap)" = 0 ]; then gap=8 width=6.0; else gap=0 width=0.0; fi
+for p in top_padding bottom_padding left_padding right_padding window_gap; do yabai -m config $p $gap; done
+borders width=$width   # updates the running instance

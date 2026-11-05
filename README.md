@@ -103,7 +103,6 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+/ , Cmd+Option+/ | display scaling: bigger / more space, through the Retina "Looks like" sizes (`.local/src/display-scale.swift`) |
 | Cmd+Ctrl+D, Cmd+Shift+Q | Displays settings, Calculator |
 | Cmd+Shift+I, Ctrl+Shift+I | promote to largest, mirror split |
-| Cmd+Option+G | quadrant mode (no gaps, no borders) |
 | Cmd+Shift+Space | toggle menu bar auto-hide (the workspace bar hides with it) |
 | Cmd+Shift+S | screenshot: select an area, copied to the clipboard (Ctrl+Shift+4 saves to a file) |
 | Cmd+Ctrl+S | Sound panel from the menu bar (output device, volume) |
