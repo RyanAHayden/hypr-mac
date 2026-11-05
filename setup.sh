@@ -104,6 +104,12 @@ hotkey 29 true 51 20 917504
 hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
+# Function keys stay normal with Fn held: no Show Desktop on F11 / Shift+F11 (36/37, macOS defaults, so not in the
+# saved list until overridden), and no leftover Dashboard on F12 / Shift+F12 (62/63)
+hotkey 36 false 65535 103 8388608
+hotkey 37 false 65535 103 8519680
+hotkey 62 false 65535 111 8388608
+hotkey 63 false 65535 111 8519680
 # Sound and Bluetooth in the menu bar (always), so SUPER+Ctrl+S / SUPER+Ctrl+B can open their panels
 defaults -currentHost write com.apple.controlcenter Sound -int 18
 defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
