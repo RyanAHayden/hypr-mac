@@ -186,6 +186,18 @@ final class Focus {
 		if let id = parked.last ?? here.first { bring(id, to: space) }
 	}
 
+	// Never stay on the attic. Closing an app's last window makes macOS activate another app, and if that app's only
+	// window is parked there, macOS switches to Space 12 (activated() deliberately ignores activations right after a
+	// close). Go back to where you were and bring that window along, the same as switching to a parked app does.
+	func leaveAttic() {
+		guard currentSpace() == attic, let back = one(["--spaces", "--space", "recent"])?["index"] as? Int, back != attic else { return }
+		closedAt = Date() // the switch back makes macOS activate an app; that's not an alt-tab
+		let front = NSWorkspace.shared.frontmostApplication.map { Int($0.processIdentifier) }
+		let here = list(["--windows", "--space", String(attic)]).filter { usable($0) }
+		_ = yabai(["space", "--focus", String(back)])
+		if let w = here.first(where: { $0["pid"] as? Int == front }), let id = w["id"] as? Int { bring(id, to: back) }
+	}
+
 	func bring(_ id: Int, to space: Int) {
 		parked.removeAll { $0 == id }
 		_ = yabai(["window", String(id), "--space", String(space)])
@@ -427,7 +439,7 @@ notify_register_dispatch("wm.move", &tokens[6], .main) { token in
 	focuser.move(to: Int(space))
 }
 let ws = NSWorkspace.shared.notificationCenter
-ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in bar.refresh() }
+ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in focuser.leaveAttic(); bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
 	if let a = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication { focuser.activated(a) }
 }
