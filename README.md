@@ -157,7 +157,7 @@ workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won'
 | `compress dir` `decompress f` | tar.gz |
 | `ssh` | resets mouse/alt-screen junk after a drop and reconnects sessions that were up 30s+ |
 
-Ctrl+G (or Ctrl+X Ctrl+E) opens the command line in nvim. Prompt is starship with the Linux `.config/starship.toml`, in silver (#e5e5e5, the border colour) instead of cyan.
+Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux `.config/starship.toml`, in silver (#e5e5e5, the border colour) instead of cyan.
 
 ## Sacrifices vs Omarchy
 

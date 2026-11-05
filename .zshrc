@@ -25,10 +25,10 @@ bindkey '^[[1;5C' forward-word '^[[1;5D' backward-word
 bindkey '^[[H' beginning-of-line '^[OH' beginning-of-line '^[[1~' beginning-of-line
 bindkey '^[[F' end-of-line '^[OF' end-of-line '^[[4~' end-of-line
 bindkey '^[[3~' delete-char
-# Ctrl+G (like Claude Code) or Ctrl+X Ctrl+E = edit the command line in nvim
+# Ctrl+X Ctrl+E = edit the command line in nvim (like bash)
 autoload -Uz edit-command-line
 zle -N edit-command-line
-bindkey '^G' edit-command-line '^X^E' edit-command-line
+bindkey '^X^E' edit-command-line
 
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=32768
