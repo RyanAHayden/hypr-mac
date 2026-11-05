@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Window transparency (needs the yabai scripting addition). Usage: window-opacity toggle | +0.05 | -0.05
-# toggle flips between opaque and 0.9, like Omarchy SUPER+Backspace.
+# Unfocused windows are see-through, the focused one opaque (yabai window_opacity, yabairc; needs the scripting
+# addition). Usage: window-opacity toggle | +0.05 | -0.05
+# toggle turns that on and off, like Omarchy SUPER+Backspace; +/- changes how see-through unfocused windows are.
 export PATH="/opt/homebrew/bin:$PATH"
-cur=$(yabai -m query --windows --window | jq .opacity) || exit 0
 case $1 in
-	toggle) new=$(awk -v c="$cur" 'BEGIN { printf "%.2f", (c < 1 ? 1 : 0.9) }') ;;
-	*) new=$(awk -v c="$cur" -v d="$1" 'BEGIN { n = c + d; if (n > 1) n = 1; if (n < 0.2) n = 0.2; printf "%.2f", n }') ;;
+	toggle) [ "$(yabai -m config window_opacity)" = on ] && yabai -m config window_opacity off || yabai -m config window_opacity on ;;
+	*)
+		new=$(awk -v c="$(yabai -m config normal_window_opacity)" -v d="$1" 'BEGIN { n = c + d; if (n > 1) n = 1; if (n < 0.2) n = 0.2; printf "%.2f", n }')
+		yabai -m config normal_window_opacity "$new" window_opacity on
+		;;
 esac
-yabai -m window --opacity "$new"

@@ -73,7 +73,7 @@ lcmd + ctrl + shift - 0x1B    : ~/.local/bin/window-resize h -300
 lcmd + ctrl + shift - 0x18    : ~/.local/bin/window-resize h 300
 lcmd + shift - r              : yabai -m space --balance
 lcmd + shift - space          : ~/.local/bin/toggle-menubar
-lcmd - 0x33                   : ~/.local/bin/window-opacity toggle   # Backspace: transparent/opaque
+lcmd - 0x33                   : ~/.local/bin/window-opacity toggle   # Backspace: unfocused windows see-through on/off
 lcmd + alt - 0x33             : ~/.local/bin/window-opacity -0.05
 lcmd + shift + alt - 0x33     : ~/.local/bin/window-opacity +0.05
 lcmd + shift - 0x33           : ~/.local/bin/quadrant-tile   # no gaps/borders, every Space
