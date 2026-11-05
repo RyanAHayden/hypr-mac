@@ -6,7 +6,12 @@
 # entry, no per-Space or per-display ones), then restart the agent so it re-reads the store.
 set -euo pipefail
 [ -f "${1:-}" ] || { echo "usage: set-wallpaper IMAGE" >&2; exit 1; }
-img="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+# Set it from a copy in ~/Pictures/Wallpapers: macOS stores the resolved file path (it follows the symlink into the repo),
+# so a path inside the repo breaks when the repo is moved or renamed (it reset to the default when macos-config became
+# hypr-mac). The copy's path never changes.
+mkdir -p "$HOME/Pictures/Wallpapers"
+img="$HOME/Pictures/Wallpapers/$(basename "$1")"
+cp -f "$1" "$img"
 
 osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$img\""
 sleep 1
