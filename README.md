@@ -95,6 +95,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
 | Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, relaunch yabai/skhd, log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
+| Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
 | Cmd+Ctrl+N | toggle Night Shift (`.local/src/night-shift.swift`) |
 | Cmd+Ctrl+C | capture menu: macOS screenshot/recording toolbar |
