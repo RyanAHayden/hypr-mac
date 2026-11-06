@@ -51,7 +51,7 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Physical key | Becomes | Used for |
 |---|---|---|
 | Caps Lock | Ctrl | Same as Ctrl |
-| Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps, Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) |
+| Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps (not Ctrl+H: Cmd+H hides the app), Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) |
 | Option | Alt | Never bound by skhd, so nvim/tmux get Meta (M-h, M-1..9, M-Enter) from either side |
 | Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
@@ -76,7 +76,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |
 | Cmd+A/D, Shift+A/D | prev/next Space / move window there |
-| Cmd+F, Cmd+T, Cmd+\ | fullscreen (blue border), float, toggle split |
+| Cmd+F, Cmd+T, Cmd+\ | fullscreen (blue border, no hover focus; stays on the workspace, so focusing another window fullscreens that one), float, toggle split |
 | Cmd+O | pop window out: float centered, on every Space, above tiled windows (again: put back) |
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
 | Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |

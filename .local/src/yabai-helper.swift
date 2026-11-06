@@ -16,7 +16,8 @@
 //   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
 //     on the Space you're on rather than switching back to the one it was minimized on.
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
-//   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border.
+//   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
+//     you focus there is the fullscreen one.
 // yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
 // wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
@@ -100,18 +101,43 @@ final class Focus {
 	}
 
 	// SUPER+F (zoom-fullscreen): the border turns blue while a zoomed window has focus. Toggling zoom fires
-	// window_resized, so wm.focus lands here.
+	// window_resized, so wm.focus lands here. Hover focus is off meanwhile: the zoomed window covers the Space, so
+	// hover could only refocus it, and a mouse nudge right after alt-tab/SUPER+H/J/K/L would undo the switch
+	// before passZoom hands the zoom over.
 	var zoomColor = false
+	var hoverFocus = "autoraise" // yabairc's focus_follows_mouse, put back when zoom loses focus
 
 	func syncZoom() {
 		guard let w = one(["--windows", "--window"]) else { return }
-		let zoomed = flag(w, "has-fullscreen-zoom")
+		let zoomed = flag(w, "has-fullscreen-zoom") || passZoom(to: w)
 		guard zoomed != zoomColor else { return }
 		zoomColor = zoomed
+		if zoomed {
+			if let d = yabai(["config", "focus_follows_mouse"]), let v = String(data: d, encoding: .utf8)?
+				.trimmingCharacters(in: .whitespacesAndNewlines), !v.isEmpty, v != "off", v != "disabled" { hoverFocus = v }
+			_ = yabai(["config", "focus_follows_mouse", "off"])
+		} else {
+			_ = yabai(["config", "focus_follows_mouse", hoverFocus])
+		}
 		let borders = Process()
 		borders.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/borders")
 		borders.arguments = ["active_color=\(zoomed ? "0xff3b82f6" : "0xffe8ddd0")"] // updates the running instance (bordersrc)
 		try? borders.run()
+	}
+
+	// SUPER+F is fullscreen for the workspace: when focus moves to another tiled window on a Space with a zoomed one
+	// (SUPER+H/J/K/L, a new window, a close), the newly focused window takes over the zoom
+	func passZoom(to w: [String: Any]) -> Bool {
+		guard usable(w), !flag(w, "is-floating"), w["subrole"] as? String == "AXStandardWindow",
+			let id = w["id"] as? Int, let space = w["space"] as? Int else { return false }
+		let full = list(["--windows", "--space", String(space)]).compactMap { o -> Int? in
+			guard let oid = o["id"] as? Int, oid != id, flag(o, "has-fullscreen-zoom"), !flag(o, "is-floating") else { return nil }
+			return oid
+		}
+		guard !full.isEmpty else { return false }
+		_ = yabai(["window", String(id), "--toggle", "zoom-fullscreen"])
+		for oid in full { _ = yabai(["window", String(oid), "--toggle", "zoom-fullscreen"]) }
+		return true
 	}
 
 	func followFocus() {
@@ -467,4 +493,5 @@ NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { 
 Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in bar.trackMouse() }
 Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in bar.refresh() }
 bar.rebuild()
+focuser.syncZoom() // a window may already be zoomed (helper restarted)
 app.run()
