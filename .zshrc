@@ -193,5 +193,6 @@ _ssh_interactive() {
 	! grep -i '^remotecommand ' <<<"$resolved" | grep -qvi '^remotecommand none$'
 }
 
-# Unity CLI
-. "/Users/mba/.unity/env"
+
+# machine-local overrides, not in the repo
+[[ -r ~/.zshrc.local ]] && source ~/.zshrc.local
