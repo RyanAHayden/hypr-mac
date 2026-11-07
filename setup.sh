@@ -12,6 +12,8 @@ brew install stow tmux syncthing jq neovim ripgrep btop
 brew install zoxide eza bat starship
 # sqlcipher writes Raycast's encrypted settings (see below)
 brew install sqlcipher
+# duti sets default apps (text files open in nvim, below)
+brew install duti
 brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/borders
 brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
@@ -343,6 +345,33 @@ brew services start syncthing
 # "Fix Keyboard" app (Raycast/Spotlight): runs ~/.local/bin/fixkeys to restart Karabiner + skhd
 mkdir -p ~/Applications
 osacompile -o ~/Applications/Fix\ Keyboard.app -e "do shell script \"$HOME/.local/bin/fixkeys\"" 2>/dev/null
+# "Nvim" app (~/Applications): opens files in nvim in a new Ghostty window; the default for text and code files, so
+# Finder, `open` and Raycast never use TextEdit (RTF still opens in TextEdit)
+osacompile -o ~/Applications/Nvim.app -e "on open fs
+	set args to \"\"
+	repeat with f in fs
+		set args to args & \" \" & quoted form of POSIX path of f
+	end repeat
+	do shell script \"open -na Ghostty --args -e $(command -v nvim)\" & args
+end open
+on run
+	do shell script \"open -na Ghostty --args -e $(command -v nvim)\"
+end run" 2>/dev/null
+plist=~/Applications/Nvim.app/Contents/Info.plist
+plutil -replace CFBundleIdentifier -string com.ryha.nvim "$plist"
+plutil -replace CFBundleDocumentTypes -json '[{"CFBundleTypeRole":"Editor","LSHandlerRank":"Alternate","LSItemContentTypes":["public.text","public.data"]}]' "$plist"
+codesign -f -s - ~/Applications/Nvim.app 2>/dev/null
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f ~/Applications/Nvim.app
+for t in public.plain-text public.utf8-plain-text public.text public.source-code public.script public.shell-script \
+	public.json public.xml public.yaml net.daringfireball.markdown public.comma-separated-values-text public.log \
+	public.python-script public.ruby-script public.perl-script public.c-source public.c-header public.swift-source \
+	com.netscape.javascript-source public.css; do
+	duti -s com.ryha.nvim "$t" all 2>/dev/null
+done
+for e in txt md markdown log conf cfg ini toml yaml yml json jsonc lua sh bash zsh fish py rb js ts tsx jsx css scss \
+	xml csv tsv env gitignore gitconfig vim swift c h cpp rs go java kt sql tex typ nix; do
+	duti -s com.ryha.nvim ".$e" all 2>/dev/null
+done
 if $sip_off; then
 	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 12 (1-9, 10 on 0, 11 = scratchpad on SUPER+S, 12 = SUPER+M parking)
 	yabai --restart-service

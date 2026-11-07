@@ -93,8 +93,9 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Ctrl+Option+Tab (+Shift) | focus next (previous) display |
 | Cmd+Shift+Option+arrows | move the whole Space to the display that way (renumbers Spaces) |
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
-| Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, relaunch yabai/skhd, log out, restart, shut down. Also in Raycast as "Power: ..." |
+| Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, reopen apps at login (off by default), relaunch yabai/skhd, log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
+| Opening a text/code file | nvim in a new Ghostty window (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
 | Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
 | Cmd+Ctrl+N | toggle Night Shift (`.local/src/night-shift.swift`) |
@@ -112,7 +113,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Cmd+drag / right-drag | move / resize window (yabai takes Cmd+click; three-finger middle click opens links in a new tab) |
 | F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
 | Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts |
-| (off) | hot corners, Sequoia drag-to-edge tiling, click-wallpaper-to-show-desktop, Ctrl+Space input switching (tmux prefix), Cmd+Option+Space Finder search, Ctrl+arrows (Mission Control, Desktop left/right), Ctrl+F1…F8 keyboard navigation, Fn+Ctrl+arrows window tiling, reopening apps after restart/log out |
+| (off) | hot corners, Sequoia drag-to-edge tiling, click-wallpaper-to-show-desktop, Ctrl+Space input switching (tmux prefix), Cmd+Option+Space Finder search, Ctrl+arrows (Mission Control, Desktop left/right), Ctrl+F1…F8 keyboard navigation, Fn+Ctrl+arrows window tiling, reopening apps after restart/log out (toggle in the Cmd+Escape menu) |
 
 ## Workspace bar
 
