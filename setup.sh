@@ -31,6 +31,10 @@ for p in tmux-resurrect tmux-continuum; do
 	[ -d ~/.config/tmux/plugins/$p ] || git clone -q --depth 1 https://github.com/tmux-plugins/$p ~/.config/tmux/plugins/$p
 done
 
+echo "==> LibreWolf (github.com/RyanAHayden/librewolf, shared with dotfiles)"
+[ -d ~/librewolf ] || git clone -q https://github.com/RyanAHayden/librewolf ~/librewolf
+~/librewolf/setup.sh
+
 echo "==> LazyVim plugins and treesitter parsers"
 nvim --headless "+Lazy! sync" +qa
 # parsers snacks wants for rendering images/math in docs (norg isn't in nvim-treesitter anymore)
