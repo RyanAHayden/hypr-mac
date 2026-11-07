@@ -4,7 +4,7 @@ export USER="${USER:-$(id -un)}"
 # Omarchy-style workspace actions on yabai. Usage: ws focus|move|move-silent <N|prev|next>, ws focus recent
 # (move-silent sends the window there and stays put; recent = the Space you were on before)
 # Focusing a Space needs yabai's scripting addition (SIP off); without it, fall back
-# to macOS's own "Switch to Desktop" shortcuts (ctrl+N / ctrl+arrows).
+# to macOS's own "Switch to Desktop" shortcuts (ctrl+N; prev/next are resolved to N below).
 # The 11th Space is the scratchpad (.local/bin/scratchpad), the 12th where SUPER+M parks windows (yabai-helper).
 action=$1 target=$2
 # SUPER+Shift+N: yabai-helper switches and moves over yabai's socket, back to back, so the move doesn't flash (yabai only
@@ -44,9 +44,8 @@ elif [ "$action" = focus ] && [[ $target =~ ^[0-9]+$ ]] && [ -n "$(ls -A ~/.cach
 fi
 fallback() {
 	case $target in
-		prev) skhd -k "ctrl - left" ;;
+		prev | next) ;; # resolved to a number above unless yabai couldn't be queried
 		recent) ;; # no macOS shortcut for the previous Desktop; needs the scripting addition
-		next) skhd -k "ctrl - right" ;;
 		10) skhd -k "ctrl - 0" ;;
 		11) ;; # no macOS Desktop shortcut for 11; needs the scripting addition
 		*) skhd -k "ctrl - $target" ;;

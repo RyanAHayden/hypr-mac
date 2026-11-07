@@ -111,7 +111,8 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Hover | focuses the window under the mouse and brings it to the front (yabai `focus_follows_mouse autoraise`) |
 | Cmd+drag / right-drag | move / resize window (yabai takes Cmd+click; three-finger middle click opens links in a new tab) |
 | F4 / F5 | keyboard brightness down / up (instead of Spotlight / Dictation) |
-| Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts. Ctrl+F1…F8 are still macOS keyboard navigation |
+| Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts. |
+| (off) | hot corners, Sequoia drag-to-edge tiling, click-wallpaper-to-show-desktop, Ctrl+Space input switching (tmux prefix), Cmd+Option+Space Finder search, Ctrl+arrows (Mission Control, Desktop left/right), Ctrl+F1…F8 keyboard navigation, Fn+Ctrl+arrows window tiling |
 
 ## Workspace bar
 

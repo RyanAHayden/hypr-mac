@@ -69,6 +69,16 @@ defaults write com.apple.dock mru-spaces -bool false
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock expose-group-apps -bool true
+# no hot corners (bottom-right is Quick Note by default)
+for c in tl tr bl br; do
+	defaults write com.apple.dock wvous-$c-corner -int 1
+	defaults write com.apple.dock wvous-$c-modifier -int 0
+done
+# yabai tiles: no Sequoia drag-to-edge tiling or Option-drag tiling, and clicking the wallpaper doesn't hide every window
+defaults write com.apple.WindowManager EnableTilingByEdgeDrag -bool false
+defaults write com.apple.WindowManager EnableTopTilingByEdgeDrag -bool false
+defaults write com.apple.WindowManager EnableTilingOptionAccelerator -bool false
+defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
 defaults write com.apple.spaces spans-displays -bool false
 defaults write -g _HIHideMenuBar -bool false
 defaults write -g NSWindowShouldDragOnGesture -bool true
@@ -99,6 +109,11 @@ hotkey() { # id enabled ascii keycode modmask
 		"<dict><key>enabled</key><$2/><key>value</key><dict><key>parameters</key><array><integer>$3</integer><integer>$4</integer><integer>$5</integer></array><key>type</key><string>standard</string></dict></dict>"
 }
 hotkey 64 false 32 49 1048576
+# Cmd+Option+Space (Finder search window) is SUPER+Alt+Space (Dictation)
+hotkey 65 false 32 49 1572864
+# Ctrl+Space / Ctrl+Option+Space (switch input source) are the tmux prefix / nvim completion
+hotkey 60 false 32 49 262144
+hotkey 61 false 32 49 786432
 # fn/Globe alone does nothing (fn+h/j/k/l are arrows via Karabiner; it kept popping the emoji picker - use Raycast)
 defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 # Raycast toggles itself on its own hotkey (skhd could only open it): cmd+space (49 = space)
@@ -108,6 +123,27 @@ hotkey 29 true 51 20 917504
 hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
+# Ctrl+arrows are word jump in apps (Karabiner) and the shell: no Mission Control / App Exposé (32-35) or
+# Desktop left/right (79-82) on them. ws resolves prev/next to a Desktop number, so its SIP-on fallback uses ctrl+N
+hotkey 32 false 65535 126 8650752
+hotkey 33 false 65535 125 8650752
+hotkey 34 false 65535 126 8781824
+hotkey 35 false 65535 125 8781824
+hotkey 79 false 65535 123 8650752
+hotkey 80 false 65535 123 8781824
+hotkey 81 false 65535 124 8650752
+hotkey 82 false 65535 124 8781824
+# no Ctrl+F1..F8 keyboard navigation (keyboard access, focus menu bar / Dock / window / toolbar / floating window,
+# tab movement, status menus)
+fkeys=(12:122 7:120 8:99 9:118 10:96 11:97 13:98 57:100)
+for f in "${fkeys[@]}"; do hotkey "${f%%:*}" false 65535 "${f#*:}" 8650752; done
+# Fn+Ctrl(+Shift/Option)+arrows (Window > Move & Resize tiling; Fn+H/J/K/L are arrows) go to an unreachable
+# Cmd+Option+Ctrl+Shift+F20 (an empty shortcut doesn't override them)
+f20=$(printf '\xef\x9c\x97')
+for i in Left Right Top Bottom "Left & Right" "Left & Quarters" "Right & Left" "Right & Quarters" \
+	"Top & Bottom" "Top & Quarters" "Bottom & Top" "Bottom & Quarters"; do
+	defaults write -g NSUserKeyEquivalents -dict-add $'\033Window\033Move & Resize\033'"$i" -string "@~^\$$f20"
+done
 # Function keys stay normal with Fn held: no Show Desktop on F11 / Shift+F11 (36/37, macOS defaults, so not in the
 # saved list until overridden), and no leftover Dashboard on F12 / Shift+F12 (62/63)
 hotkey 36 false 65535 103 8388608
@@ -340,7 +376,7 @@ Manual steps:
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
      for Karabiner-Core-Service (SIP off: done above). Until then the Ctrl shortcuts and Caps Lock -> Ctrl don't work (SUPER binds do: skhd binds left Cmd itself)
-  3. SIP on only: Mission Control (ctrl+up): add Desktops until there are 12 (11 = scratchpad, 12 = SUPER+M parking)
+  3. SIP on only: Mission Control (F3 or four-finger swipe up): add Desktops until there are 12 (11 = scratchpad, 12 = SUPER+M parking)
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384
 EOF
