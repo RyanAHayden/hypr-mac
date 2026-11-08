@@ -201,3 +201,4 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   no menu bar colour setting; Reduce transparency makes it solid grey). A wallpaper with a lighter top shows through.
 - Syncthing runs always (brew service) instead of being bound to a mount.
 - Zen comes from its own repo, [zen](https://github.com/RyanAHayden/zen) (cloned to `~/zen`), which dotfiles uses too, so prefs, mods, shortcuts and extensions match on both.
+- Vencord's settings come from their own private repo, [vencord](https://github.com/RyanAHayden/vencord) (cloned to `~/vencord`), shared with dotfiles. They turn off Discord's minimum window size so it tiles in a narrow column on the scratchpad. Its `setup.sh` also patches Vencord back into Discord after a Discord update undoes it.
