@@ -55,6 +55,25 @@ swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
 swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
 swiftc -O ~/.local/src/sendkey.swift -o ~/.local/bin/sendkey
 swiftc -O ~/.local/src/bind-repeat.swift -o ~/.local/bin/bind-repeat
+# crash-notify needs an app bundle to post notifications (ad-hoc signed; macOS asks to allow them on first run)
+cn=~/.local/share/crash-notify/CrashNotify.app/Contents
+mkdir -p "$cn/MacOS"
+cat >"$cn/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key><string>com.ryha.crash-notify</string>
+	<key>CFBundleName</key><string>Crash Reports</string>
+	<key>CFBundleExecutable</key><string>crash-notify</string>
+	<key>CFBundlePackageType</key><string>APPL</string>
+	<key>CFBundleVersion</key><string>1</string>
+	<key>LSUIElement</key><true/>
+</dict>
+</plist>
+PLIST
+swiftc -O ~/.local/src/crash-notify.swift -o "$cn/MacOS/crash-notify"
+codesign -fs - ~/.local/share/crash-notify/CrashNotify.app
 mkdir -p ~/.cache
 
 echo "==> dark mode and wallpaper"
@@ -224,6 +243,23 @@ cat >~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist <<PLIST
 PLIST
 launchctl bootout gui/$UID/com.ryha.lid-sleep-watcher 2>/dev/null || true
 launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist
+# Crash notifications instead of macOS's "quit unexpectedly" dialog (.local/src/crash-notify.swift); reports are
+# still written to ~/Library/Logs/DiagnosticReports
+defaults write com.apple.CrashReporter DialogType none
+cat >~/Library/LaunchAgents/com.ryha.crash-notify.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.ryha.crash-notify</string>
+	<key>ProgramArguments</key><array><string>$HOME/.local/share/crash-notify/CrashNotify.app/Contents/MacOS/crash-notify</string></array>
+	<key>RunAtLoad</key><true/>
+	<key>KeepAlive</key><true/>
+</dict>
+</plist>
+PLIST
+launchctl bootout gui/$UID/com.ryha.crash-notify 2>/dev/null || true
+launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.crash-notify.plist
 # Default menu bar icon spacing (it was tightened to fit the old right-side workspace bar next to the notch)
 defaults -currentHost delete -globalDomain NSStatusItemSpacing 2>/dev/null || true
 defaults -currentHost delete -globalDomain NSStatusItemSelectionPadding 2>/dev/null || true

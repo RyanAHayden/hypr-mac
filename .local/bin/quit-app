@@ -8,4 +8,5 @@ pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
 # Closing/quitting makes macOS activate another app; tell the instant alt-tab helper that's not an
 # alt-tab, or it jumps to that app's workspace instead of staying on this (now empty) one
 touch ~/.cache/ws-switch
+~/.local/bin/quiet-crash "$pid"
 osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate; ''" >/dev/null

@@ -14,8 +14,9 @@ if [ -z "$id" ]; then
 	pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
 	[[ $pid =~ ^[0-9]+$ ]] || exit 0
 	read -r id app < <(yabai -m query --windows | jq -r --argjson p "$pid" 'first(.[] | select(.pid == $p and ."is-minimized" == false)) | "\(.id) \(.app)"')
-	[ -n "$id" ] || { terminate "$pid"; exit 0; }
+	[ -n "$id" ] || { ~/.local/bin/quiet-crash "$pid"; terminate "$pid"; exit 0; }
 fi
+~/.local/bin/quiet-crash "$pid"
 case $app in
 	Spotify | Discord) terminate "$pid" ;;
 	*) yabai -m window "$id" --close || terminate "$pid" ;;

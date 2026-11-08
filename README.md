@@ -153,6 +153,15 @@ SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai ow
 left Cmd from right, so this is how Cmd-drag reaches macOS. While paused nothing tiles, the bar stops updating,
 workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won't jump to other Spaces.
 
+## Crash notifications
+
+macOS's "X quit unexpectedly" dialog is off (`CrashReporter DialogType none`). Instead, `crash-notify`
+(`.local/src/crash-notify.swift`, built into `~/.local/share/crash-notify/CrashNotify.app`, run by the
+`com.ryha.crash-notify` LaunchAgent) watches `~/Library/Logs/DiagnosticReports` and posts a notification for each
+app crash. Clicking it opens Ghostty with `cld` in `~/.cache/crashes`, asked to explain the crash report and the
+process's last 5 minutes of log (saved there when it crashed). Apps you close with SUPER+W, SUPER+Shift+W or SUPER+Q
+are marked by `.local/bin/quiet-crash` first, so the ones that crash on their way out (KeePassXC) stay silent.
+
 ## Shell
 
 `.zshrc` ports Omarchy's `default/bash` (emacs keys like readline) plus the Linux `.bashrc`:
