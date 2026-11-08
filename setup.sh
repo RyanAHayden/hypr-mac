@@ -82,7 +82,8 @@ osascript -e 'tell application "System Events" to tell appearance preferences to
 ~/.local/bin/set-wallpaper ~/.local/share/wallpapers/0-dot-hands.jpg
 
 echo "==> macOS settings"
-# input (hypr/input.lua): fast repeat, flat mouse, natural scroll; three fingers = middle click only
+# input (hypr/input.lua): fast repeat, flat mouse, natural scroll; three fingers = middle click only,
+# four = Desktop left/right only (no Mission Control / App Exposé swipe up/down)
 defaults write -g KeyRepeat -int 2
 defaults write -g InitialKeyRepeat -int 15
 defaults write -g ApplePressAndHoldEnabled -bool false
@@ -94,8 +95,10 @@ for d in com.apple.AppleMultitouchTrackpad com.apple.driver.AppleBluetoothMultit
 	defaults write $d TrackpadThreeFingerHorizSwipeGesture -int 0
 	defaults write $d TrackpadThreeFingerVertSwipeGesture -int 0
 	defaults write $d TrackpadFourFingerHorizSwipeGesture -int 2
-	defaults write $d TrackpadFourFingerVertSwipeGesture -int 2
+	defaults write $d TrackpadFourFingerVertSwipeGesture -int 0
 done
+defaults write com.apple.dock showMissionControlGestureEnabled -bool false
+defaults write com.apple.dock showAppExposeGestureEnabled -bool false
 defaults write art.ginzburg.MiddleClick fingers -int 3
 defaults write art.ginzburg.MiddleClick allowMoreFingers -bool false
 # Spaces / Dock / menu bar (native menu bar, always shown)
@@ -204,8 +207,9 @@ hotkey 164 true 65535 80 0
 # skip the one-time "Do you want to enable Dictation?" prompt
 defaults write com.apple.speech.recognition.AppleSpeechRecognition.prefs DictationIMIntroMessagePresented -bool true
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
-# F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, reapplied at login by a LaunchAgent
-fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
+# F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, F3 (Mission Control, either usage it sends) -> bare
+# F20 (unbound), reapplied at login by a LaunchAgent
+fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC0000029F,"HIDKeyboardModifierMappingDst":0x70000006F},{"HIDKeyboardModifierMappingSrc":0xFF0100000010,"HIDKeyboardModifierMappingDst":0x70000006F},{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
 hidutil property --set "$fnmap" >/dev/null
 cat >~/Library/LaunchAgents/com.ryha.keyboard-brightness-keys.plist <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -493,7 +497,7 @@ Manual steps:
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
      for Karabiner-Core-Service (SIP off: done above). Until then no binds, Ctrl shortcuts or Caps Lock -> Ctrl
-  3. SIP on only: Mission Control (F3 or four-finger swipe up): add Desktops until there are 12 (11 = scratchpad, 12 = SUPER+M parking)
+  3. SIP on only: Mission Control (open -a "Mission Control"): add Desktops until there are 12 (11 = scratchpad, 12 = SUPER+M parking)
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384
 EOF
