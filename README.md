@@ -56,6 +56,12 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
 
+Finder keys follow Dolphin: Return opens, Fn+F2 renames (Return/Esc then finish, as after Ctrl+Shift+N new folder; a
+name started by slow-clicking it needs a click away instead, since Karabiner can't see it), Ctrl+X cuts files (Finder
+can't, so it copies and the next Ctrl+V moves them with Cmd+Option+V), Ctrl+L goes to a path (Cmd+L would make an
+alias), Ctrl+H shows hidden files, Fn+Backspace (Delete) moves to the Trash, Alt+Up / Left / Right go to the parent
+folder / back / forward.
+
 SUPER is physical left Cmd, bound natively by skhd (`lcmd`), so binds keep working when Karabiner isn't running
 (right after boot/login, around sleep/wake). Right Cmd is a normal Cmd, and Karabiner's Ctrl shortcuts send right
 Cmd, so Ctrl+S saves instead of firing SUPER+S. If Ctrl shortcuts stop working, `fixkeys` (or "Fix Keyboard" in
