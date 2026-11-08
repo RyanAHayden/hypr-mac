@@ -8,9 +8,9 @@ cmd=${1:-dismiss}
 
 is_open() { [ "$(osascript -l JavaScript -e 'Application("System Events").processes["NotificationCenter"].windows().some(w => w.name() === "Notification Center")' 2>/dev/null)" = true ]; }
 # open by clicking the clock; a second scripted click doesn't close it, a real Escape key event does
-# (skhd -k posts one; System Events' "key code 53" doesn't reach it)
+# (sendkey posts one; System Events' "key code 53" doesn't reach it)
 center() {
-	if is_open; then skhd -k escape
+	if is_open; then ~/.local/bin/sendkey escape
 	else osascript -e 'tell application "System Events" to tell process "ControlCenter" to click (first menu bar item of menu bar 1 whose description is "Clock")' >/dev/null 2>&1; fi
 }
 

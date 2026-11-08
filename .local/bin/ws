@@ -46,9 +46,9 @@ fallback() {
 	case $target in
 		prev | next) ;; # resolved to a number above unless yabai couldn't be queried
 		recent) ;; # no macOS shortcut for the previous Desktop; needs the scripting addition
-		10) skhd -k "ctrl - 0" ;;
+		10) ~/.local/bin/sendkey "ctrl - 0" ;;
 		11) ;; # no macOS Desktop shortcut for 11; needs the scripting addition
-		*) skhd -k "ctrl - $target" ;;
+		*) ~/.local/bin/sendkey "ctrl - $target" ;;
 	esac
 }
 # Switching Spaces makes macOS activate an app (landing on an empty Space hands focus

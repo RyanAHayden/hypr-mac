@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
-# fixkeys: restart Karabiner's user services and skhd when keys stop being remapped (Ctrl shortcuts,
-# Caps Lock -> Ctrl) or binds stop firing. Also runs from "Fix Keyboard" in Raycast (~/Applications).
+# fixkeys: restart Karabiner's user services when keys stop being remapped (SUPER binds, Ctrl shortcuts,
+# Caps Lock -> Ctrl), after regenerating the binds from bindings.conf. Also runs from "Fix Keyboard" in Raycast
+# (~/Applications).
 export PATH="/opt/homebrew/bin:$PATH"
 uid=$(id -u)
+~/.local/bin/binds-apply >/dev/null
 for svc in org.pqrs.service.agent.Karabiner-Core-Service-rev2 org.pqrs.service.agent.Karabiner-Console-User-Server; do
 	launchctl kickstart -k "gui/$uid/$svc" 2>/dev/null
 done
-skhd --restart-service 2>/dev/null || skhd --start-service
 
 # wait for Karabiner to grab the keyboard again, then report
 for _ in $(seq 20); do
 	tail -n 5 /var/log/karabiner/core_service.log 2>/dev/null | grep -q 'Keyboard.*(grabbed)' && break
 	sleep 0.5
 done
-if pgrep -xq skhd && tail -n 20 /var/log/karabiner/core_service.log 2>/dev/null | grep -q '(grabbed)'; then
-	msg="Karabiner and skhd restarted"
+if tail -n 20 /var/log/karabiner/core_service.log 2>/dev/null | grep -q '(grabbed)'; then
+	msg="Karabiner restarted"
 else
 	msg="Restarted, but Karabiner hasn't grabbed the keyboard yet - open Karabiner-Elements"
 fi

@@ -8,4 +8,4 @@
 # @raycast.packageName Omarchy
 
 export PATH="/opt/homebrew/bin:$PATH"
-yabai --restart-service; skhd --restart-service
+yabai --restart-service; ~/.local/bin/binds-apply

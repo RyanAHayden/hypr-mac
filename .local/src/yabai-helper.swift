@@ -18,7 +18,7 @@
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
-// yabai signals (yabairc) and skhd ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
+// yabai signals (yabairc) and binds ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
 // wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
 import notify
@@ -190,7 +190,7 @@ final class Focus {
 		}
 		guard let switchOnActivate = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleSpacesSwitchOnActivate"] as? NSNumber,
 			!switchOnActivate.boolValue else { return }
-		// skhd's "new window" binds touch this first: a window is on its way, so stay put
+		// the "new window" binds touch this first: a window is on its way, so stay put
 		if age("yabai-new-window") < 2 { return }
 		// ws just switched Spaces, or a window just closed / an app quit (close binds, yabairc): this activation came
 		// from that, not from alt-tab. Those land 70-110 ms after; 300 ms covers them without eating a real alt-tab.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SUPER+Q: quit the frontmost app (a normal quit, so it can still ask to save). Bound in skhd rather
+# SUPER+Q: quit the frontmost app (a normal quit, so it can still ask to save). Bound in bindings.conf rather
 # than left to the app's own Cmd+Q, which some players swallow (Infuse during playback).
 pid=$(lsappinfo info -only pid "$(lsappinfo front)" | sed 's/.*=//')
 [[ $pid =~ ^[0-9]+$ ]] || exit 0

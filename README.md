@@ -3,9 +3,9 @@
 My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, workspaces and look as my Linux
 [dotfiles](https://github.com/RyanAHayden/dotfiles), in the ryha-silver colors.
 
-![Three tiled Ghostty windows (fastfetch, skhd binds, yabai config) with the workspace bar top left](media/desktop.png)
+![Three tiled Ghostty windows (fastfetch, binds, yabai config) with the workspace bar top left](media/desktop.png)
 
-- **Tiling** with yabai and skhd. SUPER is left Cmd, and the binds follow Omarchy's
+- **Tiling** with yabai, binds through Karabiner. SUPER is left Cmd, and the binds follow Omarchy's
 - **Instant workspaces** (1-10, plus a scratchpad), with no macOS slide. Alt-tab, minimize and fullscreen stay
   on the workspace you're on
 - **Workspace bar** in the top left of the menu bar, drawn by a small native helper (`yabai-helper`)
@@ -15,7 +15,7 @@ My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, worksp
 - **One command**: `./setup.sh` installs everything, stows the configs into `~`, applies the macOS settings and,
   with SIP off, grants every permission up front, so nothing prompts
 
-Built from yabai, skhd, JankyBorders, Karabiner-Elements, Ghostty, LazyVim and zsh. Everything is a plain config
+Built from yabai, JankyBorders, Karabiner-Elements, Ghostty, LazyVim and zsh. Everything is a plain config
 file stowed into `~`. Older setups are in git history.
 
 ## Setup
@@ -29,17 +29,17 @@ file stowed into `~`. Older setups are in git history.
    ```
 
    Reboot. With SIP off, setup writes every privacy permission straight into the TCC databases (Ghostty/Terminal
-   get everything, plus yabai, skhd, AltTab, MiddleClick, Karabiner and scripting System Events), so you don't
+   get everything, plus yabai, AltTab, MiddleClick, Karabiner and scripting System Events), so you don't
    click through Allow prompts. It also disables `systemstatusd` (the purple/orange privacy dots), adds a sudoers
    rule so yabai loads its scripting addition (instant Space switching, Space creation, swapping, opacity), and
    creates the 11 Desktops. `csrutil enable` in Recovery turns SIP back on.
 2. `./setup.sh` - installs packages, stows using --adopt so you can see git changes before discarding what you
-   want to change, and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai or
-   skhd (the sudoers rule and permissions pin the binaries). It also turns off automatic macOS update
+   want to change, and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai (the
+   sudoers rule and permissions pin the binary). It also turns off automatic macOS update
    downloads/installs (security responses still install): check yabai supports a new macOS before upgrading, and
    install minor updates by hand from Software Update ("Other updates" lists same-major ones).
 3. Approve Karabiner-Elements' driver (General > Login Items & Extensions) and log out/in. With SIP on you also
-   have to do the rest by hand: grant Accessibility (yabai, skhd, AltTab, MiddleClick), Input Monitoring
+   have to do the rest by hand: grant Accessibility (yabai, Karabiner-Console-User-Server, AltTab, MiddleClick), Input Monitoring
    (Karabiner-Core-Service), give Ghostty and Terminal every Privacy & Security permission (Full Disk Access,
    Accessibility, Input Monitoring, Screen Recording, App Management, Developer Tools), re-run setup.sh from
    Ghostty (silences AltTab's monthly screen recording prompt) and add 11 Desktops in Mission Control.
@@ -52,8 +52,8 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 |---|---|---|
 | Caps Lock | Ctrl | Same as Ctrl |
 | Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps (not Ctrl+H: Cmd+H hides the app), Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) |
-| Option | Alt | Never bound by skhd, so nvim/tmux get Meta (M-h, M-1..9, M-Enter) from either side |
-| Cmd | SUPER | All window manager binds (skhd). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
+| Option | Alt | Never bound alone, so nvim/tmux get Meta (M-h, M-1..9, M-Enter) from either side. Outside terminals Alt+[ / Alt+] are back/forward (Cmd+[ / ] do nothing) |
+| Left Cmd | SUPER | All window manager binds (`bindings.conf`). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
 
 Finder keys follow Dolphin: Return opens, Fn+F2 renames (Return/Esc then finish, as after Ctrl+Shift+N new folder; a
@@ -62,19 +62,26 @@ can't, so it copies and the next Ctrl+V moves them with Cmd+Option+V), Ctrl+L go
 alias), Ctrl+H shows hidden files, Fn+Backspace (Delete) moves to the Trash, Alt+Up / Left / Right go to the parent
 folder / back / forward.
 
-SUPER is physical left Cmd, bound natively by skhd (`lcmd`), so binds keep working when Karabiner isn't running
-(right after boot/login, around sleep/wake). Right Cmd is a normal Cmd, and Karabiner's Ctrl shortcuts send right
-Cmd, so Ctrl+S saves instead of firing SUPER+S. If Ctrl shortcuts stop working, `fixkeys` (or "Fix Keyboard" in
+The binds live in `.config/binds/bindings.conf` (skhd-style lines: `super + shift - b : command`, `send` for a
+key, `repeat` for binds that repeat while held). `binds-apply` turns it into a Karabiner rule, and a LaunchAgent runs
+it on every save, so changes are live as soon as you save. Karabiner reads the keyboard below macOS's Secure Input,
+so binds work in password fields too (skhd's event tap gets nothing there, and the key went to the app: SUPER+S
+saved the page). Commands run from Karabiner-Console-User-Server, which needs Accessibility (setup grants it with
+SIP off). SUPER is physical left Cmd; right Cmd is a normal Cmd, and Karabiner's Ctrl shortcuts send right Cmd, so
+Ctrl+S saves instead of firing SUPER+S. Karabiner lets go of the keyboard on sleep and takes it back 2-3 s after
+waking (~1.5 s for macOS to report powered on, ~1 s for its virtual keyboard to be ready); keys pressed in that gap
+reach apps unmapped. If Ctrl shortcuts stop working, `fixkeys` (or "Fix Keyboard" in
 Raycast) restarts Karabiner. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
-the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/skhd/skhdrc` (Cmd+I shows it).
+the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/binds/bindings.conf` (Cmd+I shows it).
 
 | Key | Action |
 |---|---|
 | Cmd+Return / Cmd+Option+Return | Ghostty / Ghostty in tmux `Work` |
 | Cmd+Space | Raycast (its own hotkey, so it toggles) |
-| Cmd+Tab / Cmd+Shift+Tab | AltTab (window switcher with previews), replacing the macOS app switcher |
+| Cmd+Tab / Cmd+Shift+Tab | AltTab (window switcher with previews), replacing the macOS app switcher. While it's open (a Karabiner rule, like the Linux switcher): Esc cancels, H/J/K/L move (as arrow keys), W closes / S or M minimizes (or restores) the selected window without leaving the switcher, / searches |
 | Cmd+Shift+B / Return / Option+B | Helium / new window / incognito |
 | Cmd+Shift+F, N, T | new Finder window, nvim, btop |
+| Ctrl+Shift+Escape, Cmd+Ctrl+T | Activity Monitor (task manager) |
 | Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |
 | Cmd+Option+Space | macOS Dictation (setup gives it a hidden F19 shortcut) |
 | Cmd+W / Cmd+Shift+W | close / force kill |
@@ -99,7 +106,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/sk
 | Ctrl+Option+Tab (+Shift) | focus next (previous) display |
 | Cmd+Shift+Option+arrows | move the whole Space to the display that way (renumbers Spaces) |
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
-| Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, reopen apps at login (off by default), relaunch yabai/skhd, log out, restart, shut down. Also in Raycast as "Power: ..." |
+| Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, reopen apps at login (off by default), relaunch yabai (and reapply the binds), log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Opening a text/code file | nvim in a new Ghostty window (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
 | Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |

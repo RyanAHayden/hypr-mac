@@ -14,7 +14,13 @@ brew install zoxide eza bat starship
 brew install sqlcipher
 # duti sets default apps (text files open in nvim, below)
 brew install duti
-brew install asmvik/formulae/yabai asmvik/formulae/skhd felixkratz/formulae/borders
+brew install asmvik/formulae/yabai felixkratz/formulae/borders
+# binds moved from skhd to Karabiner (.config/binds/bindings.conf, works in password fields): drop skhd if it's here
+if brew list skhd >/dev/null 2>&1; then
+	skhd --uninstall-service 2>/dev/null || true
+	brew uninstall skhd
+	rm -f ~/.config/skhd/skhdrc && rmdir ~/.config/skhd 2>/dev/null || true
+fi
 brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
@@ -41,12 +47,14 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post and power-menu"
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey and bind-repeat"
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
 swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
 swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
+swiftc -O ~/.local/src/sendkey.swift -o ~/.local/bin/sendkey
+swiftc -O ~/.local/src/bind-repeat.swift -o ~/.local/bin/bind-repeat
 mkdir -p ~/.cache
 
 echo "==> dark mode and wallpaper"
@@ -111,7 +119,7 @@ for i in 1 2 3 4 5 6 7 8 9; do
 	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add $((117 + i)) \
 		"<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>$((48 + i))</integer><integer>${codes[$((i - 1))]}</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
 done
-# SUPER is Cmd (Karabiner + skhd): free cmd+space for Raycast, and move screenshots off cmd+shift+3/4/5
+# SUPER is left Cmd (Karabiner): free cmd+space for Raycast, and move screenshots off cmd+shift+3/4/5
 # (SUPER+shift+N moves windows) to ctrl+shift+3/4/5, ctrl+option+shift+3/4 = to clipboard
 hotkey() { # id enabled ascii keycode modmask
 	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add "$1" \
@@ -125,7 +133,7 @@ hotkey 60 false 32 49 262144
 hotkey 61 false 32 49 786432
 # fn/Globe alone does nothing (fn+h/j/k/l are arrows via Karabiner; it kept popping the emoji picker - use Raycast)
 defaults write com.apple.HIToolbox AppleFnUsageType -int 0
-# Raycast toggles itself on its own hotkey (skhd could only open it): cmd+space (49 = space)
+# Raycast toggles itself on its own hotkey (a bind could only open it): cmd+space (49 = space)
 defaults write com.raycast.macos raycastGlobalHotkey -string "Command-49"
 hotkey 28 true 51 20 393216
 hotkey 29 true 51 20 917504
@@ -163,7 +171,7 @@ hotkey 63 false 65535 111 8519680
 defaults -currentHost write com.apple.controlcenter Sound -int 18
 defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
 # macOS Dictation on, started by the hidden F19 key (keycode 80, no modifiers), which SUPER+Alt+Space sends
-# through skhd: there's no command or AppleScript to start Dictation, only its keyboard shortcut
+# (bindings.conf): there's no command or AppleScript to start Dictation, only its keyboard shortcut
 defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 1
 defaults write com.apple.assistant.support "Dictation Enabled" -bool true
 hotkey 164 true 65535 80 0
@@ -239,10 +247,18 @@ if ! defaults read com.lwouis.alt-tab-macos holdShortcut 2>/dev/null | grep -q '
 	defaults write com.lwouis.alt-tab-macos nextWindowShortcut -string "⇥"
 	defaults write com.lwouis.alt-tab-macos preferencesVersion -string "10.4.0"
 fi
+# while it's open, S minimizes/restores the selected window (W closes it, AltTab's default) and the switcher stays
+# open, and / is search (AltTab's default search key is S, and search mode keeps the switcher open after releasing
+# Cmd). Karabiner lets Cmd+S/W// through to it then, and sends Cmd+M as Cmd+S. Written archived: SRShortcuts for
+# keyCode 1 ("s") and 44 ("/"), the shape AltTab saves itself
+defaults write com.lwouis.alt-tab-macos minDeminWindowShortcut -dict string S secureData -data \
+	62706c6973743030d40102030405061e215924617263686976657258246f626a656374735424746f70582476657273696f6e5f100f4e534b657965644172636869766572a607081516171855246e756c6cd6090a0b0c0d0e0f10111213145624636c6173735a636861726163746572735f101b6368617261637465727349676e6f72696e674d6f64696669657273576b6579436f64655d6d6f646966696572466c6167735776657273696f6e800580048004800280038003100110005173d2191a1b1c5824636c61737365735a24636c6173736e616d65a21c1d5a535253686f7274637574584e534f626a656374d11f2054726f6f74800112000186a008111b242932444b515e65708e96a4acaeb0b2b4b6b8babcbec3ccd7dae5eef1f6f800000000000001010000000000000022000000000000000000000000000000fd
+defaults write com.lwouis.alt-tab-macos searchShortcut -dict string / secureData -data \
+	62706c6973743030d40102030405061e215924617263686976657258246f626a656374735424746f70582476657273696f6e5f100f4e534b657965644172636869766572a607081516171855246e756c6cd6090a0b0c0d0e0f10111213145624636c6173735a636861726163746572735f101b6368617261637465727349676e6f72696e674d6f64696669657273576b6579436f64655d6d6f646966696572466c6167735776657273696f6e800580048004800280038003102c1000512fd2191a1b1c5824636c61737365735a24636c6173736e616d65a21c1d5a535253686f7274637574584e534f626a656374d11f2054726f6f74800112000186a008111b242932444b515e65708e96a4acaeb0b2b4b6b8babcbec3ccd7dae5eef1f6f800000000000001010000000000000022000000000000000000000000000000fd
 defaults write art.ginzburg.MiddleClick "NSStatusItem Visible Item-0" -bool false
 defaults write com.raycast.macos "NSStatusItem Visible raycastIcon" -bool false
 defaults write com.raycast.macos showGettingStartedLink -bool false
-# minimal Raycast: compact window (no suggestions until you type), no favorites, and the deeplinks skhd uses
+# minimal Raycast: compact window (no suggestions until you type), no favorites, and the deeplinks the binds use
 # run without a "Request to run" prompt
 defaults write com.raycast.macos raycastPreferredWindowMode -string compact
 defaults write com.raycast.macos showFavoritesInCompactMode -bool false
@@ -294,15 +310,17 @@ if $sip_off; then
 		tcc_automation "$id" "$path"
 	done
 	# everything else that would otherwise prompt or need switching on by hand
-	for bin in yabai skhd; do
-		b=$(readlink -f "$(command -v $bin)")
-		tcc_grant "$sysdb" kTCCServiceAccessibility "$b" "$b" 1
+	yabai_bin=$(readlink -f "$(command -v yabai)")
+	tcc_grant "$sysdb" kTCCServiceAccessibility "$yabai_bin" "$yabai_bin" 1
+	# binds run from Karabiner-Console-User-Server, so it's what macOS asks about: Accessibility (osascript clicking
+	# menu bar items, power-menu's key tap), posting keys (sendkey) and scripting System Events and Finder
+	kcus=org.pqrs.Karabiner-Console-User-Server
+	kcus_app="/Library/Application Support/org.pqrs/Karabiner-Elements/Karabiner-Console-User-Server.app"
+	for svc in Accessibility PostEvent; do
+		tcc_grant "$sysdb" "kTCCService$svc" $kcus "$kcus_app"
 	done
-	# skhd binds script Finder (SUPER+Shift+F opens a new window) and post keys (skhd -k: Dictation)
-	skhd_bin=$(readlink -f "$(command -v skhd)")
-	tcc_automation "$skhd_bin" "$skhd_bin" 1 com.apple.finder /System/Library/CoreServices/Finder.app
-	tcc_automation "$skhd_bin" "$skhd_bin" 1
-	tcc_grant "$sysdb" kTCCServicePostEvent "$skhd_bin" "$skhd_bin" 1
+	tcc_automation $kcus "$kcus_app"
+	tcc_automation $kcus "$kcus_app" 0 com.apple.finder /System/Library/CoreServices/Finder.app
 	for svc in Accessibility ScreenCapture; do
 		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
 	done
@@ -313,7 +331,7 @@ if $sip_off; then
 	sudo killall tccd 2>/dev/null || true
 	launchctl disable "gui/$(id -u)/com.apple.systemstatusd"
 	launchctl bootout "gui/$(id -u)/com.apple.systemstatusd" 2>/dev/null || true
-	# the hash pins the rule (and the yabai/skhd grants above) to these binaries, so re-run setup after upgrading them
+	# the hash pins the rule (and the yabai grant above) to this binary, so re-run setup after upgrading them
 	echo "$(whoami) ALL=(root) NOPASSWD: sha256:$(shasum -a 256 "$(readlink -f "$(command -v yabai)")" | cut -d' ' -f1) $(command -v yabai) --load-sa" |
 		sudo tee /private/etc/sudoers.d/yabai >/dev/null
 	sudo chmod 440 /private/etc/sudoers.d/yabai
@@ -343,10 +361,24 @@ spctl developer-mode enable-terminal 2>/dev/null || true
 
 echo "==> services and login items"
 yabai --start-service 2>/dev/null || yabai --restart-service
-skhd --start-service 2>/dev/null || skhd --restart-service
+# binds: bindings.conf -> Karabiner rule now, and again whenever it's saved (Karabiner reloads its config itself)
+~/.local/bin/binds-apply
+cat >~/Library/LaunchAgents/com.ryha.binds.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.ryha.binds</string>
+	<key>ProgramArguments</key><array><string>$HOME/.local/bin/binds-apply</string></array>
+	<key>WatchPaths</key><array><string>$HOME/.config/binds</string></array>
+</dict>
+</plist>
+PLIST
+launchctl bootout gui/$UID/com.ryha.binds 2>/dev/null || true
+launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.binds.plist
 brew services start borders 2>/dev/null || brew services restart borders
 brew services start syncthing
-# "Fix Keyboard" app (Raycast/Spotlight): runs ~/.local/bin/fixkeys to restart Karabiner + skhd
+# "Fix Keyboard" app (Raycast/Spotlight): runs ~/.local/bin/fixkeys to reapply the binds and restart Karabiner
 mkdir -p ~/Applications
 osacompile -o ~/Applications/Fix\ Keyboard.app -e "do shell script \"$HOME/.local/bin/fixkeys\"" 2>/dev/null
 # "Nvim" app (~/Applications): opens files in nvim in a new Ghostty window; the default for text and code files, so
@@ -404,14 +436,14 @@ cat <<'EOF'
 
 Done - check `git diff` (stow --adopt pulled existing files into the repo) and `git checkout .` what you don't want.
 Manual steps:
-  1. Privacy & Security > Accessibility: allow yabai, skhd, AltTab, MiddleClick (+ Screen Recording for AltTab),
-     then: yabai --restart-service; skhd --restart-service
+  1. Privacy & Security > Accessibility: allow yabai, Karabiner-Console-User-Server (it runs the binds), AltTab,
+     MiddleClick (+ Screen Recording for AltTab), then: yabai --restart-service
      SIP on only (with SIP off setup grants these and makes the Desktops itself):
      Ghostty and Terminal get everything, so nothing run in them prompts: turn both on in Full Disk Access
      (covers "access data from other apps"), Accessibility, Input Monitoring, Screen & System Audio Recording,
      App Management and Developer Tools; then re-run this script from Ghostty so the AltTab fix above is written
   2. Open Karabiner-Elements: allow its driver extension (General > Login Items & Extensions) and Input Monitoring
-     for Karabiner-Core-Service (SIP off: done above). Until then the Ctrl shortcuts and Caps Lock -> Ctrl don't work (SUPER binds do: skhd binds left Cmd itself)
+     for Karabiner-Core-Service (SIP off: done above). Until then no binds, Ctrl shortcuts or Caps Lock -> Ctrl
   3. SIP on only: Mission Control (F3 or four-finger swipe up): add Desktops until there are 12 (11 = scratchpad, 12 = SUPER+M parking)
   4. Log out and back in (key repeat, trackpad)
   5. Syncthing: http://127.0.0.1:8384

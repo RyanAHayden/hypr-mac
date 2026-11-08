@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# binds-apply: turn ~/.config/binds/bindings.conf into the "SUPER binds" rule at the top of Karabiner's config.
+# Karabiner reloads karabiner.json by itself, so the binds are live as soon as this finishes; the com.ryha.binds
+# LaunchAgent runs it whenever bindings.conf is saved. Errors (unknown key, duplicate bind) leave the config alone
+# and show a notification.
+#
+# bindings.conf lines (# comments):
+#   mods - key : shell command          mods: super (physical left Cmd), shift, alt (Option), ctrl; joined with +
+#   mods - key : send mods - key        press another key instead (macOS's own shortcuts), no shell
+#   mods - key : repeat shell command   held down, runs again at the key repeat rate (resize, focus, cycling)
+# keys: a-z, 0-9, f1-f20, return, space, tab, escape, backspace, left/right/up/down, minus, equal, slash, backslash,
+# comma, or any Karabiner key_code. Commands run in sh with Homebrew on PATH. Right Cmd stays a normal Cmd (Karabiner's
+# Linux-style ctrl shortcuts send it), so only physical left Cmd hits SUPER binds; unbound combos still reach apps.
+export PATH="/opt/homebrew/bin:$PATH"
+conf=~/.config/binds/bindings.conf
+kb=~/.config/karabiner/karabiner.json
+# Karabiner runs shell_command in sh with launchd's bare PATH
+path="/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+if ! rule=$(jq -Rn --arg path "$path" '
+	def from_mod: {super: "left_command", shift: "shift", alt: "option", ctrl: "control"};
+	def to_mod: {super: "left_command", cmd: "left_command", shift: "left_shift", alt: "left_option", ctrl: "left_control"};
+	def names: {return: "return_or_enter", space: "spacebar", backspace: "delete_or_backspace", left: "left_arrow",
+		right: "right_arrow", up: "up_arrow", down: "down_arrow", minus: "hyphen", equal: "equal_sign"};
+	# "mods - key" -> {key_code, mods}; $table maps modifier names
+	def combo($table; $n):
+		(capture("^(?<m>.*?)\\s*-\\s*(?<k>[^ ]+)$") // error("line \($n): expected mods - key, got \"\(.)\""))
+		| {key_code: (names[.k] // .k),
+			mods: [.m | split("+")[] | gsub("^\\s+|\\s+$"; "") | select(. != "")
+				| $table[.] // error("line \($n): unknown modifier \"\(.)\"")]};
+	[inputs | [., input_line_number] | .[1] as $n | .[0] | sub("^\\s+"; "")
+		| select(. != "" and (startswith("#") | not))
+		| (capture("^(?<keys>[^:]+?)\\s*:\\s*(?<cmd>.+)$") // error("line \($n): no \" : command\""))
+		| (.keys | combo(from_mod; $n)) as $from
+		| {keys: .keys, from: {key_code: $from.key_code, modifiers: {mandatory: $from.mods}}}
+			+ if .cmd | startswith("send ") then
+				{to: [.cmd[5:] | if test(" - ") then combo(to_mod; $n) else {key_code: (names[.] // .), mods: []} end
+					| {key_code} + (if .mods == [] then {} else {modifiers: .mods} end)]}
+			# held down: bind-repeat runs it again every key repeat until the release stops it
+			elif .cmd | startswith("repeat ") then
+				{to: [{shell_command: "export PATH=\($path); ~/.local/bin/bind-repeat start \(.cmd[7:] | @sh)"}],
+					to_after_key_up: [{shell_command: "~/.local/bin/bind-repeat stop"}]}
+			else {to: [{shell_command: "export PATH=\($path); \(.cmd)"}]} end]
+	| (group_by(.from) | map(select(length > 1))[0] // null) as $dup
+	| if $dup then error("bound twice: \($dup[0].keys)") else . end
+	| {description: "SUPER binds (generated from ~/.config/binds/bindings.conf by binds-apply)",
+		manipulators: map({type: "basic"} + del(.keys))}
+' <"$conf" 2>&1); then
+	msg=$(sed 's/^jq: error[^:]*: //' <<<"$rule" | head -1)
+	echo "binds-apply: $msg" >&2
+	osascript -e "display notification \"$msg\" with title \"bindings.conf not applied\"" >/dev/null 2>&1
+	exit 1
+fi
+
+# replaced where it is (rules above it, like the AltTab one, win over it); first run: at the top
+new=$(jq --indent 4 --argjson rule "$rule" '.profiles[0].complex_modifications.rules |=
+	if any(.[]; .description | startswith("SUPER binds")) then map(if .description | startswith("SUPER binds") then $rule else . end)
+	else [$rule] + . end' "$kb") || exit 1
+# write in place only when something changed (karabiner.json is tracked in the repo; Karabiner reloads on change)
+[ "$new" = "$(cat "$kb")" ] || printf '%s\n' "$new" >"$kb"
+echo "binds-apply: $(jq '.manipulators | length' <<<"$rule") binds"

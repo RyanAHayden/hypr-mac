@@ -54,8 +54,8 @@ add("Restart", "r", "power-restart.sh", "restart")
 add("Shut Down", "p", "power-shutdown.sh", "power")
 
 // Up on the first item goes to the last and Down on the last to the first (NSMenu stops at the ends). Menu tracking
-// doesn't pass keys to NSEvent monitors, so an event tap catches them (allowed: skhd starts this, and has
-// Accessibility); highlightItem: is NSMenu's private highlight setter.
+// doesn't pass keys to NSEvent monitors, so an event tap catches them (allowed: Karabiner-Console-User-Server starts
+// this, and has Accessibility); highlightItem: is NSMenu's private highlight setter.
 final class Wrap: NSObject, NSMenuDelegate {
 	var highlighted: NSMenuItem?
 	func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) { highlighted = item }
