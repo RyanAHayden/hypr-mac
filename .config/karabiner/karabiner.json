@@ -3874,7 +3874,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^md\\.obsidian$"
                                         ]
                                     }
                                 ]
@@ -4286,7 +4287,8 @@
                                         "type": "frontmost_application_unless",
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
-                                            "^com\\.apple\\.Terminal$"
+                                            "^com\\.apple\\.Terminal$",
+                                            "^md\\.obsidian$"
                                         ]
                                     }
                                 ]
@@ -4380,7 +4382,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^md\\.obsidian$"
                                         ]
                                     }
                                 ]
