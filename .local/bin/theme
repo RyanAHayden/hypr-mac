@@ -16,12 +16,14 @@
 # Themes are ~/.config/omarchy/themes (clones, and hypr-mac's themes/ linked in by setup), then Omarchy's own.
 # A theme's colors.toml (or, for older themes, its ghostty.conf) resolves the way Omarchy's omarchy-theme-color does.
 # Set writes ~/.local/state/theme: ghostty.conf (Ghostty's config includes it; SIGUSR2 reloads it), neovim.lua (linked
-# as nvim's lua/plugins/theme.lua, which lazy's change detection reloads), border (bordersrc) and mode.
+# as nvim's lua/plugins/theme.lua, which lazy's change detection reloads), border (bordersrc), border-zoom
+# (yabai-helper, for a zoomed window) and mode.
 # The wallpaper is the theme's first backgrounds/ image, or yours for a theme without one (hypr-mac's): whatever was
 # on the desktop that a theme didn't put there is saved as yours (user-wallpaper), and keep-wallpaper (theme wallpaper
 # keep) leaves it alone.
 export PATH="/opt/homebrew/bin:$PATH"
 setopt extended_glob null_glob
+zmodload zsh/mathfunc   # abs() in similar
 
 USER_THEMES=~/.config/omarchy/themes
 # basecamp/omarchy, sparse: just its themes' colors and nvim/Ghostty files (no wallpapers). Not ~/.local/share/omarchy,
@@ -180,18 +182,31 @@ ${out%$'\n'}
 }"
 }
 
+# whether hex colours $1 and $2 are close enough to read as the same border
+similar() {
+	local a=${1#\#} b=${2#\#}
+	(( abs(16#${a[1,2]} - 16#${b[1,2]}) + abs(16#${a[3,4]} - 16#${b[3,4]}) + abs(16#${a[5,6]} - 16#${b[5,6]}) < 130 ))
+}
+
 cmd_set() {
-	local name=$1 dir border tmp f
+	local name=$1 dir border zoom tmp f
 	theme_dir "$name" || die "No theme named '$name' (theme list shows them)"
 	dir=$REPLY
 	load_colors $dir || die "$name has no colors.toml or ghostty.conf"
 	[[ ${C[border]} =~ '^#[0-9A-Fa-f]{6}$' ]] && border=0xff${C[border]#\#} || border=0xffe8ddd0
+	# the zoomed (SUPER+F) window's border, which Omarchy has no colour for: border_zoom, else the theme's blue, or its
+	# magenta where blue is about the border's colour already
+	zoom=${C[border_zoom]:-${C[blue]}}
+	[[ -z ${C[border_zoom]} && ${C[border]} =~ '^#[0-9A-Fa-f]{6}$' && $zoom =~ '^#[0-9A-Fa-f]{6}$' ]] &&
+		similar ${C[border]} $zoom && zoom=${C[magenta]}
+	[[ $zoom =~ '^#[0-9A-Fa-f]{6}$' ]] && zoom=0xff${zoom#\#} || zoom=0xff3b82f6
 
 	mkdir -p $STATE
 	tmp=$(mktemp -d $STATE/.new.XXXXXX) || exit 1
 	if [[ -f $dir/ghostty.conf ]]; then cp $dir/ghostty.conf $tmp/; else gen_ghostty >$tmp/ghostty.conf; fi
 	if [[ -f $dir/neovim.lua ]]; then cp $dir/neovim.lua $tmp/; else gen_nvim >$tmp/neovim.lua; fi
 	print -r -- $border >$tmp/border
+	print -r -- $zoom >$tmp/border-zoom
 	print -r -- ${C[mode]} >$tmp/mode
 	print -r -- $name >$tmp/name
 	# one rename per file, so nvim's change detection never reads half a file

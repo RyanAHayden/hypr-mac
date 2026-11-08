@@ -100,7 +100,8 @@ final class Focus {
 		}
 	}
 
-	// SUPER+F (zoom-fullscreen): the border turns blue while a zoomed window has focus. Toggling zoom fires
+	// SUPER+F (zoom-fullscreen): the border takes the theme's zoom colour (blue unless that's the border's) while a zoomed
+	// window has focus. Toggling zoom fires
 	// window_resized, so wm.focus lands here. Hover focus is off meanwhile: the zoomed window covers the Space, so
 	// hover could only refocus it, and a mouse nudge right after alt-tab/SUPER+H/J/K/L would undo the switch
 	// before passZoom hands the zoom over.
@@ -121,10 +122,12 @@ final class Focus {
 		}
 		let borders = Process()
 		borders.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/borders")
-		// back to the theme's colour (theme script), as bordersrc starts with
-		let themed = (try? String(contentsOfFile: NSHomeDirectory() + "/.local/state/theme/border", encoding: .utf8))?
-			.trimmingCharacters(in: .whitespacesAndNewlines) ?? "0xffe8ddd0"
-		borders.arguments = ["active_color=\(zoomed ? "0xff3b82f6" : themed)"] // updates the running instance (bordersrc)
+		// the theme's colours (theme script): border-zoom while zoomed, else border, as bordersrc starts with
+		func themed(_ file: String, _ fallback: String) -> String {
+			(try? String(contentsOfFile: NSHomeDirectory() + "/.local/state/theme/" + file, encoding: .utf8))?
+				.trimmingCharacters(in: .whitespacesAndNewlines) ?? fallback
+		}
+		borders.arguments = ["active_color=\(zoomed ? themed("border-zoom", "0xff3b82f6") : themed("border", "0xffe8ddd0"))"] // updates the running instance (bordersrc)
 		try? borders.run()
 	}
 

@@ -91,7 +91,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |
 | Cmd+A/D, Shift+A/D | prev/next Space / move window there |
-| Cmd+F, Cmd+T, Cmd+\ | fullscreen (blue border, no hover focus; stays on the workspace, so focusing another window fullscreens that one), float, toggle split |
+| Cmd+F, Cmd+T, Cmd+\ | fullscreen (border in the theme's zoom colour, no hover focus; stays on the workspace, so focusing another window fullscreens that one), float, toggle split |
 | Cmd+O | pop window out: float centered, on every Space, above tiled windows (again: put back) |
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
 | Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |
@@ -142,7 +142,9 @@ Theme", "Install Theme"; setup imports it) is its picker. Setting a theme:
 - Ghostty: `~/.local/state/theme/ghostty.conf`, which Ghostty's config includes, reloaded live (SIGUSR2)
 - nvim: `~/.local/state/theme/neovim.lua`, linked in as `lua/plugins/theme.lua` and hot-reloaded like on Omarchy
   (the theme's own file, or aether in its colours)
-- window border (JankyBorders): the theme's accent
+- window border (JankyBorders): the theme's accent. A zoomed window (Cmd+F) gets the theme's blue instead, or its
+  magenta where blue is about the border's colour (Omarchy has no colour for this); `border_zoom` in a `colors.toml`
+  sets it
 - macOS dark/light mode: the theme's `mode` (or `light.mode` file, or how bright its background is)
 - wallpaper: the theme's first one, or yours for themes without any (hypr-mac's). Whatever's on the desktop that a
   theme didn't put there counts as yours. `theme wallpaper keep` (Raycast: the wallpaper dropdown in Switch Theme's search
