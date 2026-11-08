@@ -26,25 +26,5 @@ keybind = alt+shift+enter=text:\x1b[13;4u
 # so tmux etc. on servers without it don't fail with "missing or unsuitable terminal"
 shell-integration-features = ssh-env,no-ssh-terminfo
 
-# ryha-silver colors (github.com/RyanAHayden/ryha-omarchy-theme)
-background = #000000
-foreground = #e5e5e5
-cursor-color = #e5e5e5
-selection-background = #3a3a3a
-selection-foreground = #ffffff
-palette = 0=#000000
-palette = 1=#ef4444
-palette = 2=#22c55e
-palette = 3=#f59e0b
-palette = 4=#3b82f6
-palette = 5=#a855f7
-palette = 6=#06b6d4
-palette = 7=#e5e5e5
-palette = 8=#737373
-palette = 9=#f87171
-palette = 10=#4ade80
-palette = 11=#fbbf24
-palette = 12=#60a5fa
-palette = 13=#c084fc
-palette = 14=#22d3ee
-palette = 15=#ffffff
+# colors: the current theme (theme script, Raycast's Switch Theme), which reloads Ghostty with SIGUSR2
+config-file = ?~/.local/state/theme/ghostty.conf

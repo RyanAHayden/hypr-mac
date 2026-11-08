@@ -706,6 +706,41 @@
                             {
                                 "type": "basic",
                                 "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_command",
+                                            "control",
+                                            "shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -g \"raycast://extensions/ryanahayden/hypr-mac-theme/switch-theme\""
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_command",
+                                            "control"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/theme wallpaper next"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
                                     "key_code": "escape",
                                     "modifiers": {
                                         "mandatory": [

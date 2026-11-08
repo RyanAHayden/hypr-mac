@@ -1,0 +1,3 @@
+#!/bin/zsh
+# Omarchy's theme install command, so the line omarchy.org shows for a theme can be pasted as it is
+exec ~/.local/bin/theme install "$@"

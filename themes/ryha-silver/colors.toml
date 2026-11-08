@@ -1,0 +1,35 @@
+# The OLED look hypr-mac started with (github.com/RyanAHayden/omarchy-ryha-theme with a silver accent):
+# pure black, neutral greys, Tailwind 500 accents, a Starlight (M3 Air) window border
+mode = "dark"
+
+accent = "#e5e5e5"
+border = "#e8ddd0"
+selection = "#3a3a3a"
+selection_foreground = "#ffffff"
+muted = "#737373"
+
+background = "#000000"
+dark_background = "#000000"
+darker_background = "#000000"
+lighter_background = "#1a1a1a"
+
+foreground = "#e5e5e5"
+dark_foreground = "#737373"
+light_foreground = "#e5e5e5"
+bright_foreground = "#ffffff"
+
+red = "#ef4444"
+yellow = "#f59e0b"
+orange = "#f97316"
+green = "#22c55e"
+cyan = "#06b6d4"
+blue = "#3b82f6"
+magenta = "#a855f7"
+brown = "#7b4f06"
+
+bright_red = "#f87171"
+bright_yellow = "#fbbf24"
+bright_green = "#4ade80"
+bright_cyan = "#22d3ee"
+bright_blue = "#60a5fa"
+bright_magenta = "#c084fc"

@@ -66,7 +66,7 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey, bind-repeat and finder-trash"
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey, bind-repeat, finder-trash and wallpaper-band"
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
@@ -75,6 +75,7 @@ swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
 swiftc -O ~/.local/src/sendkey.swift -o ~/.local/bin/sendkey
 swiftc -O ~/.local/src/bind-repeat.swift -o ~/.local/bin/bind-repeat
 swiftc -O ~/.local/src/finder-trash.swift -o ~/.local/bin/finder-trash
+swiftc -O ~/.local/src/wallpaper-band.swift -o ~/.local/bin/wallpaper-band
 # crash-notify needs an app bundle to post notifications (ad-hoc signed; macOS asks to allow them on first run)
 cn=~/.local/share/crash-notify/CrashNotify.app/Contents
 mkdir -p "$cn/MacOS"
@@ -96,9 +97,18 @@ swiftc -O ~/.local/src/crash-notify.swift -o "$cn/MacOS/crash-notify"
 codesign -fs - ~/.local/share/crash-notify/CrashNotify.app
 mkdir -p ~/.cache
 
-echo "==> dark mode and wallpaper"
-osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'
-~/.local/bin/set-wallpaper ~/.local/share/wallpapers/0-dot-hands.jpg
+echo "==> theme (.local/bin/theme: Omarchy's themes plus hypr-mac's in themes/) and wallpaper"
+# hypr-mac's themes are linked in beside the cloned ones; the theme also sets dark or light mode
+mkdir -p ~/.config/omarchy/themes
+for d in "$REPO"/themes/*/; do
+	t=~/.config/omarchy/themes/$(basename "$d")
+	[ -e "$t" ] && [ ! -L "$t" ] && continue   # a clone by the same name wins
+	ln -sfn "${d%/}" "$t"
+done
+# first run: this repo's wallpaper, which the theme then keeps as yours (themes without wallpapers bring it back)
+[ -f ~/.local/state/theme/name ] || ~/.local/bin/set-wallpaper ~/.local/share/wallpapers/0-dot-hands.jpg
+~/.local/bin/theme update   # fetches Omarchy's themes and re-sets the current one
+[ -f ~/.local/state/theme/name ] || ~/.local/bin/theme set ryha-silver
 
 echo "==> macOS settings"
 # input (hypr/input.lua): fast repeat, flat mouse, natural scroll; three fingers = middle click only,
@@ -390,6 +400,8 @@ if $sip_off; then
 	done
 	tcc_automation $kcus "$kcus_app"
 	tcc_automation $kcus "$kcus_app" 0 com.apple.finder /System/Library/CoreServices/Finder.app
+	# Raycast runs the theme script (Switch Theme), whose osascript flips dark/light mode through System Events
+	tcc_automation com.raycast.macos /Applications/Raycast.app
 	for svc in Accessibility ScreenCapture; do
 		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
 	done
@@ -506,6 +518,19 @@ for a in AltTab MiddleClick Raycast Tailscale; do
 	open -a "$a"
 	osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"/Applications/$a.app\", hidden:true}" >/dev/null 2>&1 || true
 done
+
+echo "==> Raycast extension: Omarchy Themes (raycast-extension: Switch Theme, Install Theme)"
+# ray develop is how Raycast imports a local extension, and it stays installed after; it keeps watching for changes,
+# so stop it once the build is in
+(cd "$REPO/raycast-extension" && npm ci --silent)
+raylog=$(mktemp)
+(cd "$REPO/raycast-extension" && npx ray develop -I >"$raylog" 2>&1 &)
+for _ in $(seq 120); do grep -qE "ready|error" "$raylog" && break; sleep 0.5; done
+pkill -f "ray develop" || true
+grep -q ready "$raylog" || { echo "  ray develop didn't finish:"; sed 's/^/  /' "$raylog"; }
+rm -f "$raylog"
+# SUPER+CTRL+SHIFT+Space opens Switch Theme by deeplink; don't ask each time
+defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add "extension_hypr-mac-theme.switch-theme__dev" -bool true
 
 if [ -n "$adopted" ]; then
 	echo

@@ -1,7 +1,7 @@
 # hypr-mac
 
 My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, workspaces and look as my Linux
-[dotfiles](https://github.com/RyanAHayden/dotfiles), in the ryha-silver colors.
+[dotfiles](https://github.com/RyanAHayden/dotfiles), in any Omarchy theme.
 
 ![Three tiled Ghostty windows (fastfetch, binds, yabai config) with the workspace bar top left](media/desktop.png)
 
@@ -11,6 +11,8 @@ My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, worksp
 - **Workspace bar** in the top left of the menu bar, drawn by a small native helper (`yabai-helper`)
 
   ![Workspace bar: S, 1-5 and the current workspace highlighted](media/workspace-bar.png)
+- **Omarchy themes**: Ghostty, nvim, the window border and light/dark mode switch together from Raycast, and
+  themes install from git like `omarchy theme install`
 - **Linux-style keys** via Karabiner: Caps Lock is Ctrl, and Ctrl+C/V/S work in GUI apps
 - **One command**: `./setup.sh` installs everything, stows the configs into `~`, applies the macOS settings and,
   with SIP off, grants every permission up front, so nothing prompts
@@ -108,6 +110,8 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Ctrl+M | mirror displays (macOS Cmd+F1) |
 | Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, reopen apps at login (off by default), relaunch yabai (and reapply the binds), log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
+| Cmd+Ctrl+Shift+Space | theme picker (Raycast "Switch Theme", see Themes) |
+| Cmd+Ctrl+Space | next wallpaper in the theme (Raycast "Switch Wallpaper" picks from a grid) |
 | Opening a text/code file | nvim in a new Ghostty window (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
 | Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
@@ -128,6 +132,30 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | F3 | screenshot the full screen to a file (instead of Mission Control) |
 | Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts |
 | (off) | hot corners, Sequoia drag-to-edge tiling, click-wallpaper-to-show-desktop, Ctrl+Space input switching (tmux prefix), Cmd+Option+Space Finder search, Mission Control (F3, four-finger swipe up, Ctrl+Up), App Exposé (four-finger swipe down, Ctrl+Down), Ctrl+arrows (Desktop left/right), Ctrl+F1…F8 keyboard navigation, Fn+Ctrl+arrows window tiling, reopening apps after restart/log out (toggle in the Cmd+Escape menu) |
+
+## Themes
+
+Omarchy themes work as they are. `.local/bin/theme` (`theme list | current | set NAME | install GIT-URL | remove NAME |
+update`) reads a theme's `colors.toml` the way Omarchy does, and the Raycast extension in `raycast-extension` ("Switch
+Theme", "Install Theme"; setup imports it) is its picker. Setting a theme:
+
+- Ghostty: `~/.local/state/theme/ghostty.conf`, which Ghostty's config includes, reloaded live (SIGUSR2)
+- nvim: `~/.local/state/theme/neovim.lua`, linked in as `lua/plugins/theme.lua` and hot-reloaded like on Omarchy
+  (the theme's own file, or aether in its colours)
+- window border (JankyBorders): the theme's accent
+- macOS dark/light mode: the theme's `mode` (or `light.mode` file, or how bright its background is)
+- wallpaper: the theme's first one, or yours for themes without any (hypr-mac's). Whatever's on the desktop that a
+  theme didn't put there counts as yours. `theme wallpaper keep` (Raycast: Cmd+B in Switch Theme, or "Toggle Theme
+  Wallpapers") leaves yours up instead
+- picking another of the theme's wallpapers: `theme wallpaper next` (Cmd+Ctrl+Space), `theme wallpaper set FILE`, or
+  Raycast's "Switch Wallpaper" grid. The pick sticks when that theme is set again
+- tmux, btop, bat and the prompt use the terminal's 16 colours, so they follow Ghostty
+
+Themes: clones in `~/.config/omarchy/themes` (`theme install` or `omarchy-theme-install`, which take the
+line omarchy.org shows as it is), Omarchy's own (a sparse checkout of its repo in
+`~/.local/share/omarchy-themes`, colours only; a theme's wallpapers are fetched when it's first set), and hypr-mac's in `themes/`, linked in by setup: ryha-silver (the
+original OLED look), Tokyo Night OLED, and Midnight and Starlight after the MacBook Air's finishes. `border` in a
+`colors.toml` sets the border apart from the accent.
 
 ## Workspace bar
 
@@ -181,7 +209,7 @@ are marked by `.local/bin/quiet-crash` first, so the ones that crash on their wa
 | `compress dir` `decompress f` | tar.gz |
 | `ssh` | resets mouse/alt-screen junk after a drop and reconnects sessions that were up 30s+ |
 
-Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux `.config/starship.toml`, in silver (#e5e5e5, the border colour) instead of cyan.
+Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux `.config/starship.toml`, in the theme's foreground (ANSI white) instead of cyan.
 
 ## Sacrifices vs Omarchy
 
@@ -197,9 +225,10 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   per-window volume, SUPER+scroll zoom (use Accessibility > Zoom with a modifier), `clds` (Linux sudo wrapper). `c` runs `cld` (claude, bypass permissions, auto-trusts $PWD).
 - Substitutes: Dolphin -> Finder, wiremix/bluetui -> System Settings, quickshell switcher -> AltTab,
   voxtype -> macOS Dictation, bash -> zsh (`.zshrc`), Waybar -> native menu bar + top-left workspace overlay.
-- Menu bar is pitch black because Reduce transparency is off and the wallpaper's top edge is black (macOS 15 has
-  no menu bar colour setting; Reduce transparency makes it solid grey). A wallpaper with a lighter top shows through.
+- Menu bar is pitch black on any wallpaper: macOS 15 has no menu bar colour setting (Reduce transparency makes it
+  solid grey), and the menu bar takes the colour of the wallpaper under it, so `set-wallpaper` paints a black band
+  across the top of the copy it sets (`wallpaper-band`, sized from the window server's menu bar height).
 - Syncthing runs always (brew service) instead of being bound to a mount.
-- The nvim (LazyVim) config comes from its own repo, [nvim](https://github.com/RyanAHayden/nvim) (cloned to `~/nvim` and stowed into `~/.config/nvim`), shared with dotfiles. Without Omarchy it uses the ryha theme instead of Omarchy's.
+- The nvim (LazyVim) config comes from its own repo, [nvim](https://github.com/RyanAHayden/nvim) (cloned to `~/nvim` and stowed into `~/.config/nvim`), shared with dotfiles. It uses the theme `theme` set (see Themes).
 - Zen comes from its own repo, [zen](https://github.com/RyanAHayden/zen) (cloned to `~/zen`), which dotfiles uses too, so prefs, mods, shortcuts and extensions match on both.
 - Vencord's settings come from their own repo, [vencord](https://github.com/RyanAHayden/vencord) (cloned to `~/vencord` and stowed), shared with dotfiles. They turn off Discord's minimum window size so it tiles in a narrow column on the scratchpad and enable [vimcord](https://github.com/RyanAHayden/vimcord) (vim keys and an nvim look). Its `setup.sh` builds Vencord from source with vimcord in it and patches that into Discord, which it does again after a Discord update undoes it.

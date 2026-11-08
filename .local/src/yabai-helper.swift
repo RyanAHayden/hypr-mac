@@ -121,7 +121,10 @@ final class Focus {
 		}
 		let borders = Process()
 		borders.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/borders")
-		borders.arguments = ["active_color=\(zoomed ? "0xff3b82f6" : "0xffe8ddd0")"] // updates the running instance (bordersrc)
+		// back to the theme's colour (theme script), as bordersrc starts with
+		let themed = (try? String(contentsOfFile: NSHomeDirectory() + "/.local/state/theme/border", encoding: .utf8))?
+			.trimmingCharacters(in: .whitespacesAndNewlines) ?? "0xffe8ddd0"
+		borders.arguments = ["active_color=\(zoomed ? "0xff3b82f6" : themed)"] // updates the running instance (bordersrc)
 		try? borders.run()
 	}
 
@@ -342,7 +345,15 @@ func uuid(of screen: NSScreen) -> String? {
 	return CFUUIDCreateString(nil, u) as String
 }
 
-func barHeight(_ screen: NSScreen) -> CGFloat { screen.frame.maxY - screen.visibleFrame.maxY }
+// The menu bar's height: the window server's Menubar window on that screen (37 points on a notched display, where
+// visibleFrame leaves a point more, so the bar hung below the menu bar), else the gap above visibleFrame
+func barHeight(_ screen: NSScreen) -> CGFloat {
+	let list = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? []
+	for w in list where w[kCGWindowName as String] as? String == "Menubar" {
+		if let b = w[kCGWindowBounds as String] as? [String: CGFloat], b["X"] == screen.frame.minX, let h = b["Height"], h > 0 { return h }
+	}
+	return screen.frame.maxY - screen.visibleFrame.maxY
+}
 
 // The left side of the menu bar: up to the notch, or else up to the first menu bar icon (status items) on that screen
 func leftWidth(_ screen: NSScreen) -> CGFloat {
@@ -360,7 +371,7 @@ func leftWidth(_ screen: NSScreen) -> CGFloat {
 final class Row: NSView {
 	var items: [Item] = [] { didSet { needsDisplay = true } }
 	override func draw(_ dirty: NSRect) {
-		NSColor.black.setFill() // the menu bar is black (see README), so this blends in over the menus it covers
+		NSColor.black.setFill() // the menu bar is black (set-wallpaper paints the wallpaper's top black), so this blends in over the menus it covers
 		bounds.fill()
 		let font = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .medium)
 		for (i, item) in items.enumerated() {

@@ -1,5 +1,6 @@
 #!/bin/bash
-# set-wallpaper IMAGE: desktop picture on every Space and display, including ones made later.
+# set-wallpaper IMAGE: desktop picture on every Space and display, including ones made later; prints the copy it set.
+# The copy gets a black band where the menu bar sits (wallpaper-band), so the menu bar stays black on any wallpaper.
 # System Events sets it the supported way, which writes a store entry WallpaperAgent accepts (with a file
 # bookmark; a hand-written entry without one falls back to the default wallpaper) but only for the
 # current Space. Turn that entry into Wallpaper settings' "Show on all Spaces" (one AllSpacesAndDisplays
@@ -10,8 +11,11 @@ set -euo pipefail
 # so a path inside the repo breaks when the repo is moved or renamed (it reset to the default when macos-config became
 # hypr-mac). The copy's path never changes.
 mkdir -p "$HOME/Pictures/Wallpapers"
-img="$HOME/Pictures/Wallpapers/$(basename "$1")"
-cp -f "$1" "$img"
+name=$(basename "$1")
+ext=$(tr '[:upper:]' '[:lower:]' <<<"${name##*.}")
+case $ext in jpg | jpeg | png | heic | tiff) ;; *) ext=png ;; esac   # what ImageIO can write (not webp)
+img="$HOME/Pictures/Wallpapers/${name%.*}.$ext"
+~/.local/bin/wallpaper-band "$1" "$img"   # IN can be the copy itself (theme putting your wallpaper back)
 
 osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$img\""
 sleep 1
@@ -32,3 +36,4 @@ d["Displays"] = {}
 p.write_bytes(plistlib.dumps(d, fmt=plistlib.FMT_BINARY))
 PY
 launchctl kickstart -k "gui/$(id -u)/com.apple.wallpaper.agent"
+echo "$img"

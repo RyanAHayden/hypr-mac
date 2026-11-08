@@ -4,3 +4,5 @@
 --ignore=^\.stowrc$
 --ignore=\.DS_Store
 --ignore=^media$
+--ignore=^themes$
+--ignore=^raycast-extension$

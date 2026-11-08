@@ -1,0 +1,33 @@
+# After the M-series MacBook Air's Starlight finish: warm black, champagne text, earthy accents
+mode = "dark"
+
+accent = "#e8ddd0"
+selection = "#3a342c"
+selection_foreground = "#f5ede2"
+muted = "#857a6c"
+
+background = "#0c0b09"
+dark_background = "#080706"
+darker_background = "#040403"
+lighter_background = "#1a1814"
+
+foreground = "#e8ddd0"
+dark_foreground = "#857a6c"
+light_foreground = "#d6cabb"
+bright_foreground = "#f5ede2"
+
+red = "#e07a6a"
+yellow = "#e0b872"
+orange = "#e0956a"
+green = "#a7c080"
+cyan = "#88bfb0"
+blue = "#8fa8c8"
+magenta = "#c898b8"
+brown = "#7a5638"
+
+bright_red = "#ec9284"
+bright_yellow = "#ecc98c"
+bright_green = "#bccf98"
+bright_cyan = "#a0d0c3"
+bright_blue = "#a7bcd8"
+bright_magenta = "#d8aecb"

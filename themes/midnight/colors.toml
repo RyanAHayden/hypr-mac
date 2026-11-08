@@ -1,0 +1,33 @@
+# After the M-series MacBook Air's Midnight finish: blue-black, greyer than Tokyo Night, muted accents
+mode = "dark"
+
+accent = "#8a9bb3"
+selection = "#2e3642"
+selection_foreground = "#eef1f5"
+muted = "#6b7685"
+
+background = "#10141a"
+dark_background = "#0c0f14"
+darker_background = "#080a0e"
+lighter_background = "#1a2029"
+
+foreground = "#d5dae1"
+dark_foreground = "#6b7685"
+light_foreground = "#c3cad4"
+bright_foreground = "#eef1f5"
+
+red = "#e5737a"
+yellow = "#e3c07b"
+orange = "#e39b72"
+green = "#8fc38a"
+cyan = "#79c0c9"
+blue = "#7fa6d9"
+magenta = "#b49ad6"
+brown = "#7a5a44"
+
+bright_red = "#f08a90"
+bright_yellow = "#ecd093"
+bright_green = "#a5d4a0"
+bright_cyan = "#93d1d9"
+bright_blue = "#98bbe6"
+bright_magenta = "#c6b0e3"

@@ -1,0 +1,383 @@
+#!/bin/zsh
+# Omarchy themes on macOS: Ghostty, nvim, the window border and light/dark mode follow the current one.
+#   theme list [--json]    installed themes (Raycast's Switch Theme lists them)
+#   theme current
+#   theme set NAME
+#   theme install GIT-URL  clone it into ~/.config/omarchy/themes and set it, like omarchy-theme-install. Takes the
+#                          line omarchy.org shows too ("omarchy-theme-install URL"): the first git URL in it is used
+#   theme remove NAME      a cloned theme
+#   theme wallpaper [theme|keep|toggle]  whether setting a theme sets its wallpaper (default) or leaves yours; no
+#                          argument prints which
+#   theme wallpaper list [--json] | set FILE | next   the current theme's wallpapers (Raycast's Switch Wallpaper); the
+#                          one picked is what setting that theme again brings back
+#   theme update           pull Omarchy's themes and every cloned one, then re-set the current theme
+# Themes are ~/.config/omarchy/themes (clones, and hypr-mac's themes/ linked in by setup), then Omarchy's own.
+# A theme's colors.toml (or, for older themes, its ghostty.conf) resolves the way Omarchy's omarchy-theme-color does.
+# Set writes ~/.local/state/theme: ghostty.conf (Ghostty's config includes it; SIGUSR2 reloads it), neovim.lua (linked
+# as nvim's lua/plugins/theme.lua, which lazy's change detection reloads), border (bordersrc) and mode.
+# The wallpaper is the theme's first backgrounds/ image, or yours for a theme without one (hypr-mac's): whatever was
+# on the desktop that a theme didn't put there is saved as yours (user-wallpaper), and keep-wallpaper (theme wallpaper
+# keep) leaves it alone.
+export PATH="/opt/homebrew/bin:$PATH"
+setopt extended_glob null_glob
+
+USER_THEMES=~/.config/omarchy/themes
+# basecamp/omarchy, sparse: just its themes' colors and nvim/Ghostty files (no wallpapers). Not ~/.local/share/omarchy,
+# which nvim takes to mean it's on Omarchy
+OMARCHY=~/.local/share/omarchy-themes
+STATE=~/.local/state/theme
+NVIM_THEME=~/.config/nvim/lua/plugins/theme.lua
+
+die() { print -u2 -r -- "$*"; exit 1 }
+
+fetch_omarchy() {
+	if [[ -d $OMARCHY/.git ]]; then
+		git -C $OMARCHY fetch -q --depth 1 origin && git -C $OMARCHY reset -q --hard FETCH_HEAD
+	else
+		rm -rf $OMARCHY
+		git clone -q --depth 1 --filter=blob:none --sparse https://github.com/basecamp/omarchy $OMARCHY &&
+			git -C $OMARCHY sparse-checkout set --no-cone \
+				'/themes/*/colors.toml' '/themes/*/neovim.lua' '/themes/*/ghostty.conf' '/themes/*/light.mode'
+	fi
+}
+
+valid_name() { local LC_ALL=C; [[ $1 =~ '^[a-z0-9_][a-z0-9._+-]*$' ]] }
+
+names() {
+	[[ -d $OMARCHY ]] || fetch_omarchy >&2
+	local -aU all=($USER_THEMES/*(-/:t) $OMARCHY/themes/*(-/:t))
+	(( $#all )) && print -rl -- ${(o)all}
+}
+
+# theme directory of $1 in REPLY, a clone or hypr-mac's before Omarchy's
+theme_dir() {
+	valid_name $1 || return 1
+	if [[ -d $USER_THEMES/$1 ]]; then REPLY=$USER_THEMES/$1
+	elif [[ -d $OMARCHY/themes/$1 ]]; then REPLY=$OMARCHY/themes/$1
+	else return 1; fi
+}
+
+mix() {
+	awk -v start="${1#\#}" -v end="${2#\#}" -v amount="$3" '
+		function h(s, i) { return (index("0123456789abcdef", tolower(substr(s, i, 1))) - 1) * 16 + index("0123456789abcdef", tolower(substr(s, i + 1, 1))) - 1 }
+		BEGIN {
+			if (amount ~ /%$/) { sub(/%$/, "", amount); amount /= 100 } else if (amount > 1) amount /= 100
+			printf "#%02x%02x%02x\n", int(h(start, 1) * (1 - amount) + h(end, 1) * amount + 0.5),
+				int(h(start, 3) * (1 - amount) + h(end, 3) * amount + 0.5), int(h(start, 5) * (1 - amount) + h(end, 5) * amount + 0.5)
+		}'
+}
+
+typeset -gA C
+alias_c() { [[ -n ${C[$1]} ]] || C[$1]=${C[$2]} }
+
+# resolved palette of theme dir $1 in C
+load_colors() {
+	local dir=$1 key value k v
+	C=()
+	if [[ -f $dir/colors.toml ]]; then
+		while IFS='=' read -r key value; do
+			key=${key//[\"\' ]/}
+			[[ -n $key && $key != \#* ]] || continue
+			if [[ $value == *[\"\']* ]]; then
+				value=${value#*[\"\']}; value=${value%%[\"\']*}
+			else
+				value=${${value##[[:space:]]#}%%[[:space:]]#}
+			fi
+			[[ $key =~ '^[A-Za-z0-9_-]+$' && $value =~ '^[A-Za-z0-9#(),._+/% -]*$' ]] && C[$key]=$value
+		done <$dir/colors.toml
+	elif [[ -f $dir/ghostty.conf ]]; then
+		while IFS='=' read -r key value; do
+			key=${key//[[:space:]]/}; value=${value//[[:space:]]/}
+			case $key in
+				background | foreground) C[$key]=$value ;;
+				selection-background) C[selection_background]=$value ;;
+				selection-foreground) C[selection_foreground]=$value ;;
+				palette) [[ $value == (#b)([0-9]##)=(\#[0-9A-Fa-f](#c6)) ]] && C[color$match[1]]=$match[2] ;;
+			esac
+		done <$dir/ghostty.conf
+	else
+		return 1
+	fi
+
+	for k v in background bg dark_background dark_bg darker_background darker_bg lighter_background lighter_bg \
+		foreground fg dark_foreground dark_fg light_foreground light_fg bright_foreground bright_fg; do alias_c $k $v; done
+	: ${C[background]:=${C[color0]}} ${C[foreground]:=${C[color7]}}
+	[[ -n ${C[background]} ]] && C[color0]=${C[background]}
+	[[ -n ${C[foreground]} ]] && C[color7]=${C[foreground]}
+	for k v in red color1 green color2 yellow color3 blue color4 magenta color5 cyan color6 bright_red color9 \
+		bright_green color10 bright_yellow color11 bright_blue color12 bright_magenta color13 bright_cyan color14; do alias_c $k $v; done
+	alias_c magenta purple; alias_c bright_magenta bright_purple
+	: ${C[light_foreground]:=${C[color7]:-${C[foreground]}}}
+	: ${C[bright_foreground]:=${C[color15]:-${C[foreground]}}}
+	C[cursor]=${C[bright_foreground]}
+	: ${C[lighter_background]:=${C[color0]:-${C[background]}}}
+	: ${C[dark_foreground]:=${C[color8]:-${C[foreground]}}}
+	: ${C[muted]:=${C[color8]:-${C[dark_foreground]}}}
+	: ${C[selection]:=${C[selection_background]:-${C[color8]:-${C[background]}}}}
+	: ${C[selection_background]:=${C[selection]}} ${C[selection_foreground]:=${C[bright_foreground]}}
+	: ${C[orange]:=${C[yellow]}}
+	: ${C[brown]:=$(mix ${C[orange]} '#000000' 50%)}
+	: ${C[dark_background]:=$(mix ${C[background]} '#000000' 25%)}
+	: ${C[darker_background]:=$(mix ${C[background]} '#000000' 50%)}
+	for k in red yellow green cyan blue magenta; do : ${C[bright_$k]:=$(mix ${C[$k]} '#ffffff' 20%)}; done
+	for k v in color1 red color2 green color3 yellow color4 blue color5 magenta color6 cyan color8 muted color9 bright_red \
+		color10 bright_green color11 bright_yellow color12 bright_blue color13 bright_magenta color14 bright_cyan \
+		color15 bright_foreground; do alias_c $k $v; done
+	# not Omarchy keys: accent for themes without one, and border (hypr-mac's themes) for the window border
+	: ${C[accent]:=${C[blue]}} ${C[border]:=${C[accent]}}
+
+	# Omarchy's order: mode, legacy theme_type, a light.mode file, then how bright the background is
+	: ${C[mode]:=${C[theme_type]}}
+	if [[ -z ${C[mode]} ]]; then
+		if [[ -f $dir/light.mode ]]; then
+			C[mode]=light
+		elif [[ ${C[background]} =~ '^#[0-9A-Fa-f]{6}$' ]]; then
+			v=${C[background]#\#}
+			(( 16#${v[1,2]} + 16#${v[3,4]} + 16#${v[5,6]} > 382 )) && C[mode]=light
+		fi
+	fi
+	[[ ${C[mode]} == light ]] || C[mode]=dark
+}
+
+# Omarchy's ghostty.conf and neovim.lua templates, for themes that don't ship their own
+gen_ghostty() {
+	print -r -- "background = ${C[background]}
+foreground = ${C[foreground]}
+cursor-color = ${C[bright_foreground]}
+selection-background = ${C[selection_background]}
+selection-foreground = ${C[selection_foreground]}"
+	local i
+	for i in {0..15}; do print -r -- "palette = $i=${C[color$i]}"; done
+}
+
+gen_nvim() {
+	local k out=""
+	for k in bg:background dark_bg:dark_background darker_bg:darker_background lighter_bg:lighter_background \
+		fg:foreground dark_fg:dark_foreground light_fg:light_foreground bright_fg:bright_foreground muted:muted \
+		red:red yellow:yellow orange:orange green:green cyan:cyan blue:blue magenta:magenta brown:brown \
+		bright_red:bright_red bright_yellow:bright_yellow bright_green:bright_green bright_cyan:bright_cyan \
+		bright_blue:bright_blue bright_magenta:bright_magenta accent:accent cursor:bright_foreground \
+		foreground:foreground background:background selection:selection selection_foreground:selection_foreground \
+		selection_background:selection_background; do
+		out+="        ${k%%:*} = \"${C[${k#*:}]}\",
+"
+	done
+	print -r -- "return {
+  {
+    \"bjarneo/aether.nvim\",
+    branch = \"v3\",
+    priority = 1000,
+    opts = {
+      colors = {
+${out%$'\n'}
+      },
+    },
+  },
+  { \"LazyVim/LazyVim\", opts = { colorscheme = \"aether\" } },
+}"
+}
+
+cmd_set() {
+	local name=$1 dir border tmp f
+	theme_dir "$name" || die "No theme named '$name' (theme list shows them)"
+	dir=$REPLY
+	load_colors $dir || die "$name has no colors.toml or ghostty.conf"
+	[[ ${C[border]} =~ '^#[0-9A-Fa-f]{6}$' ]] && border=0xff${C[border]#\#} || border=0xffe8ddd0
+
+	mkdir -p $STATE
+	tmp=$(mktemp -d $STATE/.new.XXXXXX) || exit 1
+	if [[ -f $dir/ghostty.conf ]]; then cp $dir/ghostty.conf $tmp/; else gen_ghostty >$tmp/ghostty.conf; fi
+	if [[ -f $dir/neovim.lua ]]; then cp $dir/neovim.lua $tmp/; else gen_nvim >$tmp/neovim.lua; fi
+	print -r -- $border >$tmp/border
+	print -r -- ${C[mode]} >$tmp/mode
+	print -r -- $name >$tmp/name
+	# one rename per file, so nvim's change detection never reads half a file
+	for f in $tmp/*; do mv -f $f $STATE/; done
+	rmdir $tmp
+
+	pkill -USR2 -x ghostty
+	# lua/plugins is linked into ~/nvim, where theme.lua is gitignored
+	[[ -d ${NVIM_THEME:h} && ! -L $NVIM_THEME ]] && ln -sfn $STATE/neovim.lua $NVIM_THEME
+	pgrep -xq borders && borders active_color=$border
+	[[ -f $STATE/keep-wallpaper ]] || theme_wallpaper $dir
+	local dark=true is=false
+	[[ ${C[mode]} == light ]] && dark=false
+	[[ $(defaults read -g AppleInterfaceStyle 2>/dev/null) == Dark ]] && is=true
+	[[ $dark == $is ]] ||
+		osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to $dark" >/dev/null
+	print -r -- "Theme: ${(C)${name//-/ }}"
+}
+
+current_wallpaper() { osascript -e 'tell application "System Events" to get picture of current desktop' 2>/dev/null }
+
+# remember the desktop picture as yours unless a theme set it
+save_user_wallpaper() {
+	local cur=$(current_wallpaper) ours
+	[[ -f $STATE/wallpaper ]] && ours=$(<$STATE/wallpaper)
+	[[ -n $cur && $cur != $ours ]] && print -r -- $cur >$STATE/user-wallpaper
+}
+
+set_wallpaper() {
+	local set
+	[[ -f $1 ]] && set=$(~/.local/bin/set-wallpaper $1) && print -r -- $set >$STATE/wallpaper
+}
+
+# a theme dir's wallpapers in reply
+backgrounds() {
+	# Omarchy's wallpapers stay out of the sparse checkout until a theme of its is set
+	[[ $1 == $OMARCHY/themes/* && ! -d $1/backgrounds ]] &&
+		git -C $OMARCHY sparse-checkout add "/themes/${1:t}/backgrounds/" 2>/dev/null
+	reply=($1/backgrounds/(#i)*.(jpg|jpeg|png|heic|webp)(-.N))
+}
+
+# the theme's wallpaper picked last (background), else its first, else yours
+theme_wallpaper() {
+	local picked
+	save_user_wallpaper
+	backgrounds $1
+	[[ -f $STATE/background ]] && picked=$(<$STATE/background)
+	if (( ${reply[(Ie)$picked]} )); then
+		set_wallpaper $picked
+	elif (( $#reply )); then
+		set_wallpaper $reply[1]
+	elif [[ -f $STATE/user-wallpaper ]]; then
+		set_wallpaper "$(<$STATE/user-wallpaper)"
+	fi
+}
+
+# the current theme's wallpapers in reply, and the one up (or picked) in REPLY
+current_backgrounds() {
+	[[ -f $STATE/name ]] && theme_dir "$(<$STATE/name)" || die "No theme set"
+	backgrounds $REPLY
+	REPLY=""
+	[[ -f $STATE/background ]] && REPLY=$(<$STATE/background)
+	(( ${reply[(Ie)$REPLY]} )) || REPLY=$reply[1]
+}
+
+# pick one of the current theme's wallpapers, which also stops keeping yours
+pick_background() {
+	save_user_wallpaper
+	rm -f $STATE/keep-wallpaper
+	print -r -- $1 >$STATE/background
+	set_wallpaper $1
+	print -r -- "Wallpaper: ${${1:t:r}//-/ }"
+}
+
+wallpaper_list() {
+	local f thumb cache=~/.cache/theme/thumbs i=0
+	current_backgrounds
+	if [[ $1 != --json ]]; then
+		for f in $reply; do [[ $f == $REPLY && ! -f $STATE/keep-wallpaper ]] && print -r -- "$f *" || print -r -- $f; done
+		return
+	fi
+	mkdir -p $cache
+	for f in $reply; do
+		# Raycast's grid would load 8K originals; small JPEGs, made once
+		thumb=$cache/${$(print -rn -- $f | shasum)[1]}.jpg
+		[[ -f $thumb ]] || sips -Z 640 -s format jpeg $f --out $thumb >/dev/null 2>&1 || thumb=$f
+		jq -cn --arg path $f --arg thumb $thumb --arg title "${${f:t:r}//-/ }" \
+			--argjson current $([[ $f == $REPLY && ! -f $STATE/keep-wallpaper ]] && echo true || echo false) \
+			'{path: $path, thumb: $thumb, title: $title, current: $current}'
+	done | jq -s .
+}
+
+cmd_wallpaper() {
+	local mode=$1
+	[[ $mode == toggle ]] && { [[ -f $STATE/keep-wallpaper ]] && mode=theme || mode=keep; }
+	case $mode in
+		"") [[ -f $STATE/keep-wallpaper ]] && print keep || print theme ;;
+		keep)
+			mkdir -p $STATE
+			save_user_wallpaper
+			touch $STATE/keep-wallpaper
+			[[ -f $STATE/user-wallpaper ]] && set_wallpaper "$(<$STATE/user-wallpaper)"
+			print "Keeping your wallpaper" ;;
+		theme)
+			rm -f $STATE/keep-wallpaper
+			[[ -f $STATE/name ]] && theme_dir "$(<$STATE/name)" && theme_wallpaper $REPLY
+			print "Wallpaper follows the theme" ;;
+		list) wallpaper_list $2 ;;
+		set)
+			current_backgrounds
+			(( ${reply[(Ie)$2]} )) || die "Not one of this theme's wallpapers: $2"
+			pick_background $2 ;;
+		next)
+			current_backgrounds
+			(( $#reply )) || die "${(C)${$(<$STATE/name)//-/ }} has no wallpapers"
+			# after the one up, or the first if yours is up
+			if [[ -f $STATE/keep-wallpaper ]]; then pick_background $reply[1]
+			else pick_background $reply[$(( ${reply[(Ie)$REPLY]} % $#reply + 1 ))]; fi ;;
+		*) die "Usage: theme wallpaper [theme|keep|toggle | list [--json] | set FILE | next]" ;;
+	esac
+}
+
+cmd_list() {
+	local cur n src
+	[[ -f $STATE/name ]] && cur=$(<$STATE/name)
+	if [[ $1 != --json ]]; then
+		for n in $(names); do [[ $n == $cur ]] && print -r -- "$n *" || print -r -- $n; done
+		return
+	fi
+	for n in $(names); do
+		theme_dir $n && load_colors $REPLY || continue
+		if [[ $REPLY == $OMARCHY/* ]]; then src=omarchy
+		elif [[ -L $REPLY ]]; then src=hypr-mac
+		else src=git; fi
+		# names and values are already held to safe characters, so they go into the JSON as they are
+		printf '{"name":"%s","title":"%s","source":"%s","mode":"%s","current":%s,"colors":{"background":"%s","foreground":"%s","accent":"%s","red":"%s","green":"%s","yellow":"%s","blue":"%s","magenta":"%s","cyan":"%s"}}\n' \
+			$n "${(C)${n//-/ }}" $src ${C[mode]} $([[ $n == $cur ]] && echo true || echo false) \
+			${C[background]} ${C[foreground]} ${C[accent]} ${C[red]} ${C[green]} ${C[yellow]} ${C[blue]} ${C[magenta]} ${C[cyan]}
+	done | jq -s .
+}
+
+cmd_install() {
+	local w url p name tmp
+	(( $# )) || die "Usage: theme install GIT-URL"
+	for w in ${=*}; do
+		[[ $w =~ '^(https://|ssh://|git@)[^[:space:]]+$' ]] && { url=$w; break; }
+	done
+	[[ -n $url ]] || die "No git URL in: $* (use https://, ssh:// or git@)"
+	p=${url%/}
+	[[ $p != *://* && $p == *:* ]] && p=${p#*:}
+	name=${${${${p:t}%.git}#omarchy-}%-theme}
+	name=${name:l}
+	valid_name $name || die "$url doesn't give a usable theme name"
+	[[ -L $USER_THEMES/$name ]] && die "$name is one of hypr-mac's themes"
+	mkdir -p $USER_THEMES
+	tmp=$USER_THEMES/.$name.new
+	rm -rf $tmp
+	GIT_TERMINAL_PROMPT=0 git clone -q --depth 1 -- $url $tmp || { rm -rf $tmp; die "Couldn't clone $url"; }
+	[[ -f $tmp/colors.toml || -f $tmp/ghostty.conf ]] ||
+		{ rm -rf $tmp; die "$url has no colors.toml or ghostty.conf, so it isn't an Omarchy theme"; }
+	rm -rf $USER_THEMES/$name
+	mv $tmp $USER_THEMES/$name
+	cmd_set $name
+}
+
+cmd_remove() {
+	local d=$USER_THEMES/$1
+	valid_name "$1" && [[ -d $d ]] || die "No installed theme named '$1'"
+	[[ -L $d ]] && die "$1 is one of hypr-mac's themes (remove it from the repo's themes/)"
+	rm -rf $d
+	print -r -- "Removed ${(C)${1//-/ }}"
+}
+
+cmd_update() {
+	local d
+	fetch_omarchy || print -u2 "Couldn't update Omarchy's themes"
+	for d in $USER_THEMES/*(/); do
+		[[ ! -L $d && -d $d/.git ]] && { GIT_TERMINAL_PROMPT=0 git -C $d pull -q --ff-only || print -u2 "Couldn't update ${d:t}"; }
+	done
+	[[ -f $STATE/name ]] && cmd_set "$(<$STATE/name)"
+}
+
+case $1 in
+	list) cmd_list $2 ;;
+	current) [[ -f $STATE/name ]] && print -r -- "$(<$STATE/name)" ;;
+	set) cmd_set "$2" ;;
+	install) shift; cmd_install "$@" ;;
+	remove) cmd_remove "$2" ;;
+	update) cmd_update ;;
+	wallpaper) shift; cmd_wallpaper "$@" ;;
+	*) die "Usage: theme list [--json] | current | set NAME | install GIT-URL | remove NAME | update | wallpaper [theme|keep|toggle|list|set FILE|next]" ;;
+esac
