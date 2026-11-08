@@ -208,7 +208,8 @@ hotkey 164 true 65535 80 0
 defaults write com.apple.speech.recognition.AppleSpeechRecognition.prefs DictationIMIntroMessagePresented -bool true
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 # F4 (Spotlight) / F5 (Dictation) -> keyboard brightness down/up, F3 (Mission Control, either usage it sends) -> bare
-# F20 (unbound), reapplied at login by a LaunchAgent
+# F20 (unbound), reapplied at login by a LaunchAgent. Karabiner (fn_function_keys in karabiner.json) does the same for
+# the built-in keyboard it grabs, with F3 = full-screen screenshot to a file (Ctrl+Shift+3)
 fnmap='{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0xC0000029F,"HIDKeyboardModifierMappingDst":0x70000006F},{"HIDKeyboardModifierMappingSrc":0xFF0100000010,"HIDKeyboardModifierMappingDst":0x70000006F},{"HIDKeyboardModifierMappingSrc":0xC00000221,"HIDKeyboardModifierMappingDst":0xFF00000009},{"HIDKeyboardModifierMappingSrc":0xC000000CF,"HIDKeyboardModifierMappingDst":0xFF00000008}]}'
 hidutil property --set "$fnmap" >/dev/null
 cat >~/Library/LaunchAgents/com.ryha.keyboard-brightness-keys.plist <<PLIST
