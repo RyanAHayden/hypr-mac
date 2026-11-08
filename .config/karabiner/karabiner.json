@@ -4098,7 +4098,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^md\\.obsidian$"
                                         ]
                                     }
                                 ]
