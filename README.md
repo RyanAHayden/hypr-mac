@@ -33,8 +33,8 @@ file stowed into `~`. Older setups are in git history.
    click through Allow prompts. It also disables `systemstatusd` (the purple/orange privacy dots), adds a sudoers
    rule so yabai loads its scripting addition (instant Space switching, Space creation, swapping, opacity), and
    creates the 11 Desktops. `csrutil enable` in Recovery turns SIP back on.
-2. `./setup.sh` - installs packages, stows using --adopt so you can see git changes before discarding what you
-   want to change, and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai (the
+2. `./setup.sh` - installs packages, stows using --adopt (the end lists any existing files that
+   replaced the repo's, with the command to put the repo's back), and applies the macOS settings, dark mode and wallpaper. Re-run it after upgrading yabai (the
    sudoers rule and permissions pin the binary). It also turns off automatic macOS update
    downloads/installs (security responses still install): check yabai supports a new macOS before upgrading, and
    install minor updates by hand from Software Update ("Other updates" lists same-major ones).

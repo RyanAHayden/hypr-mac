@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sets up this Mac like github.com/RyanAHayden/dotfiles (Omarchy).
-# Safe to re-run. Stows with --adopt, so check `git diff` afterwards and discard what you don't want.
+# Safe to re-run. Stows with --adopt; the end lists any existing files that replaced the repo's, and how to undo it.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,7 +29,12 @@ brew install --cask karabiner-elements
 
 echo "==> stow"
 cd "$REPO"
+# stow --adopt replaces repo files with ones already on the machine; compare tracked changes before and after so
+# the end can list just those (not edits that were already there)
+changed() { git -C "$REPO" status --porcelain -z --untracked-files=no | while IFS= read -r -d "" e; do echo "$(git -C "$REPO" hash-object "${e:3}" 2>/dev/null) ${e:3}"; done; }
+before=$(changed)
 stow . --adopt
+adopted=$(comm -13 <(sort <<<"$before") <(changed | sort) | cut -d' ' -f2-)
 
 echo "==> tmux plugins (no TPM)"
 mkdir -p ~/.config/tmux/plugins
@@ -497,9 +502,16 @@ for a in AltTab MiddleClick Raycast Tailscale; do
 	osascript -e "tell application \"System Events\" to make login item at end with properties {path:\"/Applications/$a.app\", hidden:true}" >/dev/null 2>&1 || true
 done
 
+if [ -n "$adopted" ]; then
+	echo
+	echo "==> stow pulled these existing files into $REPO (yours replaced the repo's, see git diff):"
+	sed 's/^/  /' <<<"$adopted"
+	echo "  keep the repo's: git -C $REPO checkout --$(while read -r f; do printf ' %q' "$f"; done <<<"$adopted")"
+fi
+
 cat <<'EOF'
 
-Done - check `git diff` (stow --adopt pulled existing files into the repo) and `git checkout .` what you don't want.
+Done.
 Manual steps:
   1. Privacy & Security > Accessibility: allow yabai, Karabiner-Console-User-Server (it runs the binds), AltTab,
      MiddleClick (+ Screen Recording for AltTab), then: yabai --restart-service
