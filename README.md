@@ -199,4 +199,4 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
 - Menu bar is pitch black because Reduce transparency is off and the wallpaper's top edge is black (macOS 15 has
   no menu bar colour setting; Reduce transparency makes it solid grey). A wallpaper with a lighter top shows through.
 - Syncthing runs always (brew service) instead of being bound to a mount.
-- LibreWolf comes from its own repo, [librewolf](https://github.com/RyanAHayden/librewolf) (cloned to `~/librewolf`), which dotfiles uses too, so prefs and extensions match on both.
+- Zen comes from its own repo, [zen](https://github.com/RyanAHayden/zen) (cloned to `~/zen`), which dotfiles uses too, so prefs, mods, shortcuts and extensions match on both.
