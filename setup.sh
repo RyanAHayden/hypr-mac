@@ -24,7 +24,7 @@ fi
 brew trust --formula felixkratz/formulae/borders
 # LazyVim :checkhealth deps (search/explorer, lazygit, parser builds, snacks image/PDF/LaTeX previews)
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
-brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font helium-browser spotify discord alt-tab middleclick
+brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font spotify discord alt-tab middleclick
 brew install --cask karabiner-elements
 
 echo "==> stow"
@@ -443,6 +443,12 @@ done
 for e in txt md markdown log conf cfg ini toml yaml yml json jsonc lua sh bash zsh fish py rb js ts tsx jsx css scss \
 	xml csv tsv env gitignore gitconfig vim swift c h cpp rs go java kt sql tex typ nix; do
 	duti -s com.ryha.nvim ".$e" all 2>/dev/null
+done
+# Zen (github.com/RyanAHayden/zen) is the default browser; macOS asks once to confirm the http/https switch
+duti -s app.zen-browser.zen http 2>/dev/null
+duti -s app.zen-browser.zen https 2>/dev/null
+for t in public.html public.xhtml; do
+	duti -s app.zen-browser.zen "$t" all 2>/dev/null
 done
 if $sip_off; then
 	# yabairc loads the scripting addition now that sudo -n works; then create Desktops up to 12 (1-9, 10 on 0, 11 = scratchpad on SUPER+S, 12 = SUPER+M parking)

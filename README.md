@@ -79,7 +79,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Return / Cmd+Option+Return | Ghostty / Ghostty in tmux `Work` |
 | Cmd+Space | Raycast (its own hotkey, so it toggles) |
 | Cmd+Tab / Cmd+Shift+Tab | AltTab (window switcher with previews), replacing the macOS app switcher. While it's open (a Karabiner rule, like the Linux switcher): Esc cancels, H/J/K/L move (as arrow keys), W closes / S or M minimizes (or restores) the selected window without leaving the switcher, / searches |
-| Cmd+Shift+B / Return / Option+B | Helium / new window / incognito |
+| Cmd+Shift+B / Return / Option+B | Zen / new window / private window |
 | Cmd+Shift+F, N, T | new Finder window, nvim, btop |
 | Ctrl+Shift+Escape, Cmd+Ctrl+T | Activity Monitor (task manager) |
 | Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |

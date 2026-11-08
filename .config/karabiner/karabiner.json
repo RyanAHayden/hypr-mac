@@ -391,7 +391,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Helium --args --new-window"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --new-window"
                                     }
                                 ]
                             },
@@ -408,7 +408,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Helium --args --new-window"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --new-window"
                                     }
                                 ]
                             },
@@ -426,7 +426,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Helium --args --incognito"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --private-window"
                                     }
                                 ]
                             },
