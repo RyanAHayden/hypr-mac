@@ -267,6 +267,8 @@ launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.p
 # Crash notifications instead of macOS's "quit unexpectedly" dialog (.local/src/crash-notify.swift); reports are
 # still written to ~/Library/Logs/DiagnosticReports
 defaults write com.apple.CrashReporter DialogType none
+# ReportCrash only reads DialogType when it starts, so restart it or the dialog keeps showing until the next login
+launchctl kickstart -k gui/$(id -u)/com.apple.ReportCrash
 cat >~/Library/LaunchAgents/com.ryha.crash-notify.plist <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
