@@ -41,10 +41,14 @@ echo "==> Zen (github.com/RyanAHayden/zen, shared with dotfiles)"
 [ -d ~/zen ] || git clone -q https://github.com/RyanAHayden/zen ~/zen
 ~/zen/setup.sh
 
-echo "==> Vencord settings (github.com/RyanAHayden/vencord, private, shared with dotfiles)"
+echo "==> Vencord (github.com/RyanAHayden/vencord, shared with dotfiles)"
 # it also patches Vencord into Discord, which Discord updates undo: re-run ~/vencord/setup.sh after one
-[ -d ~/vencord ] || git clone -q https://github.com/RyanAHayden/vencord ~/vencord || echo "  couldn't clone (private: sign in to GitHub, e.g. gh auth login, and re-run)"
-[ -x ~/vencord/setup.sh ] && ~/vencord/setup.sh
+[ -d ~/vencord ] || git clone -q https://github.com/RyanAHayden/vencord ~/vencord
+~/vencord/setup.sh
+
+echo "==> nvim config (github.com/RyanAHayden/nvim, shared with dotfiles)"
+[ -d ~/nvim ] || git clone -q https://github.com/RyanAHayden/nvim ~/nvim
+~/nvim/setup.sh
 
 echo "==> LazyVim plugins and treesitter parsers"
 nvim --headless "+Lazy! sync" +qa
