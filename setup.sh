@@ -26,6 +26,11 @@ brew trust --formula felixkratz/formulae/borders
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
 brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font spotify discord alt-tab middleclick
 brew install --cask karabiner-elements
+# Rust via rustup (not brew's rust, so toolchains/components update with `rustup update`); .zprofile sources ~/.cargo/env
+if [ ! -x ~/.cargo/bin/rustup ]; then
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path \
+		--component rust-analyzer,clippy,rustfmt,rust-src
+fi
 
 echo "==> stow"
 cd "$REPO"
