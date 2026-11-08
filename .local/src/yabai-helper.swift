@@ -181,9 +181,11 @@ final class Focus {
 		guard let space = currentSpace(), space != attic else { return }
 		let windows = list(["--windows"])
 		let mine = windows.filter { $0["pid"] as? Int == pid && !flag($0, "is-minimized") && !flag($0, "is-hidden") }
-		if mine.contains(where: { $0["space"] as? Int == space }) { return } // already has a window here
+		// already has a window here. Sticky ones (a PiP) count as here: yabai reports them on one Space (often the
+		// attic), so hovering one would otherwise jump to the app's main window.
+		if mine.contains(where: { $0["space"] as? Int == space || flag($0, "is-sticky") }) { return }
 		// switching to an app whose windows are all parked (Dock, Cmd+Tab, Raycast) brings back its latest one
-		let atticIDs = mine.filter { $0["space"] as? Int == attic }.compactMap { $0["id"] as? Int }
+		let atticIDs = mine.filter { $0["space"] as? Int == attic && !flag($0, "is-sticky") }.compactMap { $0["id"] as? Int }
 		if !atticIDs.isEmpty, !mine.contains(where: { $0["space"] as? Int != attic && !flag($0, "is-sticky") }) {
 			bring(parked.last(where: atticIDs.contains) ?? atticIDs[0], to: space)
 			return
