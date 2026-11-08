@@ -60,6 +60,11 @@ echo "==> nvim config (github.com/RyanAHayden/nvim, shared with dotfiles)"
 [ -d ~/nvim ] || git clone -q https://github.com/RyanAHayden/nvim ~/nvim
 ~/nvim/setup.sh
 
+echo "==> Obsidian (github.com/RyanAHayden/obsidian, shared with dotfiles)"
+# also re-run it if a phone switches vim mode off in the synced vault
+[ -d ~/obsidian ] || git clone -q https://github.com/RyanAHayden/obsidian ~/obsidian
+~/obsidian/setup.sh
+
 echo "==> LazyVim plugins and treesitter parsers"
 nvim --headless "+Lazy! sync" +qa
 # parsers snacks wants for rendering images/math in docs (norg isn't in nvim-treesitter anymore)
