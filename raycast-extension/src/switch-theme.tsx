@@ -24,9 +24,9 @@ const SECTIONS = [
 
 export default function SwitchTheme() {
   const [themes, setThemes] = useState<Theme[]>();
-  const [keepWallpaper, setKeepWallpaper] = useState(false);
+  const [wallpaper, setWallpaper] = useState<WallpaperMode>();
   const load = useCallback(() => {
-    theme("wallpaper").then((mode) => setKeepWallpaper(mode === "keep")).catch(() => {});
+    theme("wallpaper").then((mode) => setWallpaper(mode as WallpaperMode)).catch(() => {});
     theme("list", "--json")
       .then((out) => setThemes(JSON.parse(out)))
       .catch((e: Error) => {
@@ -35,21 +35,40 @@ export default function SwitchTheme() {
       });
   }, []);
   useEffect(load, [load]);
+  const changeWallpaper = async (mode: WallpaperMode) => {
+    setWallpaper(mode);
+    try {
+      await showToast({ style: Toast.Style.Success, title: await theme("wallpaper", mode) });
+    } catch (e) {
+      await showToast({ style: Toast.Style.Failure, title: "Couldn't change the wallpaper setting", message: (e as Error).message });
+      load();
+    }
+  };
 
   return (
-    <List isLoading={!themes} searchBarPlaceholder="Search themes">
+    <List isLoading={!themes} searchBarPlaceholder="Search themes"
+      searchBarAccessory={wallpaper && (
+        // rendered once the setting is known, so the dropdown's first onChange is the setting, not a change
+        <List.Dropdown tooltip="Wallpaper" value={wallpaper} onChange={(m) => m !== wallpaper && changeWallpaper(m as WallpaperMode)}>
+          <List.Dropdown.Item title="Theme's Wallpaper" value="theme" icon={Icon.Image} />
+          <List.Dropdown.Item title="Keep My Wallpaper" value="keep" icon={Icon.Lock} />
+        </List.Dropdown>
+      )}>
       {SECTIONS.map((section) => (
         <List.Section key={section.title} title={section.title}>
           {themes
             ?.filter((t) => section.sources.includes(t.source))
-            .map((t) => <ThemeItem key={t.name} theme={t} reload={load} keepWallpaper={keepWallpaper} />)}
+            .map((t) => <ThemeItem key={t.name} theme={t} reload={load} wallpaper={wallpaper} changeWallpaper={changeWallpaper} />)}
         </List.Section>
       ))}
     </List>
   );
 }
 
-function ThemeItem({ theme: t, reload, keepWallpaper }: { theme: Theme; reload: () => void; keepWallpaper: boolean }) {
+type WallpaperMode = "theme" | "keep";
+
+function ThemeItem({ theme: t, reload, wallpaper, changeWallpaper }:
+  { theme: Theme; reload: () => void; wallpaper?: WallpaperMode; changeWallpaper: (mode: WallpaperMode) => void }) {
   return (
     <List.Item
       title={t.title}
@@ -69,8 +88,8 @@ function ThemeItem({ theme: t, reload, keepWallpaper }: { theme: Theme; reload: 
             <Action title="Remove Theme" icon={Icon.Trash} style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }} onAction={() => remove(t, reload)} />
           )}
-          <Action title={keepWallpaper ? "Use Theme Wallpapers" : "Keep My Wallpaper"} icon={Icon.Image}
-            shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={() => toggleWallpaper(reload)} />
+          <Action title={wallpaper === "keep" ? "Use Theme's Wallpaper" : "Keep My Wallpaper"} icon={Icon.Image}
+            shortcut={{ modifiers: ["cmd"], key: "b" }} onAction={() => changeWallpaper(wallpaper === "keep" ? "theme" : "keep")} />
           <Action title="Update Themes" icon={Icon.ArrowClockwise} shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={() => update(reload)} />
         </ActionPanel>
@@ -85,15 +104,6 @@ async function apply(t: Theme) {
     await showHUD(await theme("set", t.name));
   } catch (e) {
     await showHUD(`Couldn't switch theme: ${(e as Error).message}`);
-  }
-}
-
-async function toggleWallpaper(reload: () => void) {
-  try {
-    await showToast({ style: Toast.Style.Success, title: await theme("wallpaper", "toggle") });
-    reload();
-  } catch (e) {
-    await showToast({ style: Toast.Style.Failure, title: "Couldn't change the wallpaper setting", message: (e as Error).message });
   }
 }
 

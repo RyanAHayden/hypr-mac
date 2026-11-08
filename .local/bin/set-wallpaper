@@ -1,20 +1,22 @@
 #!/bin/bash
-# set-wallpaper IMAGE: desktop picture on every Space and display, including ones made later; prints the copy it set.
+# set-wallpaper IMAGE [DIR]: desktop picture on every Space and display, including ones made later; prints the copy it
+# set, which goes in DIR (default ~/Pictures/Wallpapers, your wallpapers; the theme script keeps its own elsewhere).
 # The copy gets a black band where the menu bar sits (wallpaper-band), so the menu bar stays black on any wallpaper.
 # System Events sets it the supported way, which writes a store entry WallpaperAgent accepts (with a file
 # bookmark; a hand-written entry without one falls back to the default wallpaper) but only for the
 # current Space. Turn that entry into Wallpaper settings' "Show on all Spaces" (one AllSpacesAndDisplays
 # entry, no per-Space or per-display ones), then restart the agent so it re-reads the store.
 set -euo pipefail
-[ -f "${1:-}" ] || { echo "usage: set-wallpaper IMAGE" >&2; exit 1; }
-# Set it from a copy in ~/Pictures/Wallpapers: macOS stores the resolved file path (it follows the symlink into the repo),
+[ -f "${1:-}" ] || { echo "usage: set-wallpaper IMAGE [DIR]" >&2; exit 1; }
+dir=${2:-$HOME/Pictures/Wallpapers}
+# Set it from a copy in DIR: macOS stores the resolved file path (it follows the symlink into the repo),
 # so a path inside the repo breaks when the repo is moved or renamed (it reset to the default when macos-config became
 # hypr-mac). The copy's path never changes.
-mkdir -p "$HOME/Pictures/Wallpapers"
+mkdir -p "$dir"
 name=$(basename "$1")
 ext=$(tr '[:upper:]' '[:lower:]' <<<"${name##*.}")
 case $ext in jpg | jpeg | png | heic | tiff) ;; *) ext=png ;; esac   # what ImageIO can write (not webp)
-img="$HOME/Pictures/Wallpapers/${name%.*}.$ext"
+img="$dir/${name%.*}.$ext"
 ~/.local/bin/wallpaper-band "$1" "$img"   # IN can be the copy itself (theme putting your wallpaper back)
 
 osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$img\""

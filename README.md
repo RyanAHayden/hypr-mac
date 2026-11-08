@@ -111,7 +111,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Escape | system menu (native, centered): lock, sleep, keep awake with lid closed, reopen apps at login (off by default), relaunch yabai (and reapply the binds), log out, restart, shut down. Also in Raycast as "Power: ..." |
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Cmd+Ctrl+Shift+Space | theme picker (Raycast "Switch Theme", see Themes) |
-| Cmd+Ctrl+Space | next wallpaper in the theme (Raycast "Switch Wallpaper" picks from a grid) |
+| Cmd+Ctrl+Space | next wallpaper in the theme (Raycast "Set Wallpaper" picks from a grid) |
 | Opening a text/code file | nvim in a new Ghostty window (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
 | Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
@@ -145,10 +145,13 @@ Theme", "Install Theme"; setup imports it) is its picker. Setting a theme:
 - window border (JankyBorders): the theme's accent
 - macOS dark/light mode: the theme's `mode` (or `light.mode` file, or how bright its background is)
 - wallpaper: the theme's first one, or yours for themes without any (hypr-mac's). Whatever's on the desktop that a
-  theme didn't put there counts as yours. `theme wallpaper keep` (Raycast: Cmd+B in Switch Theme, or "Toggle Theme
-  Wallpapers") leaves yours up instead
+  theme didn't put there counts as yours. `theme wallpaper keep` (Raycast: the wallpaper dropdown in Switch Theme's search
+  bar, or Cmd+B) leaves yours up instead. `theme wallpaper keep FILE|URL` (Raycast: "Add Wallpaper Image" in Set Wallpaper, which takes a
+  file, path or URL, or the image selected in Finder) adds that image to yours, `~/Pictures/Wallpapers`, and keeps it up.
+  Theme wallpapers' copies stay out of that folder, in `~/.local/state/theme/wallpapers`
 - picking another of the theme's wallpapers: `theme wallpaper next` (Cmd+Ctrl+Space), `theme wallpaper set FILE`, or
-  Raycast's "Switch Wallpaper" grid. The pick sticks when that theme is set again
+  Raycast's "Set Wallpaper" grid, which lists yours (everything in `~/Pictures/Wallpapers`) below the theme's. The pick sticks
+  when that theme is set again
 - tmux, btop, bat and the prompt use the terminal's 16 colours, so they follow Ghostty
 
 Themes: clones in `~/.config/omarchy/themes` (`theme install` or `omarchy-theme-install`, which take the

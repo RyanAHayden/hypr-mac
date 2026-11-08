@@ -14,9 +14,9 @@
       "mode": "view"
     },
     {
-      "name": "switch-wallpaper",
-      "title": "Switch Wallpaper",
-      "description": "Pick one of the current theme's wallpapers",
+      "name": "set-wallpaper",
+      "title": "Set Wallpaper",
+      "description": "Pick one of the current theme's wallpapers or yours, or add a new one",
       "mode": "view"
     },
     {
@@ -32,12 +32,6 @@
           "required": true
         }
       ]
-    },
-    {
-      "name": "toggle-wallpaper",
-      "title": "Toggle Theme Wallpapers",
-      "description": "Switch between theme wallpapers and keeping your own",
-      "mode": "no-view"
     },
     {
       "name": "next-wallpaper",

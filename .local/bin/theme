@@ -8,8 +8,10 @@
 #   theme remove NAME      a cloned theme
 #   theme wallpaper [theme|keep|toggle]  whether setting a theme sets its wallpaper (default) or leaves yours; no
 #                          argument prints which
-#   theme wallpaper list [--json] | set FILE | next   the current theme's wallpapers (Raycast's Switch Wallpaper); the
-#                          one picked is what setting that theme again brings back
+#   theme wallpaper keep FILE|URL  that image as yours, kept up through theme changes; it's added (downloaded, for a
+#                          URL) to ~/Pictures/Wallpapers, your wallpapers
+#   theme wallpaper list [--json] | set FILE | next   the current theme's wallpapers (Raycast's Set Wallpaper, which
+#                          lists yours after them); the one picked is what setting that theme again brings back
 #   theme update           pull Omarchy's themes and every cloned one, then re-set the current theme
 # Themes are ~/.config/omarchy/themes (clones, and hypr-mac's themes/ linked in by setup), then Omarchy's own.
 # A theme's colors.toml (or, for older themes, its ghostty.conf) resolves the way Omarchy's omarchy-theme-color does.
@@ -26,6 +28,7 @@ USER_THEMES=~/.config/omarchy/themes
 # which nvim takes to mean it's on Omarchy
 OMARCHY=~/.local/share/omarchy-themes
 STATE=~/.local/state/theme
+YOURS=~/Pictures/Wallpapers   # your wallpapers: set-wallpaper's copies of the images you set
 NVIM_THEME=~/.config/nvim/lua/plugins/theme.lua
 
 die() { print -u2 -r -- "$*"; exit 1 }
@@ -217,10 +220,14 @@ save_user_wallpaper() {
 	[[ -n $cur && $cur != $ours ]] && print -r -- $cur >$STATE/user-wallpaper
 }
 
+# $1 up, its copy in $2 (default: with yours)
 set_wallpaper() {
 	local set
-	[[ -f $1 ]] && set=$(~/.local/bin/set-wallpaper $1) && print -r -- $set >$STATE/wallpaper
+	[[ -f $1 ]] && set=$(~/.local/bin/set-wallpaper $1 ${2:-$YOURS}) && print -r -- $set >$STATE/wallpaper
 }
+
+# a theme's wallpaper up, its copy kept out of yours
+set_theme_wallpaper() { set_wallpaper $1 $STATE/wallpapers }
 
 # a theme dir's wallpapers in reply
 backgrounds() {
@@ -237,9 +244,9 @@ theme_wallpaper() {
 	backgrounds $1
 	[[ -f $STATE/background ]] && picked=$(<$STATE/background)
 	if (( ${reply[(Ie)$picked]} )); then
-		set_wallpaper $picked
+		set_theme_wallpaper $picked
 	elif (( $#reply )); then
-		set_wallpaper $reply[1]
+		set_theme_wallpaper $reply[1]
 	elif [[ -f $STATE/user-wallpaper ]]; then
 		set_wallpaper "$(<$STATE/user-wallpaper)"
 	fi
@@ -259,26 +266,64 @@ pick_background() {
 	save_user_wallpaper
 	rm -f $STATE/keep-wallpaper
 	print -r -- $1 >$STATE/background
-	set_wallpaper $1
+	set_theme_wallpaper $1
 	print -r -- "Wallpaper: ${${1:t:r}//-/ }"
 }
 
+# JSON for one wallpaper: $1 path, $2 theme|yours, $3 whether it's up. Raycast's grid would load 8K originals, so it
+# gets a small JPEG, made once
+wallpaper_json() {
+	local cache=~/.cache/theme/thumbs thumb
+	mkdir -p $cache
+	thumb=$cache/${$(print -rn -- $1 | shasum)[1]}.jpg
+	[[ -f $thumb ]] || sips -Z 640 -s format jpeg $1 --out $thumb >/dev/null 2>&1 || thumb=$1
+	jq -cn --arg path $1 --arg thumb $thumb --arg title "${${1:t:r}//-/ }" --arg source $2 --argjson current $3 \
+		'{path: $path, thumb: $thumb, title: $title, source: $source, current: $current}'
+}
+
 wallpaper_list() {
-	local f thumb cache=~/.cache/theme/thumbs i=0
+	local f keep=false ours
+	[[ -f $STATE/keep-wallpaper ]] && keep=true
 	current_backgrounds
 	if [[ $1 != --json ]]; then
-		for f in $reply; do [[ $f == $REPLY && ! -f $STATE/keep-wallpaper ]] && print -r -- "$f *" || print -r -- $f; done
+		for f in $reply; do [[ $f == $REPLY && $keep == false ]] && print -r -- "$f *" || print -r -- $f; done
 		return
 	fi
-	mkdir -p $cache
-	for f in $reply; do
-		# Raycast's grid would load 8K originals; small JPEGs, made once
-		thumb=$cache/${$(print -rn -- $f | shasum)[1]}.jpg
-		[[ -f $thumb ]] || sips -Z 640 -s format jpeg $f --out $thumb >/dev/null 2>&1 || thumb=$f
-		jq -cn --arg path $f --arg thumb $thumb --arg title "${${f:t:r}//-/ }" \
-			--argjson current $([[ $f == $REPLY && ! -f $STATE/keep-wallpaper ]] && echo true || echo false) \
-			'{path: $path, thumb: $thumb, title: $title, current: $current}'
-	done | jq -s .
+	[[ -f $STATE/wallpaper ]] && ours=$(<$STATE/wallpaper)
+	{
+		for f in $reply; do wallpaper_json $f theme $([[ $f == $REPLY && $keep == false ]] && echo true || echo false); done
+		for f in $YOURS/(#i)*.(jpg|jpeg|png|heic|tiff|webp|gif)(-.N); do
+			wallpaper_json $f yours $([[ $keep == true && $f == $ours ]] && echo true || echo false)
+		done
+	} | jq -s .
+}
+
+# image file for a path (~, file://) or an http(s) URL, downloaded to a temp folder, in REPLY
+user_image() {
+	local src=$1 tmp name
+	if [[ $src == http(s|)://* ]]; then
+		tmp=$(mktemp -d) || return 1
+		name=${${src%%[?#]*}:t}
+		[[ $name == *.* ]] || name=wallpaper-$(date +%Y%m%d-%H%M%S)
+		curl -fsSL --max-time 60 -A "Mozilla/5.0" -o $tmp/$name -- $src || { print -u2 "Couldn't download $src"; return 1; }
+		# a URL without an image extension: name it after what it holds, so set-wallpaper keeps a usable format
+		if [[ $name != (#i)*.(jpg|jpeg|png|heic|webp|tiff|gif) ]]; then
+			case $(file -b --mime-type $tmp/$name) in
+				image/jpeg) mv $tmp/$name $tmp/$name.jpg; name+=.jpg ;;
+				image/png) mv $tmp/$name $tmp/$name.png; name+=.png ;;
+				image/*) ;;
+				*) print -u2 "$src isn't an image"; return 1 ;;
+			esac
+		fi
+		src=$tmp/$name
+	else
+		src=${src#file://}
+		src=${src/#\~/$HOME}
+		src=${src//\%20/ }
+	fi
+	[[ -f $src ]] || { print -u2 "No such file: $src"; return 1; }
+	sips -g pixelWidth $src >/dev/null 2>&1 || { print -u2 "Not an image: $src"; return 1; }
+	REPLY=$src
 }
 
 cmd_wallpaper() {
@@ -288,6 +333,14 @@ cmd_wallpaper() {
 		"") [[ -f $STATE/keep-wallpaper ]] && print keep || print theme ;;
 		keep)
 			mkdir -p $STATE
+			if [[ -n $2 ]]; then
+				user_image "$2" || exit 1
+				touch $STATE/keep-wallpaper
+				# set-wallpaper's copy lands with yours
+				set_wallpaper $REPLY && print -r -- "$(<$STATE/wallpaper)" >$STATE/user-wallpaper &&
+					print -r -- "Wallpaper: ${${REPLY:t:r}//-/ }"
+				return
+			fi
 			save_user_wallpaper
 			touch $STATE/keep-wallpaper
 			[[ -f $STATE/user-wallpaper ]] && set_wallpaper "$(<$STATE/user-wallpaper)"

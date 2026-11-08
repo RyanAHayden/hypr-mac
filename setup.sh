@@ -341,6 +341,9 @@ defaults write com.raycast.macos showGettingStartedLink -bool false
 # run without a "Request to run" prompt
 defaults write com.raycast.macos raycastPreferredWindowMode -string compact
 defaults write com.raycast.macos showFavoritesInCompactMode -bool false
+# reopening Raycast always lands on root search (Pop to Root Search: Immediately), never inside a command like
+# clipboard history
+defaults write com.raycast.macos popToRootTimeout -int 0
 defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add builtin_command_clipboardHistory -bool true
 defaults write com.raycast.macos alwaysAllowCommandDeeplinking -dict-add builtin_command_searchEmoji -bool true
 # AI, upsells (Pro, affiliate, Wrapped, Store), Notes, Focus, Teams, MCP, Calendar, Translate, Window Management
@@ -400,8 +403,10 @@ if $sip_off; then
 	done
 	tcc_automation $kcus "$kcus_app"
 	tcc_automation $kcus "$kcus_app" 0 com.apple.finder /System/Library/CoreServices/Finder.app
-	# Raycast runs the theme script (Switch Theme), whose osascript flips dark/light mode through System Events
+	# Raycast runs the theme script (Switch Theme), whose osascript flips dark/light mode through System Events, and
+	# Set Wallpaper's Add Wallpaper Image reads the Finder selection
 	tcc_automation com.raycast.macos /Applications/Raycast.app
+	tcc_automation com.raycast.macos /Applications/Raycast.app 0 com.apple.finder /System/Library/CoreServices/Finder.app
 	for svc in Accessibility ScreenCapture; do
 		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
 	done
