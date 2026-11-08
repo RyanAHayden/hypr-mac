@@ -1065,7 +1065,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/bind-repeat start 'yabai -m window --ratio rel:-0.05'"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/bind-repeat start '~/.local/bin/window-resize w -100'"
                                     }
                                 ],
                                 "to_after_key_up": [
@@ -1086,7 +1086,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/bind-repeat start 'yabai -m window --ratio rel:0.05'"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/bind-repeat start '~/.local/bin/window-resize w 100'"
                                     }
                                 ],
                                 "to_after_key_up": [
