@@ -47,7 +47,7 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey and bind-repeat"
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey, bind-repeat and finder-trash"
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
@@ -55,6 +55,7 @@ swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
 swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
 swiftc -O ~/.local/src/sendkey.swift -o ~/.local/bin/sendkey
 swiftc -O ~/.local/src/bind-repeat.swift -o ~/.local/bin/bind-repeat
+swiftc -O ~/.local/src/finder-trash.swift -o ~/.local/bin/finder-trash
 # crash-notify needs an app bundle to post notifications (ad-hoc signed; macOS asks to allow them on first run)
 cn=~/.local/share/crash-notify/CrashNotify.app/Contents
 mkdir -p "$cn/MacOS"
@@ -100,7 +101,12 @@ defaults write art.ginzburg.MiddleClick allowMoreFingers -bool false
 # Spaces / Dock / menu bar (native menu bar, always shown)
 defaults write com.apple.dock mru-spaces -bool false
 defaults write com.apple.dock autohide -bool true
-defaults write com.apple.dock autohide-delay -float 0
+# no Dock: macOS can't turn it off (it also runs Spaces/Mission Control, and yabai's scripting addition lives in it),
+# so it autohides with a ~17-minute reveal delay and holds no apps
+defaults write com.apple.dock autohide-delay -float 1000
+defaults write com.apple.dock persistent-apps -array
+defaults write com.apple.dock persistent-others -array
+defaults write com.apple.dock show-recents -bool false
 defaults write com.apple.dock expose-group-apps -bool true
 # no hot corners (bottom-right is Quick Note by default)
 for c in tl tr bl br; do
@@ -125,7 +131,8 @@ defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
 defaults write com.apple.finder FXPreferredSearchViewStyle -string Nlsv
 find "$HOME" -name .DS_Store -not -path "$HOME/Library/*" -not -path "$HOME/Desktop/.DS_Store" -delete 2>/dev/null || true
 rm -f /Applications/.DS_Store
-killall Finder 2>/dev/null || true
+# Trash pinned to the top of the sidebar Favorites (restarts Finder)
+~/.local/bin/finder-trash
 # darker dark mode: neutral (untinted) window backgrounds
 defaults write -g AppleReduceDesktopTinting -bool true
 # Pitch-black menu bar: macOS 15 has no menu bar colour setting; with Reduce transparency on it's solid grey,
