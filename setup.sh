@@ -153,6 +153,21 @@ defaults write com.apple.dock showMissionControlGestureEnabled -bool false
 defaults write com.apple.dock showAppExposeGestureEnabled -bool false
 defaults write art.ginzburg.MiddleClick fingers -int 3
 defaults write art.ginzburg.MiddleClick allowMoreFingers -bool false
+# Moonlight is remote desktop only (no games): fullscreen 1440p (the desktop is 16:9), fixed 20 Mbps, no vsync/frame
+# pacing (latency over smoothness), remote desktop mouse mode (Ctrl+Alt+Shift+C then shows our own cursor; the
+# Sunshine Desktop app hides Hyprland's), and quit the app on disconnect so Sunshine's undo brings the cursor back
+m=com.moonlight-stream.Moonlight
+defaults write $m width -int 2560
+defaults write $m height -int 1440
+defaults write $m fps -int 60
+defaults write $m autoadjustbitrate -int 0
+defaults write $m bitrate -int 20000
+defaults write $m windowmode -int 0
+defaults write $m vsync -int 0
+defaults write $m framepacing -int 0
+defaults write $m mouseacceleration -int 1
+defaults write $m gamepadmouse -int 0
+defaults write $m quitAppAfter -int 1
 # Spaces / Dock / menu bar (native menu bar, always shown)
 defaults write com.apple.dock mru-spaces -bool false
 defaults write com.apple.dock autohide -bool true
