@@ -237,7 +237,8 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
 - Menu bar is pitch black on any wallpaper: macOS 15 has no menu bar colour setting (Reduce transparency makes it
   solid grey), and the menu bar takes the colour of the wallpaper under it, so `set-wallpaper` paints a black band
   across the top of the copy it sets (`wallpaper-band`, sized from the window server's menu bar height).
-- Moonlight (to the desktop's Sunshine) is set up for remote desktop, not games: fullscreen 1440p, 20 Mbps, remote
+- Moonlight (to the desktop's Sunshine) is set up for remote desktop, not games: windowed 1440p
+  (Ctrl+Alt+Shift+X = native fullscreen on its own Space), 20 Mbps, remote
   desktop mouse mode. Press Ctrl+Alt+Shift+C once per stream to draw the Mac's own cursor (no lag); the desktop's
   Sunshine "Desktop" app hides Hyprland's cursor while streaming (`cursor:invisible`, prep-cmd in
   `~/.config/sunshine/apps.json` there, not in this repo).
