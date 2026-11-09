@@ -77,6 +77,10 @@ echo "==> Obsidian (github.com/RyanAHayden/obsidian, shared with dotfiles)"
 [ -d ~/obsidian ] || git clone -q https://github.com/RyanAHayden/obsidian ~/obsidian
 ~/obsidian/setup.sh
 
+echo "==> VS Code (github.com/RyanAHayden/lazycode: LazyVim-style keys)"
+[ -d ~/lazycode ] || git clone -q https://github.com/RyanAHayden/lazycode ~/lazycode
+~/lazycode/setup.sh
+
 echo "==> LazyVim plugins and treesitter parsers"
 nvim --headless "+Lazy! sync" +qa
 # parsers snacks wants for rendering images/math in docs (norg isn't in nvim-treesitter anymore)

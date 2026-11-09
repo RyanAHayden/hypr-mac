@@ -3901,7 +3901,8 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.hnc\\.Discord$",
-                                            "^md\\.obsidian$"
+                                            "^md\\.obsidian$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -3933,7 +3934,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4028,7 +4030,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4060,7 +4063,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4092,7 +4096,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4125,7 +4130,8 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.hnc\\.Discord$",
-                                            "^md\\.obsidian$"
+                                            "^md\\.obsidian$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4188,7 +4194,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4220,7 +4227,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4315,7 +4323,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^md\\.obsidian$"
+                                            "^md\\.obsidian$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4410,7 +4419,8 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.hnc\\.Discord$",
-                                            "^md\\.obsidian$"
+                                            "^md\\.obsidian$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4441,7 +4451,8 @@
                                         "type": "frontmost_application_unless",
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
-                                            "^com\\.apple\\.Terminal$"
+                                            "^com\\.apple\\.Terminal$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4473,7 +4484,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
@@ -4542,7 +4554,8 @@
                                         "bundle_identifiers": [
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
-                                            "^com\\.hnc\\.Discord$"
+                                            "^com\\.hnc\\.Discord$",
+                                            "^com\\.microsoft\\.VSCode$"
                                         ]
                                     }
                                 ]
