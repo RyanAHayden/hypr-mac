@@ -21,6 +21,7 @@
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
 //   - focus lock (SUPER+Shift+O, .local/bin/focus-lock), like Omarchy's: new windows open without stealing focus.
+//   - scratchpad: shown as S in the bar slot of the workspace it stands in for, with its wallpaper dimmed (Dimmer).
 //   - menu bar icons left of the notch: a red lock while focus lock is on, a cup while sleep is off (Keep Awake With Lid
 //     Closed); and a red "yabai paused" notice in place of the workspaces while yabai isn't running (SUPER+Shift+P).
 // yabai signals (yabairc) and binds ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
@@ -442,7 +443,8 @@ func workspaces() -> [String: [Item]]? {
 		}
 		let occupied = (s["windows"] as? [Int] ?? []).contains { real.contains($0) }
 		guard i <= 5 || shown || occupied || parents.contains(i) else { continue }
-		rows[uuid, default: []].append((Double(i), (String(i), shown ? "a" : occupied ? "o" : "e")))
+		let label = padShown && i == ret ? "S" : String(i) // the scratchpad shows in the slot of the workspace it stands in for
+		rows[uuid, default: []].append((Double(i), (label, shown ? "a" : occupied ? "o" : "e")))
 	}
 	for uuid in fullscreen { rows[uuid] = [] } // layout() orders out a display's bar with no items
 	onFullscreen = !fullscreen.isEmpty
@@ -598,6 +600,45 @@ final class Bar {
 	}
 }
 
+// MARK: - Scratchpad dim
+
+// The scratchpad's wallpaper is dimmed, like Hyprland's dim_special behind the special workspace: a translucent black
+// window just above the wallpaper, under every app window. Made while Space 11 is showing and not set to join all
+// Spaces, so macOS keeps it on that Space and shows and hides it with the Space, without reacting to switches.
+let padDim: CGFloat = 0.5
+
+final class Dimmer {
+	var panel: NSPanel?
+	var spaceID = 0 // the Space it was made on; Spaces can be renumbered, so it's made again if 11 is a different one
+
+	// on Space 11 (helper start, Space changes): make it if it isn't there yet
+	func ensure() {
+		guard let s = one(["--spaces", "--space"]), s["index"] as? Int == 11, let id = s["id"] as? Int, id != spaceID || panel == nil,
+			let d = s["display"] as? Int, let du = list(["--displays"]).first(where: { $0["index"] as? Int == d })?["uuid"] as? String,
+			let screen = NSScreen.screens.first(where: { uuid(of: $0) == du }) else { return }
+		reset()
+		let p = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+		p.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
+		p.collectionBehavior = [.ignoresCycle, .stationary]
+		p.backgroundColor = NSColor.black.withAlphaComponent(padDim)
+		p.isOpaque = false
+		p.ignoresMouseEvents = true
+		p.hasShadow = false
+		p.hidesOnDeactivate = false
+		p.setFrame(screen.frame, display: false)
+		p.orderFrontRegardless()
+		panel = p
+		spaceID = id
+	}
+
+	// displays changed: drop it; the next visit to the scratchpad makes it again at the new size
+	func reset() {
+		panel?.orderOut(nil)
+		panel = nil
+		spaceID = 0
+	}
+}
+
 // MARK: - Wiring
 
 let app = NSApplication.shared
@@ -606,6 +647,7 @@ app.setActivationPolicy(.accessory)
 try? String(getpid()).write(toFile: NSHomeDirectory() + "/.cache/yabai-helper.pid", atomically: true, encoding: .utf8)
 let bar = Bar()
 let focuser = Focus()
+let dimmer = Dimmer()
 var tokens = [Int32](repeating: 0, count: 11)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
@@ -632,7 +674,7 @@ notify_register_dispatch("wm.move", &tokens[6], .main) { token in
 	focuser.move(to: Int(space))
 }
 let ws = NSWorkspace.shared.notificationCenter
-ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in focuser.leaveAttic(); bar.refresh() }
+ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in focuser.leaveAttic(); dimmer.ensure(); bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
 	// focus lock: the app activating can come before yabai reports its new window focused, so check now too
 	if focusLocked, focuser.holdFocus() { return }
@@ -649,13 +691,14 @@ ws.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: ni
 	play.arguments = ["-e", "tell application \"Spotify\" to play"] // starts Spotify if needed (yabairc puts it on the scratchpad)
 	try? play.run()
 }
-NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in bar.rebuild() }
+NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in bar.rebuild(); dimmer.reset(); dimmer.ensure() }
 // Mouse moves drive the bar's hover hiding and tell followFocus where hover focus came from (no permission needed for
 // mouse events); the slow timer catches menus closing while the mouse is still, and window counts changing without an event.
 NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { e in bar.trackMouse(); focuser.track(e.cgEvent?.location) }
 Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in bar.trackMouse() }
 Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in stayAwake = sleepDisabled(); bar.refresh() } // sleep also changes outside the toggle (sudo pmset)
 bar.rebuild()
+dimmer.ensure()
 focuser.syncZoom() // a window may already be zoomed (helper restarted)
 focuser.lockChanged()
 app.run()

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Omarchy's scratchpad as a workspace: the 11th Space, tiled like any other. It isn't in the bar: it stands in
-# for the Space you came from, which stays lit there, and SUPER+A/D go on from that one. Discord, Spotify and KeePassXC live there (yabairc rules), like scratch-app on Hyprland.
+# Omarchy's scratchpad as a workspace: the 11th Space, tiled like any other. It stands in for the Space you came
+# from: that one stays lit in the bar, shown as S, and SUPER+A/D go on from it. yabai-helper dims its wallpaper. Discord, Spotify and KeePassXC live there (yabairc rules), like scratch-app on Hyprland.
 #   scratchpad toggle   go to the scratchpad, or back to the Space you came from if you're on it
 #   scratchpad show     go to the scratchpad (stay if already there)
 #   scratchpad move     send the focused window there (stay here); on the scratchpad, send it back instead
