@@ -11,6 +11,7 @@
 # keys: a-z, 0-9, f1-f20, return, space, tab, escape, backspace, left/right/up/down, minus, equal, slash, backslash,
 # comma, or any Karabiner key_code. Commands run in sh with Homebrew on PATH. Right Cmd stays a normal Cmd (Karabiner's
 # Linux-style ctrl shortcuts send it), so only physical left Cmd hits SUPER binds; unbound combos still reach apps.
+# None of them fire in Moonlight, so SUPER combos reach the streamed Windows desktop (GlazeWM) instead.
 export PATH="/opt/homebrew/bin:$PATH"
 conf=~/.config/binds/bindings.conf
 kb=~/.config/karabiner/karabiner.json
@@ -44,7 +45,8 @@ if ! rule=$(jq -Rn --arg path "$path" '
 	| (group_by(.from) | map(select(length > 1))[0] // null) as $dup
 	| if $dup then error("bound twice: \($dup[0].keys)") else . end
 	| {description: "SUPER binds (generated from ~/.config/binds/bindings.conf by binds-apply)",
-		manipulators: map({type: "basic"} + del(.keys))}
+		manipulators: map({type: "basic"} + del(.keys) + {conditions: [{type: "frontmost_application_unless",
+			bundle_identifiers: ["^com\\.moonlight-stream\\.Moonlight$"]}]})}
 ' <"$conf" 2>&1); then
 	msg=$(sed 's/^jq: error[^:]*: //' <<<"$rule" | head -1)
 	echo "binds-apply: $msg" >&2

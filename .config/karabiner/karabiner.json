@@ -88,6 +88,14 @@
                                             "left_command"
                                         ]
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -399,6 +407,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -415,6 +431,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/tmux new -A -s Work"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -433,6 +457,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --new-window"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -449,6 +481,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --new-window"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -468,6 +508,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; /Applications/Zen.app/Contents/MacOS/zen --private-window"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -484,6 +532,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; osascript -e 'tell application \"Finder\"' -e 'make new Finder window to home' -e 'activate' -e 'end tell'"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -502,6 +558,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/nvim"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -518,6 +582,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /opt/homebrew/bin/btop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -536,6 +608,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -a Steam"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -552,6 +632,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/scratchpad show; open -a Discord"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -570,6 +658,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/scratchpad show; open -a Spotify"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -587,6 +683,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/scratchpad show; open -a KeePassXC"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -603,6 +707,14 @@
                                 "to": [
                                     {
                                         "key_code": "f19"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -626,6 +738,14 @@
                                             "left_shift"
                                         ]
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -642,6 +762,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; osascript -e 'tell application \"System Events\" to tell process \"ControlCenter\" to click (first menu bar item of menu bar 1 whose description is \"Sound\")'"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -660,6 +788,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; osascript -e 'tell application \"System Events\" to tell process \"ControlCenter\" to click (first menu bar item of menu bar 1 whose description is \"Bluetooth\")'"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -675,6 +811,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e ~/.local/bin/keybinds   # keybinds, fzf to filter"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -693,6 +837,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -a Calculator"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -710,6 +862,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -g \"raycast://extensions/raycast/clipboard-history/clipboard-history\""
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -726,6 +886,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -g \"raycast://extensions/raycast/emoji-symbols/search-emoji-symbols\""
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -745,6 +913,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -g \"raycast://extensions/ryanahayden/hypr-mac-theme/switch-theme\""
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -762,6 +938,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/theme wallpaper next"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -777,6 +961,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/power-menu   # system menu (lock, sleep, keep awake, relaunch, power)"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -795,6 +987,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -a \"Activity Monitor\""
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -811,6 +1011,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open -a \"Activity Monitor\""
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -829,6 +1037,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; osascript -e 'tell application \"System Events\" to tell process \"ControlCenter\" to click (first menu bar item of menu bar 1 whose description starts with \"Wi\")'   # Wi-Fi menu (its name includes the connection state)"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -845,6 +1061,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/night-shift   # toggle Night Shift (Omarchy nightlight)"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -863,6 +1087,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; open \"x-apple.systempreferences:com.apple.Displays-Settings.extension\""
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -880,6 +1112,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; osascript -e 'tell application \"System Events\" to tell process \"ControlCenter\" to click (first menu bar item of menu bar 1 whose description is \"Battery\")'   # Battery menu"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -895,6 +1135,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/close-window"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -913,6 +1161,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/force-kill-window"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -929,6 +1185,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/quit-app"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -944,6 +1208,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.hide"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -962,6 +1234,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.unhide"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -979,6 +1259,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/yabai-pause   # pause/resume yabai (lets Cmd-drag reach macOS)"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -994,6 +1282,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --toggle zoom-fullscreen"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1012,6 +1308,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --toggle zoom-parent   # tiled fullscreen: fill its split only"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1029,6 +1333,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --toggle native-fullscreen"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1044,6 +1356,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --toggle float --grid 6:6:1:1:4:4"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1061,6 +1381,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-pop   # pop out: float centered, sticky, on top (again: put back)"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1076,6 +1404,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --toggle split"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1094,6 +1430,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --swap largest"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1111,6 +1455,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --mirror y-axis"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1133,6 +1485,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1153,6 +1513,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1176,6 +1544,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1197,6 +1573,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1220,6 +1604,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1241,6 +1633,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1265,6 +1665,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1288,6 +1696,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1310,6 +1726,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1331,6 +1755,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1355,6 +1787,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1378,6 +1818,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1394,6 +1842,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --balance"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1412,6 +1868,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/toggle-menubar"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1427,6 +1891,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-opacity toggle   # Backspace: unfocused windows see-through on/off"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1449,6 +1921,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1473,6 +1953,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1490,6 +1978,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/quadrant-tile   # no gaps/borders, every Space"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1506,6 +2002,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/space-layout        # bsp -> stack -> float"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1525,6 +2029,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/space-layout back"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1540,6 +2052,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-group toggle"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1558,6 +2078,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-group into west"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1574,6 +2102,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-group into east"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1592,6 +2128,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-group into north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1608,6 +2152,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-group into south"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1629,6 +2181,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1652,6 +2212,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1673,6 +2241,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1697,6 +2273,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1718,6 +2302,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1741,6 +2333,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1756,6 +2356,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/scratchpad toggle"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1774,6 +2382,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/scratchpad move"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1794,6 +2410,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1816,6 +2440,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1836,6 +2468,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1858,6 +2498,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1878,6 +2526,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1900,6 +2556,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1921,6 +2585,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1941,6 +2613,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1959,6 +2639,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --warp west"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -1975,6 +2663,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --warp south"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -1993,6 +2689,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --warp north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2009,6 +2713,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --warp east"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2027,6 +2739,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --swap west"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2043,6 +2763,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --swap south"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2061,6 +2789,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --swap north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2077,6 +2813,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --swap east"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2099,6 +2843,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2119,6 +2871,14 @@
                                 "to_after_key_up": [
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2142,6 +2902,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2164,6 +2932,14 @@
                                     {
                                         "shell_command": "~/.local/bin/bind-repeat stop"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2179,6 +2955,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 1"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2196,6 +2980,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 2"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2211,6 +3003,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 3"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2228,6 +3028,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 4"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2243,6 +3051,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 5"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2260,6 +3076,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 6"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2275,6 +3099,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 7"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2292,6 +3124,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 8"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2308,6 +3148,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 9"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2323,6 +3171,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus 10"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2341,6 +3197,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 1"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2357,6 +3221,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 2"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2375,6 +3247,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 3"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2391,6 +3271,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 4"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2409,6 +3297,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 5"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2425,6 +3321,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 6"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2443,6 +3347,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 7"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2459,6 +3371,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 8"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2477,6 +3397,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 9"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2493,6 +3421,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notify-post wm.move 10"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2512,6 +3448,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 1"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2529,6 +3473,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 2"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2548,6 +3500,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 3"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2565,6 +3525,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 4"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2584,6 +3552,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 5"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2601,6 +3577,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 6"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2620,6 +3604,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 7"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2637,6 +3629,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 8"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2656,6 +3656,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 9"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2674,6 +3682,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws move-silent 10"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2690,6 +3706,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/ws focus recent   # the Space you were on before"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2709,6 +3733,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display west; yabai -m display --focus west"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2726,6 +3758,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display east; yabai -m display --focus east"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2745,6 +3785,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display north; yabai -m display --focus north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2762,6 +3810,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display south; yabai -m display --focus south"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2781,6 +3837,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display west; yabai -m display --focus west"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2798,6 +3862,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display east; yabai -m display --focus east"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2817,6 +3889,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display north; yabai -m display --focus north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2835,6 +3915,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m window --display south; yabai -m display --focus south"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2851,6 +3939,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m display --focus next || yabai -m display --focus first"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2870,6 +3966,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m display --focus prev || yabai -m display --focus last"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2887,6 +3991,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --display west; yabai -m display --focus west"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2906,6 +4018,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --display east; yabai -m display --focus east"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2924,6 +4044,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --display north; yabai -m display --focus north"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2941,6 +4069,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai -m space --display south; yabai -m display --focus south"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -2962,6 +4098,14 @@
                                             "left_command"
                                         ]
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2979,6 +4123,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; pmset displaysleepnow"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -2995,6 +4147,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; yabai --restart-service; ~/.local/bin/binds-apply"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -3017,6 +4177,14 @@
                                             "left_shift"
                                         ]
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -3032,6 +4200,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notifications dismiss"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -3050,6 +4226,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notifications dismiss"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -3067,6 +4251,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notifications dismiss-all"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -3083,6 +4275,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notifications center"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -3102,6 +4302,14 @@
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/notifications center"
                                     }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
                                 ]
                             },
                             {
@@ -3117,6 +4325,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/display-scale up"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             },
@@ -3134,6 +4350,14 @@
                                 "to": [
                                     {
                                         "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/display-scale down"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
                                     }
                                 ]
                             }
