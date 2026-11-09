@@ -26,6 +26,18 @@ brew trust --formula felixkratz/formulae/borders
 brew install fd fzf lazygit tree-sitter-cli imagemagick ghostscript tectonic
 brew install --cask ghostty raycast keepassxc font-jetbrains-mono-nerd-font spotify discord alt-tab middleclick
 brew install --cask karabiner-elements
+# node builds the Raycast extension (npm ci below); setup opens Tailscale at login
+brew install node
+brew install --cask tailscale-app claude-code
+# everyday tools: gh, fastfetch, lazydocker, git-lfs, cliclick (mouse/keys from scripts), rclone, pipx (yt-dlp below)
+brew install gh fastfetch lazydocker git-lfs cliclick rclone pipx
+git lfs install >/dev/null
+pipx install yt-dlp >/dev/null 2>&1 || true
+pipx install yt-dlp-tui >/dev/null 2>&1 || true
+# media: VLC, HandBrake, LosslessCut
+brew install --cask vlc handbrake-app losslesscut
+# Touch ID for sudo, inside tmux too (pam-reattach), in sudo_local so macOS updates don't reset it
+brew install pam-reattach
 # Rust via rustup (not brew's rust, so toolchains/components update with `rustup update`); .zprofile sources ~/.cargo/env
 if [ ! -x ~/.cargo/bin/rustup ]; then
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path \
@@ -73,6 +85,8 @@ echo
 
 echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey, bind-repeat, finder-trash and wallpaper-band"
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
+# a fixed identity instead of the build's hash, so its Automation grant (playing Spotify, below) survives rebuilds
+codesign -f -s - -i com.ryha.yabai-helper -r='designated => identifier "com.ryha.yabai-helper"' ~/.local/bin/yabai-helper 2>/dev/null
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
 swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
@@ -168,6 +182,9 @@ defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
 defaults write com.apple.finder FXPreferredSearchViewStyle -string Nlsv
 find "$HOME" -name .DS_Store -not -path "$HOME/Library/*" -not -path "$HOME/Desktop/.DS_Store" -delete 2>/dev/null || true
 rm -f /Applications/.DS_Store
+# Open and Save dialogs in list view too (2 = list)
+defaults write -g NSNavPanelFileListModeForOpenMode2 -int 2
+defaults write -g NSNavPanelFileListModeForSaveMode2 -int 2
 # Trash pinned to the top of the sidebar Favorites (restarts Finder)
 ~/.local/bin/finder-trash
 # darker dark mode: neutral (untinted) window backgrounds
@@ -412,6 +429,8 @@ if $sip_off; then
 	# Set Wallpaper's Add Wallpaper Image reads the Finder selection
 	tcc_automation com.raycast.macos /Applications/Raycast.app
 	tcc_automation com.raycast.macos /Applications/Raycast.app 0 com.apple.finder /System/Library/CoreServices/Finder.app
+	# yabai-helper swaps Music for Spotify and tells Spotify to play
+	tcc_automation ~/.local/bin/yabai-helper ~/.local/bin/yabai-helper 1 com.spotify.client /Applications/Spotify.app
 	for svc in Accessibility ScreenCapture; do
 		tcc_grant "$sysdb" "kTCCService$svc" com.lwouis.alt-tab-macos /Applications/AltTab.app
 	done
@@ -437,6 +456,9 @@ sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownl
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate ConfigDataInstall -bool true
+sudo_local="auth       optional       /opt/homebrew/lib/pam/pam_reattach.so ignore_ssh
+auth       sufficient     pam_tid.so"
+[ "$(cat /etc/pam.d/sudo_local 2>/dev/null)" = "$sudo_local" ] || echo "$sudo_local" | sudo tee /etc/pam.d/sudo_local >/dev/null
 # "Keep Awake With Lid Closed" (.config/raycast/scripts/power-lid-sleep.sh) flips sleep without a password
 echo "$(whoami) ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 0, /usr/bin/pmset -a disablesleep 1" |
 	sudo tee /private/etc/sudoers.d/pmset >/dev/null
