@@ -98,7 +98,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
 | Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |
 | Cmd+-/= (+Shift, +Option, +Ctrl) | resize width (Shift: height; Option: a little, Ctrl: a lot) |
-| Cmd+Backspace | focused window opaque on/off, like Omarchy: it stops fading when unfocused (unfocused windows are see-through) |
+| Cmd+Backspace | focused window fully opaque on/off, like Omarchy (windows are slightly see-through, more when unfocused) |
 | Option+Backspace / Shift+Option+Backspace | unfocused windows more / less see-through |
 | Cmd+Shift+Backspace | toggle gaps and borders on every Space |
 | Cmd+Option+L / Shift+Option+L | cycle Space layout bsp -> stack -> float / back |

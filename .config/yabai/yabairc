@@ -69,8 +69,9 @@ if [ -n "$sa" ]; then
     defaults write -g AppleSpacesSwitchOnActivate -bool false
     killall Dock   # dock_did_restart reloads the SA
   fi
-  # Unfocused windows see-through, the focused one opaque (Option+Backspace adjusts; SUPER+Backspace pins one opaque: window-opacity)
-  yabai -m config window_opacity on active_window_opacity 1.0 normal_window_opacity 0.9
+  # Windows slightly see-through, unfocused ones more, like Omarchy (Option+Backspace adjusts unfocused; SUPER+Backspace
+  # makes one fully opaque: window-opacity)
+  yabai -m config window_opacity on active_window_opacity 0.95 normal_window_opacity 0.8
   # Closing a workspace's last window (red button, an app's own Cmd+W) also makes macOS activate another
   # app; mark it so yabai-helper's alt-tab jump stays put. Best effort: this can race the activation (SUPER+W/Q mark first).
   signal stay_on_close window_destroyed "touch $HOME/.cache/ws-switch"
