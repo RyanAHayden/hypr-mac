@@ -219,7 +219,7 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
 
 ## Sacrifices vs Omarchy
 
-- With SIP on (see above for turning it off), no yabai scripting addition: Space switching goes through macOS ctrl+N (slide animation;
+- With SIP on (see above for turning it off), no yabai scripting addition: Space switching goes through macOS's Switch to Desktop shortcuts (setup puts them on ctrl+alt+cmd+N; slide animation;
   Accessibility > Reduce motion makes it a fade), Desktops are created by hand, and window opacity, pop out (sticky/on top),
   scratchpad toggle-back, silent moves, previous Space and moving Spaces between displays don't work (they need the SA).
 - No pseudo-tiling, Quake console, notification binds, save/restore width, window labels.

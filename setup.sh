@@ -200,11 +200,12 @@ defaults write -g AppleReduceDesktopTinting -bool true
 # with it off it shows the wallpaper, whose top edge is black. (Menus, sidebars and the Dock go translucent too.)
 defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null ||
 	echo "  (couldn't turn off Reduce transparency - do it in Accessibility > Display, or give the terminal Full Disk Access)"
-# ctrl+1..9 -> Desktop 1..9 (~/.local/bin/ws uses these while SIP is on)
-codes=(18 19 20 21 23 22 26 28 25)
-for i in 1 2 3 4 5 6 7 8 9; do
+# ctrl+alt+cmd+1..9,0 -> Desktop 1..10 (~/.local/bin/ws sends these while SIP is on). Not macOS's ctrl+N: Ctrl is real
+# in terminals, so ctrl+3 there switched Desktops
+codes=(18 19 20 21 23 22 26 28 25 29)
+for i in 1 2 3 4 5 6 7 8 9 10; do
 	defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add $((117 + i)) \
-		"<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>$((48 + i))</integer><integer>${codes[$((i - 1))]}</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
+		"<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>$((48 + i % 10))</integer><integer>${codes[$((i - 1))]}</integer><integer>1835008</integer></array><key>type</key><string>standard</string></dict></dict>"
 done
 # SUPER is left Cmd (Karabiner): free cmd+space for Raycast, and move screenshots off cmd+shift+3/4/5
 # (SUPER+shift+N moves windows) to ctrl+shift+3/4/5, ctrl+option+shift+3/4 = to clipboard
@@ -228,7 +229,7 @@ hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
 # Ctrl+arrows are word jump in apps (Karabiner) and the shell: no Mission Control / App Exposé (32-35) or
-# Desktop left/right (79-82) on them. ws resolves prev/next to a Desktop number, so its SIP-on fallback uses ctrl+N
+# Desktop left/right (79-82) on them. ws resolves prev/next to a Desktop number, so its SIP-on fallback uses ctrl+alt+cmd+N
 hotkey 32 false 65535 126 8650752
 hotkey 33 false 65535 125 8650752
 hotkey 34 false 65535 126 8781824
