@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# SUPER+I: every bind in ~/.config/binds/bindings.conf in fzf, type to filter (Omarchy's keybindings menu). Each row:
+# the keys, what it does (its trailing # comment, else the command), then dimmed the comment over its group (up to a
+# blank line or a bind with its own comment) and the section. Named keys are words (Escape, Left), so typing them
+# finds the bind; no sideways scroll to a match, so the keys always show. Esc or Enter closes it.
+export PATH="/opt/homebrew/bin:$PATH"
+awk '
+	function pretty(s,   n, p, i, k, out) {
+		gsub(/ /, "", s)
+		k = s; sub(/.*-/, "", k); sub(/-[^-]*$/, "", s)
+		if (k in key) k = key[k]; else k = toupper(k)
+		n = split(s, p, "+"); out = ""
+		for (i = 1; i <= n; i++) out = out (p[i] in mod ? mod[p[i]] : toupper(p[i])) "+"
+		return out k
+	}
+	BEGIN {
+		split("super SUPER shift SHIFT alt OPTION ctrl CTRL", a, " "); for (i = 1; i < 8; i += 2) mod[a[i]] = a[i + 1]
+		split("return Return space Space tab Tab escape Escape backspace Backspace left Left right Right up Up down Down minus - equal = slash / backslash \\ comma ,", a, " ")
+		for (i = 1; i < 32; i += 2) key[a[i]] = a[i + 1]
+	}
+	/^# ---/ { section = $0; gsub(/^# -+ *| *-+$/, "", section); group = ""; next }
+	/^#/ { if (!ingroup) { group = $0; sub(/^# */, "", group) } ingroup = 1; next }
+	/^[[:space:]]*$/ { group = ""; ingroup = 0; next }
+	{
+		ingroup = 0; mine = group
+		i = index($0, ":"); combo = substr($0, 1, i - 1); cmd = substr($0, i + 1)
+		desc = ""
+		# a bind with its own comment ends the group comment above it
+		if ((j = index(cmd, "   # ")) > 0) { desc = substr(cmd, j + 5); cmd = substr(cmd, 1, j - 1); mine = group = "" }
+		if (desc == "") {
+			desc = cmd
+			gsub(/touch ~\/\.cache\/yabai-new-window; |~\/\.local\/bin\/|\/opt\/homebrew\/bin\/|\/Applications\/[^ ]*\/MacOS\/|^ *repeat |^ +| +$/, "", desc)
+		}
+		printf "\033[1m%-28s\033[0m %s  \033[2m%s%s%s\033[0m\n", pretty(combo), desc, mine, (mine != "" ? " · " : ""), section
+	}
+' ~/.config/binds/bindings.conf |
+	fzf --ansi --layout=reverse --prompt="keybinds> " --info=inline --no-hscroll --bind "enter:abort" >/dev/null

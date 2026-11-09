@@ -74,7 +74,7 @@ Ctrl+S saves instead of firing SUPER+S. Karabiner lets go of the keyboard on sle
 waking (~1.5 s for macOS to report powered on, ~1 s for its virtual keyboard to be ready); keys pressed in that gap
 reach apps unmapped. If Ctrl shortcuts stop working, `fixkeys` (or "Fix Keyboard" in
 Raycast) restarts Karabiner. Screenshots move to Ctrl+Shift+3/4/5 (Ctrl+Option+Shift+3/4 to
-the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/binds/bindings.conf` (Cmd+I shows it).
+the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/binds/bindings.conf` (Cmd+I lists them in fzf, type to filter).
 
 | Key | Action |
 |---|---|

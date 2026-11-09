@@ -674,7 +674,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e /usr/bin/less ~/.config/binds/bindings.conf"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; touch ~/.cache/yabai-new-window; open -na Ghostty --args -e ~/.local/bin/keybinds   # keybinds, fzf to filter"
                                     }
                                 ]
                             },
@@ -776,7 +776,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/power-menu"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/power-menu   # system menu (lock, sleep, keep awake, relaunch, power)"
                                     }
                                 ]
                             },
