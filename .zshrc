@@ -38,6 +38,12 @@ HISTSIZE=32768
 SAVEHIST=32768
 setopt AUTO_CD HIST_IGNORE_DUPS HIST_IGNORE_SPACE INTERACTIVE_COMMENTS SHARE_HISTORY
 
+# A TUI that dies or loses its ssh/tmux connection can leave mouse tracking (and dark/light reports) on, so mouse moves
+# arrive as typed text (35;60;46M) and typing gets buried. Nothing should have them on at a prompt: turn them off.
+_reset_mouse() { printf '\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2031l'; }
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _reset_mouse
+
 export EDITOR=nvim
 export SUDO_EDITOR=nvim
 export MANPAGER='nvim +Man!'
