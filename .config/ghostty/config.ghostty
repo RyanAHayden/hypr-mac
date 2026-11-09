@@ -27,4 +27,7 @@ keybind = alt+shift+enter=text:\x1b[13;4u
 shell-integration-features = ssh-env,no-ssh-terminfo
 
 # colors: the current theme (theme script, Raycast's Switch Theme), which reloads Ghostty with SIGUSR2
+# Ghostty 1.4 needs a conditional theme to report dark mode correctly (ghostty#13604).
+# The variants must differ; the current theme's config overrides their palettes.
+theme = light:GitHub Light Default,dark:GitHub Dark
 config-file = ?~/.local/state/theme/ghostty.conf
