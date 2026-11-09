@@ -317,8 +317,8 @@ let slotW: CGFloat = 24, pillH: CGFloat = 22, pad: CGFloat = 6
 
 typealias Item = (label: String, state: Character) // a = shown on its display, o = has windows, e = empty
 
-// 1-5 always, higher Spaces when occupied or shown; Space 11 is the scratchpad ("S") and goes first. Only real
-// windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
+// 1-5 always, higher Spaces when occupied or shown. Space 11, the scratchpad, isn't drawn: while it's shown it stands in
+// for the workspace you came from (.local/bin/scratchpad), which stays lit. Only real windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
 // restarting), so the bar keeps what it shows instead of blinking off and uncovering the menus.
 var onFullscreen = false // a display shows a native fullscreen Desktop (set by workspaces())
 // Menu bar set to auto-hide (SUPER+Shift+Space, .local/bin/toggle-menubar): no bar. toggle-menubar posts wm.menubar with
@@ -348,20 +348,22 @@ func workspaces() -> [String: [Item]]? {
 		originOf[fi] = oi
 	}
 	let parents = Set(originOf.values)
+	let padShown = spaces.contains { $0["index"] as? Int == 11 && flag($0, "is-visible") }
+	let ret = (try? String(contentsOfFile: NSHomeDirectory() + "/.cache/scratchpad-return", encoding: .utf8))
+		.flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }.flatMap { $0 == 11 ? nil : $0 } ?? 1
 	var rows = [String: [(Double, Item)]]()
 	var fullscreen = Set<String>() // displays showing a native fullscreen Space: no menu bar there, so no bar
 	for s in spaces {
-		guard let i = s["index"] as? Int, i != attic, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
-		let shown = flag(s, "is-visible")
+		guard let i = s["index"] as? Int, i != attic, i != 11, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
+		let shown = flag(s, "is-visible") || (padShown && i == ret)
 		if flag(s, "is-native-fullscreen") {
-			if shown { fullscreen.insert(uuid) }
+			if flag(s, "is-visible") { fullscreen.insert(uuid) }
 			rows[uuid, default: []].append((Double(originOf[i] ?? 100 + i) + 0.5, ("F", shown ? "a" : "o")))
 			continue
 		}
 		let occupied = (s["windows"] as? [Int] ?? []).contains { real.contains($0) }
 		guard i <= 5 || shown || occupied || parents.contains(i) else { continue }
-		let label = i == 11 ? "S" : String(i) // 11 = the scratchpad (.local/bin/scratchpad)
-		rows[uuid, default: []].append((Double(i == 11 ? 0 : i), (label, shown ? "a" : occupied ? "o" : "e")))
+		rows[uuid, default: []].append((Double(i), (String(i), shown ? "a" : occupied ? "o" : "e")))
 	}
 	for uuid in fullscreen { rows[uuid] = [] } // layout() orders out a display's bar with no items
 	onFullscreen = !fullscreen.isEmpty

@@ -101,7 +101,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Option+L / Shift+Option+L | cycle Space layout bsp -> stack -> float / back |
 | Cmd+G, Cmd+Option+arrows | group (yabai stack) with neighbour / ungroup, move window into the group that way |
 | Cmd+Option+Tab, Cmd+Ctrl+Left/Right | next/prev window in the group |
-| Cmd+S / Cmd+Option+S | scratchpad (11th Space, "S" in the bar): go there and back / send window there (from it: back) |
+| Cmd+S / Cmd+Option+S | scratchpad (11th Space, not in the bar): go there and back / send window there (from it: back) |
 | Cmd+Shift+Option+1..0 | move window to that Space without following it |
 | Cmd+Ctrl+Tab | back to the previous Space |
 | Cmd+Ctrl+Shift+H/J/K/L or arrows | move window to the display that way |
@@ -180,7 +180,8 @@ hidden Space 12 instantly, and it comes back to the workspace you're on with SUP
 (Dock, Cmd+Tab, Raycast) or by picking it in AltTab. Real minimize (yellow button) still works: the window is kept sticky while
 minimized, so restoring it brings it up on the current workspace.
 The scratchpad is the 11th Space (`.local/bin/scratchpad`): a normal tiled workspace where Discord, Spotify and
-KeePassXC live, drawn as "S" first in the bar (while you're on it or it has windows) and skipped by SUPER+A/D.
+KeePassXC live. It isn't in the bar: it stands in for the workspace you came from, which stays lit, and SUPER+A/D go
+on from that one (from 2, SUPER+S then SUPER+A goes to 1).
 Workspaces 1-5 always show, higher ones when occupied; current = white pill, occupied = white, empty = grey.
 
 SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai owns SUPER(Cmd)+drag and can't tell
