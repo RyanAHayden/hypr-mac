@@ -20,17 +20,20 @@
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
+//   - focus lock (SUPER+Shift+O, .local/bin/focus-lock), like Omarchy's: new windows open without stealing focus.
+//   - menu bar icons left of the notch: a red lock while focus lock is on, a cup while sleep is off (Keep Awake With Lid
+//     Closed); and a red "yabai paused" notice in place of the workspaces while yabai isn't running (SUPER+Shift+P).
 // yabai signals (yabairc) and binds ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
-// wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
+// wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> | wm.created <window> | wm.focuslock |
+// wm.awake (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
 import AppKit
 import notify
 
 // MARK: - yabai over its socket (same message format as `yabai -m`: int32 length, then each arg NUL-terminated, then NUL)
 
-func yabai(_ args: [String]) -> Data? {
+func connectYabai() -> Int32? {
 	let fd = socket(AF_UNIX, SOCK_STREAM, 0)
 	guard fd >= 0 else { return nil }
-	defer { close(fd) }
 	var timeout = timeval(tv_sec: 1, tv_usec: 0)
 	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
 	var addr = sockaddr_un()
@@ -40,7 +43,20 @@ func yabai(_ args: [String]) -> Data? {
 	let connected = withUnsafePointer(to: &addr) {
 		$0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
 	}
-	guard connected == 0 else { return nil }
+	guard connected == 0 else { close(fd); return nil }
+	return fd
+}
+
+// Not running (SUPER+Shift+P paused it, or it quit): its socket file stays but nothing accepts. A busy yabai still does.
+func yabaiRunning() -> Bool {
+	guard let fd = connectYabai() else { return false }
+	close(fd)
+	return true
+}
+
+func yabai(_ args: [String]) -> Data? {
+	guard let fd = connectYabai() else { return nil }
+	defer { close(fd) }
 	var body = [UInt8]()
 	for a in args { body += Array(a.utf8) + [0] }
 	body.append(0)
@@ -79,6 +95,16 @@ func currentSpace() -> Int? { one(["--spaces", "--space"])?["index"] as? Int }
 
 let attic = 12 // hidden Space SUPER+M parks windows on (not in the bar, skipped by SUPER+A/D)
 
+// Focus lock is on while this file exists (.local/bin/focus-lock toggles it and posts wm.focuslock)
+let lockFile = NSHomeDirectory() + "/.local/state/focus-lock"
+var focusLocked = FileManager.default.fileExists(atPath: lockFile)
+// Keep Awake With Lid Closed (pmset disablesleep, .config/raycast/scripts/power-lid-sleep.sh) is on
+func sleepDisabled() -> Bool {
+	let pm = NSDictionary(contentsOfFile: "/Library/Preferences/com.apple.PowerManagement.plist")
+	return ((pm?["SystemPowerSettings"] as? [String: Any])?["SleepDisabled"] as? NSNumber)?.boolValue ?? false
+}
+var stayAwake = sleepDisabled()
+
 // MARK: - Focus
 
 final class Focus {
@@ -94,10 +120,12 @@ final class Focus {
 	// wm.focus: focus moved, or a window moved/resized. Opening several windows at once fires a burst of these,
 	// so coalesce them and act on wherever focus ends up.
 	func changed() {
+		if holdFocus() { return } // straight away, not after the burst: keys typed meanwhile go to the new window
 		guard !checkPending else { return }
 		checkPending = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
 			self.checkPending = false
+			if self.holdFocus() { return } // focus goes straight back; don't zoom or move the mouse to the new window
 			self.syncZoom()
 			self.followFocus()
 		}
@@ -244,6 +272,48 @@ final class Focus {
 		if switched { focus(id) } // without the scripting addition it can't switch Spaces; the window still moves
 	}
 
+	// MARK: focus lock
+
+	// Like hypr-win's: focus that lands on a window opened under a second ago is stolen and goes back to the window that
+	// had it; any other focus change (binds, hover, alt-tab, clicking the new window later) moves the lock to that window.
+	let stealGrace: TimeInterval = 1
+	var born = [Int: Date]() // windows opened while locked (wm.created)
+	var lockTarget = 0, prevTarget = 0
+	var targetSetAt = Date.distantPast
+
+	func lockChanged() {
+		focusLocked = FileManager.default.fileExists(atPath: lockFile)
+		born = [:]
+		prevTarget = 0
+		lockTarget = focusLocked ? one(["--windows", "--window"])?["id"] as? Int ?? 0 : 0
+	}
+
+	func holdFocus() -> Bool {
+		guard focusLocked, let id = one(["--windows", "--window"])?["id"] as? Int, id != lockTarget else { return false }
+		if let at = born[id], Date().timeIntervalSince(at) < stealGrace, lockTarget != 0 {
+			focus(lockTarget)
+			return true
+		}
+		prevTarget = lockTarget
+		lockTarget = id
+		targetSetAt = Date()
+		return false
+	}
+
+	// wm.created: remember it, and take focus back if it already has it. yabai can report the focus before the window, in which case holdFocus already took it for
+	// a focus change you made; hand it back.
+	func created(_ id: Int) {
+		guard focusLocked else { return }
+		let now = Date()
+		born = born.filter { now.timeIntervalSince($0.value) < stealGrace }
+		born[id] = now
+		if one(["--windows", "--window"])?["id"] as? Int == id, lockTarget != 0, lockTarget != id { focus(lockTarget); return }
+		if id == lockTarget, prevTarget != 0, now.timeIntervalSince(targetSetAt) < stealGrace {
+			lockTarget = prevTarget
+			focus(lockTarget)
+		}
+	}
+
 	// MARK: SUPER+M parking
 
 	func hide() {
@@ -313,7 +383,16 @@ final class Focus {
 
 // MARK: - Workspace bar
 
-let slotW: CGFloat = 24, pillH: CGFloat = 22, pad: CGFloat = 6
+let slotW: CGFloat = 24, pillH: CGFloat = 22, pad: CGFloat = 6, iconW: CGFloat = 22
+
+// SF Symbols drawn at the bar's right end, just left of the notch (or the menu bar icons), like the dotfiles' Waybar ones
+func indicators() -> [(name: String, color: NSColor)] {
+	(focusLocked ? [("lock.fill", NSColor.systemRed)] : []) + (stayAwake ? [("cup.and.saucer.fill", NSColor.white)] : [])
+}
+
+// yabai stopped: a red notice in place of the workspaces (which would be stale), so it's obvious nothing is tiling
+let pausedText = NSAttributedString(string: "YABAI PAUSED  ·  SUPER+SHIFT+P",
+	attributes: [.font: NSFont.systemFont(ofSize: 12, weight: .heavy), .foregroundColor: NSColor.white])
 
 typealias Item = (label: String, state: Character) // a = shown on its display, o = has windows, e = empty
 
@@ -401,9 +480,18 @@ func leftWidth(_ screen: NSScreen) -> CGFloat {
 
 final class Row: NSView {
 	var items: [Item] = [] { didSet { needsDisplay = true } }
+	var icons: [(name: String, color: NSColor)] = [] { didSet { needsDisplay = true } }
+	var paused = false { didSet { needsDisplay = true } }
 	override func draw(_ dirty: NSRect) {
 		NSColor.black.setFill() // the menu bar is black (set-wallpaper paints the wallpaper's top black), so this blends in over the menus it covers
 		bounds.fill()
+		if paused {
+			let size = pausedText.size()
+			let pill = NSRect(x: pad, y: (bounds.height - pillH) / 2, width: size.width + 20, height: pillH)
+			NSColor.systemRed.setFill()
+			NSBezierPath(roundedRect: pill, xRadius: 5, yRadius: 5).fill()
+			pausedText.draw(at: NSPoint(x: pill.minX + 10, y: pill.midY - size.height / 2 + 0.5))
+		}
 		let font = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .medium)
 		for (i, item) in items.enumerated() {
 			let slot = NSRect(x: pad + CGFloat(i) * slotW, y: (bounds.height - pillH) / 2, width: slotW, height: pillH)
@@ -419,6 +507,13 @@ final class Row: NSView {
 			let text = NSAttributedString(string: item.label, attributes: [.font: font, .foregroundColor: color])
 			let size = text.size()
 			text.draw(at: NSPoint(x: slot.midX - size.width / 2, y: slot.midY - size.height / 2 + 0.5))
+		}
+		for (i, icon) in icons.reversed().enumerated() {
+			let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium).applying(.init(paletteColors: [icon.color]))
+			guard let image = NSImage(systemSymbolName: icon.name, accessibilityDescription: nil)?.withSymbolConfiguration(config) else { continue }
+			let slot = NSRect(x: bounds.maxX - pad - CGFloat(i + 1) * iconW, y: 0, width: iconW, height: bounds.height)
+			image.draw(in: NSRect(x: slot.midX - image.size.width / 2, y: slot.midY - image.size.height / 2,
+				width: image.size.width, height: image.size.height))
 		}
 	}
 }
@@ -453,21 +548,25 @@ final class Bar {
 		refreshPending = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
 			self.refreshPending = false
-			if let rows = workspaces() { self.layout(rows) }
+			if !yabaiRunning() { self.layout([:], paused: true) } else if let rows = workspaces() { self.layout(rows) }
 		}
 	}
 
 	var leftFullscreen = false
-	func layout(_ rows: [String: [Item]]) {
+	func layout(_ rows: [String: [Item]], paused: Bool = false) {
 		// A panel ordered out on a native fullscreen Desktop comes back pinned to the one Space it's shown on again
 		// (canJoinAllSpaces lost, re-ordering doesn't help); fresh panels join all Spaces, so rebuild once on the way out.
 		if onFullscreen { leftFullscreen = true } else if leftFullscreen { leftFullscreen = false; rebuild(); return }
+		let icons = indicators()
 		for (id, p) in panels {
 			let h = barHeight(p.screen)
 			let items = rows[id] ?? []
-			guard h > 0, !menuBarHidden, !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
+			guard h > 0, !menuBarHidden, paused || !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
 			if p.row.items.map(\.label) != items.map(\.label) || p.row.items.map(\.state) != items.map(\.state) { p.row.items = items }
-			let w = max(pad * 2 + slotW * CGFloat(items.count), leftWidth(p.screen))
+			if p.row.icons.map(\.name) != icons.map(\.name) { p.row.icons = icons }
+			if p.row.paused != paused { p.row.paused = paused }
+			let content = paused ? pausedText.size().width + 20 : slotW * CGFloat(items.count)
+			let w = max(pad * 2 + content + iconW * CGFloat(icons.count), leftWidth(p.screen))
 			let f = NSRect(x: p.screen.frame.minX, y: p.screen.frame.maxY - h, width: w, height: h)
 			if p.panel.frame != f { p.panel.setFrame(f, display: true) }
 			p.panel.alphaValue = hidden ? 0 : 1
@@ -507,7 +606,7 @@ app.setActivationPolicy(.accessory)
 try? String(getpid()).write(toFile: NSHomeDirectory() + "/.cache/yabai-helper.pid", atomically: true, encoding: .utf8)
 let bar = Bar()
 let focuser = Focus()
-var tokens = [Int32](repeating: 0, count: 8)
+var tokens = [Int32](repeating: 0, count: 11)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
 notify_register_dispatch("wm.closed", &tokens[2], .main) { _ in focuser.closed(); bar.refresh() }
@@ -520,6 +619,13 @@ notify_register_dispatch("wm.menubar", &tokens[7], .main) { token in
 	menuBarHidden = state == 1
 	bar.refresh()
 }
+notify_register_dispatch("wm.created", &tokens[8], .main) { token in
+	var id: UInt64 = 0
+	notify_get_state(token, &id)
+	focuser.created(Int(id))
+}
+notify_register_dispatch("wm.focuslock", &tokens[9], .main) { _ in focuser.lockChanged(); bar.refresh() }
+notify_register_dispatch("wm.awake", &tokens[10], .main) { _ in stayAwake = sleepDisabled(); bar.refresh() }
 notify_register_dispatch("wm.move", &tokens[6], .main) { token in
 	var space: UInt64 = 0
 	notify_get_state(token, &space)
@@ -528,6 +634,8 @@ notify_register_dispatch("wm.move", &tokens[6], .main) { token in
 let ws = NSWorkspace.shared.notificationCenter
 ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in focuser.leaveAttic(); bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
+	// focus lock: the app activating can come before yabai reports its new window focused, so check now too
+	if focusLocked, focuser.holdFocus() { return }
 	if let a = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication { focuser.activated(a) }
 }
 // Music can't be deleted (sealed system volume) and macOS has no setting for what Play starts, so swap it for Spotify.
@@ -546,7 +654,8 @@ NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenPar
 // mouse events); the slow timer catches menus closing while the mouse is still, and window counts changing without an event.
 NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { e in bar.trackMouse(); focuser.track(e.cgEvent?.location) }
 Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in bar.trackMouse() }
-Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in bar.refresh() }
+Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in stayAwake = sleepDisabled(); bar.refresh() } // sleep also changes outside the toggle (sudo pmset)
 bar.rebuild()
 focuser.syncZoom() // a window may already be zoomed (helper restarted)
+focuser.lockChanged()
 app.run()

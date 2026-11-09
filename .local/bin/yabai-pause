@@ -11,3 +11,5 @@ else
 	yabai --start-service
 	notify "Resumed"
 fi
+# the menu bar's paused notice (yabai-helper) shows now rather than on its next 5 s check (yabairc clears it on resume)
+~/.local/bin/notify-post wm.bar

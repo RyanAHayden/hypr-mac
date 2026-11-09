@@ -8,7 +8,8 @@ My [Omarchy](https://omarchy.org) setup, rebuilt on macOS: the same keys, worksp
 - **Tiling** with yabai, binds through Karabiner. SUPER is left Cmd, and the binds follow Omarchy's
 - **Instant workspaces** (1-10, plus a scratchpad), with no macOS slide. Alt-tab, minimize and fullscreen stay
   on the workspace you're on
-- **Workspace bar** in the top left of the menu bar, drawn by a small native helper (`yabai-helper`)
+- **Workspace bar** in the top left of the menu bar, drawn by a small native helper (`yabai-helper`), with a lock
+  left of the notch while focus lock is on and a cup while the Mac is kept awake
 
   ![Workspace bar: S, 1-5 and the current workspace highlighted](media/workspace-bar.png)
 - **Omarchy themes**: Ghostty, nvim, the window border and light/dark mode switch together from Raycast, and
@@ -93,6 +94,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+A/D, Shift+A/D | prev/next Space / move window there |
 | Cmd+F, Cmd+T, Cmd+\ | fullscreen (border in the theme's zoom colour, no hover focus; stays on the workspace, so focusing another window fullscreens that one), float, toggle split |
 | Cmd+O | pop window out: float centered, on every Space, above tiled windows (again: put back) |
+| Cmd+Shift+O | focus lock: new windows open without stealing focus (a lock shows left of the notch) |
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
 | Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |
 | Cmd+-/= (+Shift, +Option, +Ctrl) | resize width (Shift: height; Option: a little, Ctrl: a lot) |
@@ -227,7 +229,7 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   `.config/raycast/settings.sql` is written into its encrypted settings database. Raycast has to have been opened
   once first. To change it, flip things in Raycast Settings and re-dump its `raycastConfiguration` table.
 - Not ported (Linux/desktop only): gaming (stretched res, MangoHud caps, gamescope, crosshair, xpadneo), Sunshine,
-  sddm/limine/plymouth, TPM2, reboot-to-windows, GPU toggle, monitor mirror/TV/pin, focus lock, window labels,
+  sddm/limine/plymouth, TPM2, reboot-to-windows, GPU toggle, monitor mirror/TV/pin, window labels,
   per-window volume, SUPER+scroll zoom (use Accessibility > Zoom with a modifier), `clds` (Linux sudo wrapper). `c` runs `cld` (claude, bypass permissions, auto-trusts $PWD).
 - Substitutes: Dolphin -> Finder, wiremix/bluetui -> System Settings, quickshell switcher -> AltTab,
   voxtype -> macOS Dictation, bash -> zsh (`.zshrc`), Waybar -> native menu bar + top-left workspace overlay.

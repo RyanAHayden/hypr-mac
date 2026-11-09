@@ -1066,6 +1066,23 @@
                             {
                                 "type": "basic",
                                 "from": {
+                                    "key_code": "o",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_command",
+                                            "shift"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/focus-lock   # focus lock: new windows open without stealing focus (lock in the menu bar)"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
                                     "key_code": "backslash",
                                     "modifiers": {
                                         "mandatory": [

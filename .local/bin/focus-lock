@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# SUPER+Shift+O, like Omarchy: new windows open without stealing focus while the flag file exists. yabai-helper does
+# the work (puts focus back when a just-opened window takes it) and shows a lock in the menu bar, left of the notch.
+flag="$HOME/.local/state/focus-lock"
+if [ -e "$flag" ]; then rm "$flag"; else mkdir -p "${flag%/*}" && touch "$flag"; fi
+exec ~/.local/bin/notify-post wm.focuslock

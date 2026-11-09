@@ -17,9 +17,12 @@ zle -N _complete_word
 bindkey '^I' _complete_word
 bindkey '^[[Z' reverse-menu-complete
 
-# Up/Down match what you've typed so far against history (ssh<Up> -> ssh rycs)
-bindkey '^[[A' history-beginning-search-backward '^[OA' history-beginning-search-backward
-bindkey '^[[B' history-beginning-search-forward '^[OB' history-beginning-search-forward
+# Up/Down match what you've typed so far against history (ssh<Up> -> ssh rycs), cursor at the end of the line
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search '^[OA' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search '^[OB' down-line-or-beginning-search
 # Ctrl+arrows word jump, Home/End, Delete
 bindkey '^[[1;5C' forward-word '^[[1;5D' backward-word
 bindkey '^[[H' beginning-of-line '^[OH' beginning-of-line '^[[1~' beginning-of-line
