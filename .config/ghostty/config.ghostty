@@ -4,6 +4,8 @@ font-size = 13
 window-decoration = true
 macos-titlebar-style = hidden
 macos-window-buttons = hidden
+# no split drag handle (the three dots at the top, shown on hover since 1.4): splits are tmux's
+drag-handle = never
 window-padding-x = 14
 window-padding-y = 14
 window-padding-balance = true
