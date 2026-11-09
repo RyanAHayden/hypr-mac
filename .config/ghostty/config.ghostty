@@ -9,7 +9,7 @@ drag-handle = never
 window-padding-x = 14
 window-padding-y = 14
 window-padding-balance = true
-# transparency is yabai's: unfocused windows only (yabairc)
+# transparency is yabai's, for every app alike: unfocused windows fade (yabairc), SUPER+Backspace pins one opaque
 background-opacity = 1.0
 # Option acts as Meta so nvim/tmux M-* binds work (binds leave Option alone; SUPER is left Cmd)
 macos-option-as-alt = true

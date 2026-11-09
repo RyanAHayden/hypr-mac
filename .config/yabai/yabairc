@@ -43,6 +43,8 @@ for ev in window_destroyed window_minimized application_terminated; do
   signal "closed_$ev" "$ev" "$post wm.closed"
 done
 signal demin window_deminimized "$post wm.demin"
+# SUPER+Backspace (.local/bin/window-opacity) marks windows pinned opaque; drop the marker so a reused id starts see-through
+signal opaque_gone window_destroyed "rm -f $HOME/.cache/yabai-opaque/\$YABAI_WINDOW_ID"
 # focus lock (SUPER+Shift+O, .local/bin/focus-lock): the helper hands focus back when a just-opened window takes it
 signal created window_created "$post wm.created \$YABAI_WINDOW_ID"
 # Native fullscreen Desktops remember the workspace they came from (.local/bin/fs-origin): ws cycles them right
@@ -67,7 +69,7 @@ if [ -n "$sa" ]; then
     defaults write -g AppleSpacesSwitchOnActivate -bool false
     killall Dock   # dock_did_restart reloads the SA
   fi
-  # Unfocused windows see-through, the focused one opaque (SUPER+Backspace toggles, Option+Backspace adjusts: window-opacity)
+  # Unfocused windows see-through, the focused one opaque (Option+Backspace adjusts; SUPER+Backspace pins one opaque: window-opacity)
   yabai -m config window_opacity on active_window_opacity 1.0 normal_window_opacity 0.9
   # Closing a workspace's last window (red button, an app's own Cmd+W) also makes macOS activate another
   # app; mark it so yabai-helper's alt-tab jump stays put. Best effort: this can race the activation (SUPER+W/Q mark first).

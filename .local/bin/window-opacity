@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
-# Unfocused windows are see-through, the focused one opaque (yabai window_opacity, yabairc; needs the scripting
-# addition). Usage: window-opacity toggle | +0.05 | -0.05
-# toggle turns that on and off, like Omarchy SUPER+Backspace; +/- changes how see-through unfocused windows are.
+# Window transparency, like Omarchy. Usage: window-opacity toggle | +0.05 | -0.05
+# Windows are see-through while unfocused (yabairc). toggle (SUPER+Backspace): the focused window stays fully opaque
+# when unfocused too, until toggled again. +/- (Option+Backspace) changes how see-through unfocused windows are.
+# Needs the scripting addition (yabai's opacity).
 export PATH="/opt/homebrew/bin:$PATH"
 case $1 in
-	toggle) [ "$(yabai -m config window_opacity)" = on ] && yabai -m config window_opacity off || yabai -m config window_opacity on ;;
+	toggle)
+		w=$(yabai -m query --windows --window) || exit 1
+		id=$(jq .id <<<"$w")
+		mark=~/.cache/yabai-opaque/$id   # yabairc drops it when the window closes, so a reused id starts see-through
+		if [ -e "$mark" ]; then
+			rm "$mark"
+			yabai -m window "$id" --opacity 0.0   # 0 = back to yabairc's focused/unfocused opacity
+		else
+			mkdir -p "${mark%/*}" && touch "$mark"
+			yabai -m window "$id" --opacity 1.0
+		fi
+		;;
 	*)
 		new=$(awk -v c="$(yabai -m config normal_window_opacity)" -v d="$1" 'BEGIN { n = c + d; if (n > 1) n = 1; if (n < 0.2) n = 0.2; printf "%.2f", n }')
 		yabai -m config normal_window_opacity "$new" window_opacity on

@@ -1443,7 +1443,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-opacity toggle   # Backspace: unfocused windows see-through on/off"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/window-opacity toggle   # Backspace: focused window stays opaque when unfocused, on/off"
                                     }
                                 ]
                             },
