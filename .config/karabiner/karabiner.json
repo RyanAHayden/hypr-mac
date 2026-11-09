@@ -60,7 +60,7 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "AltTab while Cmd+Tab is held: Esc cancels, Cmd+H/J/K/L move (arrow keys), Cmd+W closes / Cmd+S or Cmd+M minimizes (toggle) the selected window, Cmd+/ searches",
+                        "description": "AltTab while Cmd+Tab is held: Esc cancels, Cmd+H/J/K/L move (arrow keys), Cmd+W closes / Cmd+Q quits the app of / Cmd+S or Cmd+M minimizes (toggle) the selected window, Cmd+/ searches",
                         "manipulators": [
                             {
                                 "type": "basic",
@@ -246,6 +246,32 @@
                                 "to": [
                                     {
                                         "key_code": "w",
+                                        "modifiers": [
+                                            "left_command"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "q",
+                                    "modifiers": {
+                                        "mandatory": [
+                                            "left_command"
+                                        ]
+                                    }
+                                },
+                                "conditions": [
+                                    {
+                                        "type": "variable_if",
+                                        "name": "alttab_open",
+                                        "value": 1
+                                    }
+                                ],
+                                "to": [
+                                    {
+                                        "key_code": "q",
                                         "modifiers": [
                                             "left_command"
                                         ]

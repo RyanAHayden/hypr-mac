@@ -351,9 +351,9 @@ if ! defaults read com.lwouis.alt-tab-macos holdShortcut 2>/dev/null | grep -q '
 	defaults write com.lwouis.alt-tab-macos nextWindowShortcut -string "⇥"
 	defaults write com.lwouis.alt-tab-macos preferencesVersion -string "10.4.0"
 fi
-# while it's open, S minimizes/restores the selected window (W closes it, AltTab's default) and the switcher stays
+# while it's open, S minimizes/restores the selected window (W closes it and Q quits its app, AltTab's defaults) and the switcher stays
 # open, and / is search (AltTab's default search key is S, and search mode keeps the switcher open after releasing
-# Cmd). Karabiner lets Cmd+S/W// through to it then, and sends Cmd+M as Cmd+S. Written archived: SRShortcuts for
+# Cmd). Karabiner lets Cmd+S/W/Q// through to it then, and sends Cmd+M as Cmd+S. Written archived: SRShortcuts for
 # keyCode 1 ("s") and 44 ("/"), the shape AltTab saves itself
 defaults write com.lwouis.alt-tab-macos minDeminWindowShortcut -dict string S secureData -data \
 	62706c6973743030d40102030405061e215924617263686976657258246f626a656374735424746f70582476657273696f6e5f100f4e534b657965644172636869766572a607081516171855246e756c6cd6090a0b0c0d0e0f10111213145624636c6173735a636861726163746572735f101b6368617261637465727349676e6f72696e674d6f64696669657273576b6579436f64655d6d6f646966696572466c6167735776657273696f6e800580048004800280038003100110005173d2191a1b1c5824636c61737365735a24636c6173736e616d65a21c1d5a535253686f7274637574584e534f626a656374d11f2054726f6f74800112000186a008111b242932444b515e65708e96a4acaeb0b2b4b6b8babcbec3ccd7dae5eef1f6f800000000000001010000000000000022000000000000000000000000000000fd
