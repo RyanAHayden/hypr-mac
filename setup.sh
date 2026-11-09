@@ -355,10 +355,6 @@ if ! defaults read com.lwouis.alt-tab-macos holdShortcut 2>/dev/null | grep -q '
 	defaults write com.lwouis.alt-tab-macos nextWindowShortcut -string "⇥"
 	defaults write com.lwouis.alt-tab-macos preferencesVersion -string "10.4.0"
 fi
-# AltTab's default exceptions, plus Moonlight with shortcuts ignored, so SUPER+Tab reaches the streamed Windows desktop
-# (Karabiner leaves SUPER combos alone there too); Moonlight itself captures system shortcuts while fullscreen
-defaults write com.lwouis.alt-tab-macos blacklist -string '[{"bundleIdentifier":"com.McAfee.McAfeeSafariHost","hide":"1","ignore":"0"},{"bundleIdentifier":"com.apple.finder","hide":"2","ignore":"0"},{"bundleIdentifier":"com.microsoft.rdc.macos","hide":"0","ignore":"2"},{"bundleIdentifier":"com.teamviewer.TeamViewer","hide":"0","ignore":"2"},{"bundleIdentifier":"org.virtualbox.app.VirtualBoxVM","hide":"0","ignore":"2"},{"bundleIdentifier":"com.parallels.","hide":"0","ignore":"2"},{"bundleIdentifier":"com.citrix.XenAppViewer","hide":"0","ignore":"2"},{"bundleIdentifier":"com.citrix.receiver.icaviewer.mac","hide":"0","ignore":"2"},{"bundleIdentifier":"com.nicesoftware.dcvviewer","hide":"0","ignore":"2"},{"bundleIdentifier":"com.vmware.fusion","hide":"0","ignore":"2"},{"bundleIdentifier":"com.apple.ScreenSharing","hide":"0","ignore":"2"},{"bundleIdentifier":"com.moonlight-stream.Moonlight","hide":"0","ignore":"1"}]'
-defaults write com.moonlight-stream.Moonlight capturesyskeys -int 1
 # while it's open, S minimizes/restores the selected window (W closes it and Q quits its app, AltTab's defaults) and the switcher stays
 # open, and / is search (AltTab's default search key is S, and search mode keeps the switcher open after releasing
 # Cmd). Karabiner lets Cmd+S/W/Q// through to it then, and sends Cmd+M as Cmd+S. Written archived: SRShortcuts for
