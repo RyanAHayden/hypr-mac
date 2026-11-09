@@ -5,6 +5,7 @@
 //     menu opened from the bar is showing, so the menus underneath stay usable.
 //   - mouse follows focus: when focus moves to another window (a new window, alt-tab, a close) and the mouse isn't
 //     in it, move the mouse to it, so hover focus (focus_follows_mouse) doesn't hand focus back on the next nudge.
+//     Not when hover gave it focus: a quick swipe across windows leaves the mouse where you swiped to.
 //     yabai's own mouse_follows_focus only covers focus changes yabai makes itself.
 //   - after a window closes, minimizes or its app quits, focus the next window on this Space (macOS leaves focus
 //     on nothing, or on an app with no window here).
@@ -15,6 +16,7 @@
 //     it (AltTab).
 //   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
 //     on the Space you're on rather than switching back to the one it was minimized on.
+//   - no Music: macOS starts it when Play is pressed (keyboard, AirPods) with nothing playing; quit it and play Spotify.
 //   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
@@ -85,6 +87,7 @@ final class Focus {
 	var warpedTo = CGPoint.zero
 	var checkPending = false
 	var closedAt = Date.distantPast
+	var trail = [(at: Date, point: CGPoint)]() // where the mouse has been in the last moment (global mouse monitor)
 	var parked = [Int]() // SUPER+M'd window ids, oldest first (windows found on the attic without a record go last)
 	let stuckDir = NSHomeDirectory() + "/.cache/yabai-min-sticky" // windows made sticky while minimized, one file per id
 
@@ -155,6 +158,11 @@ final class Focus {
 		let fresh = id != lastID
 		lastID = id
 		if f.contains(at) { return } // hover focused it, or the mouse is already there
+		// Hover focused it and the mouse has already moved on (a quick swipe across windows): the mouse's path crossed the
+		// window. Warping back here would snap the cursor onto it. A fast swipe's samples can be hundreds of points
+		// apart, landing either side of the window, so check the lines between them rather than the points.
+		let path = trail.map(\.point) + [at]
+		if zip(path, path.dropFirst()).contains(where: { crosses(f, $0, $1) }) { return }
 		// Only new focus, or the same window still being tiled right after we moved the mouse to it (as long as the
 		// mouse hasn't been touched since). Otherwise windows moving in the background would yank the mouse around.
 		let settling = Date().timeIntervalSince(warpedAt) < 1.5 && hypot(at.x - warpedTo.x, at.y - warpedTo.y) < 2
@@ -164,6 +172,24 @@ final class Focus {
 		CGAssociateMouseAndMouseCursorPosition(1) // warping freezes the cursor briefly otherwise
 		warpedAt = Date()
 		warpedTo = c
+	}
+
+	// Does the line from a to b pass through r? Checked every few points along it.
+	func crosses(_ r: CGRect, _ a: CGPoint, _ b: CGPoint) -> Bool {
+		let steps = max(1, Int(hypot(b.x - a.x, b.y - a.y) / 4))
+		return (0...steps).contains { i in
+			let t = CGFloat(i) / CGFloat(steps)
+			return r.contains(CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t))
+		}
+	}
+
+	// Mouse moved: keep the last second of positions; a swipe fires a burst of hover focus changes that can reach
+	// followFocus several hundred ms behind the mouse
+	func track(_ point: CGPoint?) {
+		guard let point else { return }
+		let now = Date()
+		trail.removeAll { now.timeIntervalSince($0.at) > 1 }
+		trail.append((now, point))
 	}
 
 	// wm.closed: macOS picks what gets focus a little after the close; check soon, and again in case it lands late
@@ -502,10 +528,21 @@ ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: ni
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
 	if let a = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication { focuser.activated(a) }
 }
+// Music can't be deleted (sealed system volume) and macOS has no setting for what Play starts, so swap it for Spotify.
+// Telling Spotify to play needs Automation, which setup grants (it signs this binary with a fixed identifier for that).
+ws.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { note in
+	guard let a = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+		a.bundleIdentifier == "com.apple.Music" else { return }
+	a.forceTerminate()
+	let play = Process()
+	play.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+	play.arguments = ["-e", "tell application \"Spotify\" to play"] // starts Spotify if needed (yabairc puts it on the scratchpad)
+	try? play.run()
+}
 NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in bar.rebuild() }
-// Mouse moves drive the bar's hover hiding (no permission needed for mouse events); the slow timer catches menus
-// closing while the mouse is still, and window counts changing without an event.
-NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { _ in bar.trackMouse() }
+// Mouse moves drive the bar's hover hiding and tell followFocus where hover focus came from (no permission needed for
+// mouse events); the slow timer catches menus closing while the mouse is still, and window counts changing without an event.
+NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { e in bar.trackMouse(); focuser.track(e.cgEvent?.location) }
 Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in bar.trackMouse() }
 Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in bar.refresh() }
 bar.rebuild()
