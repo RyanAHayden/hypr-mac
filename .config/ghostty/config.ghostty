@@ -24,9 +24,10 @@ quit-after-last-window-closed = true
 # Shift+Return / Alt+Shift+Return as CSI-u, so TUIs and tmux (M-S-Enter) can tell them apart
 keybind = shift+enter=text:\x1b[13;2u
 keybind = alt+shift+enter=text:\x1b[13;4u
-# over ssh, send TERM=xterm-256color instead of xterm-ghostty (no terminfo auto-install),
-# so tmux etc. on servers without it don't fail with "missing or unsuitable terminal"
-shell-integration-features = ssh-env,no-ssh-terminfo
+# no ssh wrapper from Ghostty: since 1.4 its ssh-env runs ssh under `ghostty +ssh` and replaces the ssh() in .zshrc
+# (reconnect, mode cleanup); when that helper died it left ssh orphaned holding the terminal raw. .zshrc's ssh() sends
+# TERM=xterm-256color itself, so servers without Ghostty's terminfo don't fail with "missing or unsuitable terminal".
+shell-integration-features = no-ssh-env,no-ssh-terminfo
 
 # colors: the current theme (theme script, Raycast's Switch Theme), which reloads Ghostty with SIGUSR2
 # Ghostty 1.4 needs a conditional theme to report dark mode correctly (ghostty#13604).

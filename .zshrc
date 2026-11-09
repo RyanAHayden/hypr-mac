@@ -150,10 +150,11 @@ dip() {
 lip() { pgrep -lf "ssh.*-L [0-9]+:localhost:[0-9]+" || echo "No active forwards"; }
 
 # ssh: clean up terminal modes a dropped remote tmux/nvim left armed, and reconnect
-# interactive sessions that drop after being up 30s+ (Omarchy's ssh-reconnect)
+# interactive sessions that drop after being up 30s+ (Omarchy's ssh-reconnect). TERM=xterm-256color, not
+# xterm-ghostty: servers rarely have Ghostty's terminfo (Ghostty's own ssh wrapper is off, config.ghostty)
 ssh() {
 	local rc started=$SECONDS
-	command ssh "$@"
+	TERM=${TERM/#xterm-ghostty/xterm-256color} command ssh "$@"
 	rc=$?
 	[[ -t 1 ]] || return $rc
 	_ssh_disarm
@@ -164,7 +165,7 @@ ssh() {
 		while true; do
 			echo "Connection lost. Reconnecting (Ctrl-C to stop)..."
 			sleep 2
-			command ssh "$@"
+			TERM=${TERM/#xterm-ghostty/xterm-256color} command ssh "$@"
 			rc=$?
 			_ssh_disarm
 			(( rc != 255 )) && exit $rc
