@@ -20,11 +20,14 @@ done
 sleep 0.5
 osascript -l JavaScript -e '
 ObjC.import("CoreGraphics")
-// the bridge hands CG constants over as strings, so the values are spelled out: Control | Option | Shift, HID tap = 0
-for (const down of [true, false]) {
-  const e = $.CGEventCreateKeyboardEvent(null, 8, down)  // 8 = C
-  $.CGEventSetFlags(e, 0x40000 | 0x80000 | 0x20000)
-  $.CGEventPost(0, e)
-}' >/dev/null
+// SDL reads modifiers from their own key events, so press Control, Option, Shift (keycodes 59, 58, 56), then C (8),
+// then let go, like a keyboard would. The bridge hands CG constants over as strings, hence the numbers (HID tap = 0).
+const mods = [[59, 0x40000], [58, 0x80000], [56, 0x20000]]
+let flags = 0
+const post = (key, down) => { const e = $.CGEventCreateKeyboardEvent(null, key, down); $.CGEventSetFlags(e, flags); $.CGEventPost(0, e); delay(0.02) }
+for (const [key, bit] of mods) { flags |= bit; post(key, true) }
+post(8, true); post(8, false)
+for (const [key, bit] of mods.reverse()) { flags &= ~bit; post(key, false) }
+' >/dev/null
 
 exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>&1
