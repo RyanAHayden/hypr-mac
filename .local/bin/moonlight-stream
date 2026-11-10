@@ -20,9 +20,11 @@ done
 sleep 0.5
 osascript -l JavaScript -e '
 ObjC.import("CoreGraphics")
-// SDL reads modifiers from their own key events, so press Control, Option, Shift (keycodes 59, 58, 56), then C (8),
-// then let go, like a keyboard would. The bridge hands CG constants over as strings, hence the numbers (HID tap = 0).
-const mods = [[59, 0x40000], [58, 0x80000], [56, 0x20000]]
+// SDL reads modifiers from their own key events, so press Control, Option, Shift (keycodes 62, 58, 56), then C (8),
+// then let go, like a keyboard would. Right Control, as Karabiner sends in Moonlight: the work laptop's PowerToys
+// swallows a left Ctrl coming in through Sunshine. The bridge hands CG constants over as strings, hence the numbers
+// (HID tap = 0).
+const mods = [[62, 0x40000], [58, 0x80000], [56, 0x20000]]
 let flags = 0
 const post = (key, down) => { const e = $.CGEventCreateKeyboardEvent(null, key, down); $.CGEventSetFlags(e, flags); $.CGEventPost(0, e); delay(0.02) }
 for (const [key, bit] of mods) { flags |= bit; post(key, true) }

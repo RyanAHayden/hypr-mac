@@ -254,7 +254,9 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   notch, 20 Mbps, remote desktop mouse mode. When a stream window opens, yabai runs `moonlight-stream`: it turns on
   Moonlight's local cursor (Ctrl+Alt+Shift+C, so the pointer has no network lag) and runs `clip-sync`, a two-way text
   clipboard over SSH from this Mac (Moonlight has none) until the window closes. Hosts are matched by stream window
-  title in `moonlight-stream`. Host side (not in this repo): the work laptop's Sunshine streams its virtual display
+  title in `moonlight-stream`. Karabiner sends left Ctrl (and Caps Lock) as right Ctrl in Moonlight: the work
+  laptop's PowerToys Keyboard Manager swallows a left Ctrl coming in through Sunshine, which drops Ctrl from
+  shortcuts or leaves apps thinking it's still held. Host side (not in this repo): the work laptop's Sunshine streams its virtual display
   as the only screen at the client's resolution and blanks Windows' cursors (hypr-win `stream-cursor.ps1`);
   omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
   (dotfiles `bin/stream-display`).

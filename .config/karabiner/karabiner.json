@@ -60,6 +60,35 @@
             "complex_modifications": {
                 "rules": [
                     {
+                        "description": "Moonlight: left Ctrl (and Caps Lock) sent as right Ctrl",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "right_control"
+                                    }
+                                ],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_if",
+                                        "bundle_identifiers": [
+                                            "^com\\.moonlight-stream\\.Moonlight$"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "description": "AltTab while Cmd+Tab is held: Esc cancels, Cmd+H/J/K/L move (arrow keys), Cmd+W closes / Cmd+Q quits the app of / Cmd+S or Cmd+M minimizes (toggle) the selected window, Cmd+/ searches",
                         "manipulators": [
                             {
