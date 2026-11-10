@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # yabai window_created for Moonlight (yabairc): when a stream window opens, share the clipboard with that host until
-# the window closes, and turn on Moonlight's local cursor (Ctrl+Alt+Shift+C; it starts hidden every stream and has no
-# setting), so the pointer has no network lag. omarchy-desktop hides its own cursor while streaming; the work laptop
-# keeps its Windows cursor (blanking it caused trouble), so there it trails ours.
+# the window closes. Hosts are matched by the stream window's title.
 wid=$1
 title=$(yabai -m query --windows --window "$wid" | jq -r .title)
 
@@ -12,26 +10,6 @@ case "$title" in
   omarchy-desktop) host=desktop kind=wayland ;;
   *) exit 0 ;;
 esac
-
-# the toggle only reaches Moonlight once its stream window has focus
-for _ in $(seq 50); do
-  [ "$(yabai -m query --windows --window "$wid" | jq -r '."has-focus"')" = true ] && break
-  sleep 0.1
-done
-sleep 0.5
-osascript -l JavaScript -e '
-ObjC.import("CoreGraphics")
-// SDL reads modifiers from their own key events, so press Control, Option, Shift (keycodes 62, 58, 56), then C (8),
-// then let go, like a keyboard would. Right Control, as Karabiner sends in Moonlight: PowerToys on the work laptop
-// swallows a left Ctrl coming in through Sunshine. The bridge hands CG constants over as strings, hence the numbers
-// (HID tap = 0).
-const mods = [[62, 0x40000], [58, 0x80000], [56, 0x20000]]
-let flags = 0
-const post = (key, down) => { const e = $.CGEventCreateKeyboardEvent(null, key, down); $.CGEventSetFlags(e, flags); $.CGEventPost(0, e); delay(0.02) }
-for (const [key, bit] of mods) { flags |= bit; post(key, true) }
-post(8, true); post(8, false)
-for (const [key, bit] of mods.reverse()) { flags &= ~bit; post(key, false) }
-' >/dev/null
 
 mkdir -p ~/.cache/clip-sync
 exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>>~/.cache/clip-sync/log

@@ -254,15 +254,13 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   solid grey), and the menu bar takes the colour of the wallpaper under it, so `set-wallpaper` paints a black band
   across the top of the copy it sets (`wallpaper-band`, sized from the window server's menu bar height).
 - Moonlight is set up for remote desktop, not games: native fullscreen (own Space) at 2560x1600, the screen below the
-  notch, 20 Mbps, remote desktop mouse mode. When a stream window opens, yabai runs `moonlight-stream`: it turns on
-  Moonlight's local cursor (Ctrl+Alt+Shift+C, so the pointer has no network lag) and runs `clip-sync`, a two-way text
+  notch, 20 Mbps. When a stream window opens, yabai runs `moonlight-stream`, which runs `clip-sync`, a two-way text
   clipboard over SSH from this Mac (Moonlight has none) until the window closes. Hosts are matched by stream window
   title in `moonlight-stream`. Karabiner sends left Ctrl (and Caps Lock) as right Ctrl in Moonlight: the work
   laptop's PowerToys Keyboard Manager swallows a left Ctrl coming in through Sunshine, which drops Ctrl from
   shortcuts or leaves apps thinking it's still held. Host side (not in this repo): the work laptop's Sunshine streams whatever its primary screen is and leaves the
   display layout alone: its own screen (mirrored with the virtual display, and left on) at its own resolution, or the
-  virtual display with the lid closed. Pinning it to the virtual display failed while mirrored. It keeps its Windows cursor (blanking it caused trouble), which trails
-  the local one;
+  virtual display with the lid closed. Pinning it to the virtual display failed while mirrored. It keeps its Windows cursor (blanking it caused trouble);
   omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
   (dotfiles `bin/stream-display`).
 - Syncthing runs always (brew service) instead of being bound to a mount.

@@ -47,7 +47,7 @@ signal demin window_deminimized "$post wm.demin"
 signal opaque_gone window_destroyed "rm -f $HOME/.cache/yabai-opaque/\$YABAI_WINDOW_ID"
 # focus lock (SUPER+Shift+O, .local/bin/focus-lock): the helper hands focus back when a just-opened window takes it
 signal created window_created "$post wm.created \$YABAI_WINDOW_ID"
-# Moonlight stream windows: local cursor on + clipboard shared with the host (.local/bin/moonlight-stream)
+# Moonlight stream windows: clipboard shared with the host (.local/bin/moonlight-stream)
 yabai -m signal --remove moonlight 2>/dev/null
 yabai -m signal --add label=moonlight event=window_created app="^Moonlight$" action="$HOME/.local/bin/moonlight-stream \$YABAI_WINDOW_ID"
 # Native fullscreen Desktops remember the workspace they came from (.local/bin/fs-origin): ws cycles them right
