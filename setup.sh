@@ -164,7 +164,7 @@ defaults write art.ginzburg.MiddleClick fingers -int 3
 defaults write art.ginzburg.MiddleClick allowMoreFingers -bool false
 # Moonlight is remote desktop only (no games): 2560x1600 = the screen below the notch, which the hosts' virtual display
 # matches; mode 1 = native fullscreen on its own Space (mode 0 is a fake fullscreen that covers the Space and can't be
-# moved); fixed 20 Mbps, no vsync/frame pacing (latency over smoothness); quit the app on disconnect so Sunshine's undo runs
+# moved); fixed 20 Mbps, no vsync/frame pacing (latency over smoothness); no mouse acceleration; quit the app on disconnect so Sunshine's undo runs
 m=com.moonlight-stream.Moonlight
 # Moonlight calls itself a game (LSSupportsGameMode), so fullscreen streams switched on Game Mode: opt it out and
 # re-sign ad hoc (no hardened runtime, so its own frameworks still load). A brew upgrade undoes it until setup runs again.
@@ -180,7 +180,7 @@ defaults write $m bitrate -int 20000
 defaults write $m windowmode -int 1
 defaults write $m vsync -int 0
 defaults write $m framepacing -int 0
-defaults write $m mouseacceleration -int 1
+defaults write $m mouseacceleration -int 0
 defaults write $m gamepadmouse -int 0
 defaults write $m quitAppAfter -int 1
 # Spaces / Dock / menu bar (native menu bar, always shown)
