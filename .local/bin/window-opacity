@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Window transparency, like Omarchy. Usage: window-opacity toggle | +0.05 | -0.05
-# Windows are slightly see-through, more while unfocused (yabairc). toggle (SUPER+Backspace): the focused window fully
-# opaque, focused or not, until toggled again. +/- (Option+Backspace) changes how see-through unfocused windows are.
+# Unfocused windows are see-through, and the apps in ~/.config/yabai/see-through slightly while focused too (yabairc,
+# yabai-helper). toggle (SUPER+Backspace): the focused window fully opaque, focused or not, until toggled again. +/- (Option+Backspace) changes how see-through unfocused windows are.
 # Needs the scripting addition (yabai's opacity).
 export PATH="/opt/homebrew/bin:$PATH"
 case $1 in
@@ -12,7 +12,7 @@ case $1 in
 		if [ -e "$mark" ]; then
 			rm "$mark"
 			yabai -m window "$id" --opacity 0.0   # 0 = back to yabairc's focused/unfocused opacity
-			~/.local/bin/notify-post wm.opaque   # a focused Zen goes back to fully opaque (yabai-helper)
+			~/.local/bin/notify-post wm.opaque   # a focused see-through app goes back to slightly see-through (yabai-helper)
 		else
 			mkdir -p "${mark%/*}" && touch "$mark"
 			yabai -m window "$id" --opacity 1.0

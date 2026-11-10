@@ -21,7 +21,8 @@
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
 //   - focus lock (SUPER+Shift+O, .local/bin/focus-lock), like Omarchy's: new windows open without stealing focus.
-//   - Zen fully opaque while focused (syncOpaque); other focused windows are slightly see-through (yabairc).
+//   - apps listed in ~/.config/yabai/see-through stay slightly see-through while focused (syncSeeThrough); other
+//     focused windows are opaque (yabairc).
 //   - scratchpad: shown as S in the bar slot of the workspace it stands in for, with its wallpaper dimmed (Dimmer).
 //   - menu bar icons left of the notch: a red lock while focus lock is on, a cup while sleep is off (Keep Awake With Lid
 //     Closed); and a red "yabai paused" notice in place of the workspaces while yabai isn't running (SUPER+Shift+P).
@@ -129,7 +130,7 @@ final class Focus {
 			self.checkPending = false
 			if self.holdFocus() { return } // focus goes straight back; don't zoom or move the mouse to the new window
 			self.syncZoom()
-			self.syncOpaque()
+			self.syncSeeThrough()
 			self.followFocus()
 		}
 	}
@@ -275,32 +276,38 @@ final class Focus {
 		if switched { focus(id) } // without the scripting addition it can't switch Spaces; the window still moves
 	}
 
-	// MARK: fully opaque while focused
+	// MARK: see-through while focused
 
-	// Apps that show fully opaque while focused, instead of yabairc's slightly see-through focused windows (unfocused they
-	// fade like the rest). Their focused window gets its own opacity, dropped again when focus moves on; windows pinned
-	// with SUPER+Backspace (.local/bin/window-opacity, a marker per id) are left alone.
-	let opaqueApps: Set<String> = ["Zen", "zen"]
-	var opaqueID = 0
+	// Focused windows are fully opaque (yabairc); apps listed in ~/.config/yabai/see-through stay slightly see-through
+	// while focused too (unfocused, every window fades). Their focused window gets its own opacity, dropped again when
+	// focus moves on; windows pinned with SUPER+Backspace (.local/bin/window-opacity, a marker per id) are left alone.
+	// The list is read on every focus change, so edits apply on the next one.
+	let seeThroughOpacity = "0.95"
+	var seeThroughID = 0
 
-	func syncOpaque() {
+	func seeThroughApps() -> Set<String> {
+		let text = (try? String(contentsOfFile: NSHomeDirectory() + "/.config/yabai/see-through", encoding: .utf8)) ?? ""
+		return Set(text.split(separator: "\n").map { $0.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false)[0]
+			.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty })
+	}
+
+	func syncSeeThrough() {
 		let w = one(["--windows", "--window"])
 		let id = w?["id"] as? Int ?? 0
-		guard id != opaqueID else { return }
-		let pinned = { (id: Int) in FileManager.default.fileExists(atPath: NSHomeDirectory() + "/.cache/yabai-opaque/\(id)") }
-		if opaqueID != 0, !pinned(opaqueID) { _ = yabai(["window", String(opaqueID), "--opacity", "0.0"]) } // 0 = back to yabairc's
-		opaqueID = 0
-		guard let w, let app = w["app"] as? String, opaqueApps.contains(app), !pinned(id) else { return }
-		_ = yabai(["window", String(id), "--opacity", "1.0"])
-		opaqueID = id
+		guard id != seeThroughID else { return }
+		if seeThroughID != 0, !pinned(seeThroughID) { _ = yabai(["window", String(seeThroughID), "--opacity", "0.0"]) } // 0 = back to yabairc's
+		seeThroughID = 0
+		guard let w, let app = w["app"] as? String, seeThroughApps().contains(app), !pinned(id) else { return }
+		_ = yabai(["window", String(id), "--opacity", seeThroughOpacity])
+		seeThroughID = id
 	}
 
-	// wm.opaque: SUPER+Backspace unpinned a window, which drops its opacity back to yabairc's; the focused Zen goes opaque again
+	// wm.opaque: SUPER+Backspace unpinned a window, which drops its opacity back to yabairc's; a focused listed one is see-through again
 	func repin() {
-		if opaqueID != 0, !FileManager.default.fileExists(atPath: NSHomeDirectory() + "/.cache/yabai-opaque/\(opaqueID)") {
-			_ = yabai(["window", String(opaqueID), "--opacity", "1.0"])
-		}
+		if seeThroughID != 0, !pinned(seeThroughID) { _ = yabai(["window", String(seeThroughID), "--opacity", seeThroughOpacity]) }
 	}
+
+	func pinned(_ id: Int) -> Bool { FileManager.default.fileExists(atPath: NSHomeDirectory() + "/.cache/yabai-opaque/\(id)") }
 
 	// MARK: focus lock
 

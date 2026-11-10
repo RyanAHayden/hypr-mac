@@ -98,7 +98,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Ctrl+F | tiled fullscreen (fill its split only) |
 | Cmd+Option+F | native macOS fullscreen. Its Desktop belongs to the workspace it came from (`.local/bin/fs-origin`): "F" right after it in the bar, Cmd+A/D cycle through it there, and that workspace's number reaches it (when it has no other windows, or press it again) |
 | Cmd+-/= (+Shift, +Option, +Ctrl) | resize width (Shift: height; Option: a little, Ctrl: a lot) |
-| Cmd+Backspace | focused window fully opaque on/off, like Omarchy (windows are slightly see-through, more when unfocused) |
+| Cmd+Backspace | focused window fully opaque on/off, like Omarchy (unfocused windows are see-through, and the apps in `.config/yabai/see-through` - Ghostty, Finder... - slightly while focused too) |
 | Option+Backspace / Shift+Option+Backspace | unfocused windows more / less see-through |
 | Cmd+Shift+Backspace | toggle gaps and borders on every Space |
 | Cmd+Option+L / Shift+Option+L | cycle Space layout bsp -> stack -> float / back |
@@ -135,6 +135,19 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | F3 | screenshot the full screen to a file (instead of Mission Control) |
 | Fn+F1…F12 | plain function keys for apps: setup turns off macOS's Show Desktop (F11) and Dashboard (F12) shortcuts |
 | (off) | hot corners, Sequoia drag-to-edge tiling, click-wallpaper-to-show-desktop, Ctrl+Space input switching (tmux prefix), Cmd+Option+Space Finder search, Mission Control (F3, four-finger swipe up, Ctrl+Up), App Exposé (four-finger swipe down, Ctrl+Down), Ctrl+arrows (Desktop left/right), Ctrl+F1…F8 keyboard navigation, Fn+Ctrl+arrows window tiling, reopening apps after restart/log out (toggle in the Cmd+Escape menu), Tailscale's floating window (plain menu-bar menu instead) |
+
+### Transparency
+
+Focused windows are fully opaque and unfocused ones fade (needs the scripting addition). Where to change it:
+
+- **Apps that stay slightly see-through while focused**: `.config/yabai/see-through`, one app per line (Ghostty,
+  Terminal, Finder, Obsidian, VS Code, Discord, Spotify). Read on every focus change, so edits apply right away. An
+  app's name: focus it and run `yabai -m query --windows --window | jq -r .app`
+- **How see-through unfocused windows are** (0.8): `normal_window_opacity` in `.config/yabai/yabairc`, or
+  Option+Backspace / Shift+Option+Backspace live
+- **How see-through the listed apps are while focused** (0.95): `seeThroughOpacity` in `.local/src/yabai-helper.swift`
+  (rebuilt by `setup.sh`)
+- **One window**: SUPER+Backspace makes the focused window fully opaque, focused or not, until pressed again
 
 ## Themes
 

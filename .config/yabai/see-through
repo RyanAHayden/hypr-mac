@@ -1,0 +1,10 @@
+# Apps that stay slightly see-through while focused (yabai-helper reads this on every focus change, so edits apply on
+# the next one). Every other focused window is fully opaque; unfocused windows all fade (yabairc). One app per line,
+# as yabai names it: yabai -m query --windows --window | jq -r .app
+Ghostty
+Terminal
+Finder
+Obsidian
+Code
+Discord
+Spotify
