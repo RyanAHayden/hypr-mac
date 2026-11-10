@@ -259,8 +259,9 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   omarchy-desktop turns on Moonlight's local cursor (Ctrl+Alt+Shift+C, so the pointer has no network lag). Hosts are matched by stream window
   title in `moonlight-stream`. Karabiner sends left Ctrl (and Caps Lock) as right Ctrl in Moonlight: the work
   laptop's PowerToys Keyboard Manager swallows a left Ctrl coming in through Sunshine, which drops Ctrl from
-  shortcuts or leaves apps thinking it's still held. Host side (not in this repo): the work laptop's Sunshine streams its virtual display
-  at the client's resolution, still mirrored to its own screen (which stays on), and keeps its Windows cursor (blanking it caused trouble), so there's
+  shortcuts or leaves apps thinking it's still held. Host side (not in this repo): the work laptop's Sunshine streams whatever its primary screen is and leaves the
+  display layout alone: its own screen (mirrored with the virtual display, and left on) at its own resolution, or the
+  virtual display with the lid closed. Pinning it to the virtual display failed while mirrored. It keeps its Windows cursor (blanking it caused trouble), so there's
   no local cursor for it;
   omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
   (dotfiles `bin/stream-display`).
