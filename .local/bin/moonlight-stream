@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
 # yabai window_created for Moonlight (yabairc): when a stream window opens, share the clipboard with that host until
-# the window closes, and for hosts that hide their own cursor while streaming (cursor=local), turn on Moonlight's local
-# cursor (Ctrl+Alt+Shift+C; it starts hidden every stream and has no setting) so ours is the only one. The work laptop
-# keeps its Windows cursor (blanking it caused trouble), so it gets no local cursor, or there'd be two.
+# the window closes, and turn on Moonlight's local cursor (Ctrl+Alt+Shift+C; it starts hidden every stream and has no
+# setting), so the pointer has no network lag. omarchy-desktop hides its own cursor while streaming; the work laptop
+# keeps its Windows cursor (blanking it caused trouble), so there it trails ours.
 wid=$1
 title=$(yabai -m query --windows --window "$wid" | jq -r .title)
 
 # stream windows are titled with the Moonlight host name; the app's own window is "Moonlight"
 case "$title" in
-  SHS05660770683C) host=work kind=windows cursor=remote ;;
-  omarchy-desktop) host=desktop kind=wayland cursor=local ;;
+  SHS05660770683C) host=work kind=windows ;;
+  omarchy-desktop) host=desktop kind=wayland ;;
   *) exit 0 ;;
 esac
 
-if [ "$cursor" = local ]; then
-  # the toggle only reaches Moonlight once its stream window has focus
-  for _ in $(seq 50); do
-    [ "$(yabai -m query --windows --window "$wid" | jq -r '."has-focus"')" = true ] && break
-    sleep 0.1
-  done
-  sleep 0.5
-  osascript -l JavaScript -e '
+# the toggle only reaches Moonlight once its stream window has focus
+for _ in $(seq 50); do
+  [ "$(yabai -m query --windows --window "$wid" | jq -r '."has-focus"')" = true ] && break
+  sleep 0.1
+done
+sleep 0.5
+osascript -l JavaScript -e '
 ObjC.import("CoreGraphics")
 // SDL reads modifiers from their own key events, so press Control, Option, Shift (keycodes 62, 58, 56), then C (8),
 // then let go, like a keyboard would. Right Control, as Karabiner sends in Moonlight: PowerToys on the work laptop
@@ -32,8 +31,7 @@ const post = (key, down) => { const e = $.CGEventCreateKeyboardEvent(null, key, 
 for (const [key, bit] of mods) { flags |= bit; post(key, true) }
 post(8, true); post(8, false)
 for (const [key, bit] of mods.reverse()) { flags &= ~bit; post(key, false) }
-  ' >/dev/null
-fi
+' >/dev/null
 
 mkdir -p ~/.cache/clip-sync
 exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>>~/.cache/clip-sync/log
