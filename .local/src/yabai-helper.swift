@@ -853,33 +853,37 @@ final class Binds {
 
 	// MARK: closing
 
-	// SUPER+W: close the focused window. Apps that only order their window out on close (Spotify, Discord) keep running
-	// with a blank tile in yabai, so quit those instead. yabai sometimes loses track of focus (e.g. Infuse/Catalyst video
-	// players), so fall back to the frontmost app as macOS sees it and close its frontmost window.
+	// The window SUPER+W/Shift+W/Q act on: the focused one if it's on screen. yabai sometimes loses track of focus
+	// (e.g. Infuse/Catalyst video players), so else the frontmost app's window on screen. Never one on another Space: on
+	// an empty workspace macOS keeps the last app frontmost with its windows elsewhere (SUPER+Q there quit a Moonlight
+	// stream on the scratchpad), so then nothing happens.
+	func target() -> [String: Any]? {
+		if let w = one(["--windows", "--window"]), flag(w, "is-visible") { return w }
+		guard let pid = frontPID() else { return nil }
+		return list(["--windows"]).first { $0["pid"] as? Int == pid && flag($0, "is-visible") && !flag($0, "is-minimized") }
+	}
+
+	// SUPER+W: close the window. Apps that only order their window out on close (Spotify, Discord) keep running with a
+	// blank tile in yabai, so quit those instead.
 	func close() {
+		guard let w = target(), let id = w["id"] as? Int, let pid = w["pid"] as? Int else { return }
 		focuser.closedAt = Date() // closing makes macOS activate another app; that's not an alt-tab
-		var w = one(["--windows", "--window"])
-		if w == nil, let pid = frontPID() {
-			w = list(["--windows"]).first { $0["pid"] as? Int == pid && !flag($0, "is-minimized") }
-			if w == nil { quietCrash(pid); terminate(pid); return }
-		}
-		guard let w, let id = w["id"] as? Int, let pid = w["pid"] as? Int else { return }
 		quietCrash(pid)
 		if ["Spotify", "Discord"].contains(w["app"] as? String ?? "") || !ok(["window", String(id), "--close"]) { terminate(pid) }
 	}
 
-	// SUPER+Shift+W: SIGKILL the app owning the focused window (works on frozen apps); the frontmost app if yabai lost focus
+	// SUPER+Shift+W: SIGKILL the window's app (works on frozen apps)
 	func forceKill() {
-		guard let pid = one(["--windows", "--window"])?["pid"] as? Int ?? frontPID(), pid > 1 else { return }
+		guard let pid = target()?["pid"] as? Int, pid > 1 else { return }
 		focuser.closedAt = Date()
 		quietCrash(pid)
 		kill(pid_t(pid), SIGKILL)
 	}
 
-	// SUPER+Q: quit the frontmost app (a normal quit, so it can still ask to save), rather than leaving it to the app's own
+	// SUPER+Q: quit the window's app (a normal quit, so it can still ask to save), rather than leaving it to the app's own
 	// Cmd+Q, which some players swallow (Infuse during playback)
 	func quit() {
-		guard let app = NSWorkspace.shared.frontmostApplication else { return }
+		guard let pid = target()?["pid"] as? Int, let app = NSRunningApplication(processIdentifier: pid_t(pid)) else { return }
 		switch app.bundleIdentifier {
 		case "com.apple.finder": return // Finder has no Quit (Cmd+Q does nothing there); keep it that way
 		case "com.mitchellh.ghostty": close() // one Ghostty runs every terminal (.local/bin/term): quit just this one
