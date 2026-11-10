@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# term [--cwd DIR] [command args...]: a new Ghostty window running the command, or the shell. One Ghostty runs every
+# window: when it's up, its AppleScript opens the window (open -na started a whole new Ghostty per window, ~125 MB each and
+# a cold start); when it isn't, it's launched with the command. Tells yabai-helper a window is coming, so focus going
+# to Ghostty isn't taken for an alt-tab. Binds, crash-notify and the Nvim app (setup.sh) use it.
+cwd=
+[ "$1" = --cwd ] && { cwd=$2; shift 2; }
+cmd=
+[ $# -gt 0 ] && cmd=$(printf '%q ' "$@")
+~/.local/bin/wmctl opening 2>/dev/null
+if pgrep -xq ghostty; then
+	exec osascript - "$cmd" "$cwd" >/dev/null <<'AS'
+on run argv
+	tell application "Ghostty"
+		set c to new surface configuration
+		if item 1 of argv is not "" then set command of c to item 1 of argv
+		if item 2 of argv is not "" then set initial working directory of c to item 2 of argv
+		new window with configuration c
+		activate
+	end tell
+end run
+AS
+fi
+args=()
+[ -n "$cwd" ] && args+=("--working-directory=$cwd")
+[ $# -gt 0 ] && args+=(-e "$@")
+exec open -na Ghostty --args "${args[@]}"

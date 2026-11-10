@@ -1,7 +1,0 @@
-#!/bin/bash
-# Run by "Keep Awake With Lid Closed" (and at login): with sleep disabled macOS leaves the screen on when the lid
-# shuts, so blank it while the lid is closed. Quits once sleep is back on.
-while pmset -g | grep -q 'SleepDisabled[[:space:]]*1'; do
-	ioreg -r -k AppleClamshellState -d 4 | grep -q '"AppleClamshellState" = Yes' && pmset displaysleepnow
-	sleep 3
-done

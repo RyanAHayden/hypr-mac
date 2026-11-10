@@ -76,15 +76,11 @@ if [ -n "$sa" ]; then
   # slightly see-through while focused too (yabai-helper). Option+Backspace adjusts unfocused; SUPER+Backspace makes
   # one fully opaque, focused or not (window-opacity)
   yabai -m config window_opacity on active_window_opacity 1.0 normal_window_opacity 0.8
-  # Closing a workspace's last window (red button, an app's own Cmd+W) also makes macOS activate another
-  # app; mark it so yabai-helper's alt-tab jump stays put. Best effort: this can race the activation (SUPER+W/Q mark first).
-  signal stay_on_close window_destroyed "touch $HOME/.cache/ws-switch"
-  signal stay_on_quit application_terminated "touch $HOME/.cache/ws-switch"
   # SUPER+O (.local/bin/window-pop) marks popped windows; drop the marker so a reused id starts unpopped
   signal pop_gone window_destroyed "rm -f $HOME/.cache/yabai-pop/\$YABAI_WINDOW_ID"
 else
   # No SA: nothing could switch Spaces for us, so hand it back to macOS
-  yabai -m signal --remove stay_on_close 2>/dev/null; yabai -m signal --remove stay_on_quit 2>/dev/null; yabai -m signal --remove pop_gone 2>/dev/null
+  yabai -m signal --remove pop_gone 2>/dev/null
   if [ "$(defaults read -g AppleSpacesSwitchOnActivate 2>/dev/null)" = 0 ]; then
     defaults delete -g AppleSpacesSwitchOnActivate
     killall Dock

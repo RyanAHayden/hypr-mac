@@ -12,9 +12,8 @@
 if pmset -g | grep -q 'SleepDisabled[[:space:]]*1'; then
 	sudo -n pmset -a disablesleep 0 && echo "Sleep back on"
 else
+	# yabai-helper blanks the screen when the lid closes while sleep is off
 	sudo -n pmset -a disablesleep 1 || exit 1
-	# blanks the screen while the lid is closed (LaunchAgent from setup.sh, which also runs it at login)
-	launchctl kickstart -k "gui/$(id -u)/com.ryha.lid-sleep-watcher"
 	echo "Staying awake: lid close only turns the screen off"
 fi
 # the menu bar's stay-awake icon (yabai-helper) updates now rather than on its next 5 s check

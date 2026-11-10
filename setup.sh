@@ -5,6 +5,10 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Ask for the password once, up front: keep sudo's ticket fresh until setup ends (it lapses after 5 minutes otherwise)
+sudo -v
+while kill -0 $$ 2>/dev/null; do sudo -n true; sleep 50; done 2>/dev/null &
+
 echo "==> Homebrew packages"
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
 brew install stow tmux syncthing jq neovim ripgrep btop
@@ -87,15 +91,20 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c "lua require('nvim-treesitter').install({'latex','scss','typst','vue'}):wait(300000)" -c "qa!"
 echo
 
-echo "==> yabai-helper (workspace bar, focus fixes, alt-tab), notify-post, power-menu, sendkey, bind-repeat, finder-trash and wallpaper-band"
+echo "==> yabai-helper (workspace bar, focus fixes, alt-tab, window binds), wmctl, notify-post, power-menu, bind-repeat, menu-extra, notifications, finder-trash and wallpaper-band"
+# links left behind by scripts since removed from the repo (and the old notifications script, now built below)
+find ~/.local/bin -maxdepth 1 -type l ! -exec test -e {} \; -delete
+[ -L ~/.local/bin/notifications ] && rm ~/.local/bin/notifications
 swiftc -O ~/.local/src/yabai-helper.swift -o ~/.local/bin/yabai-helper
 # a fixed identity instead of the build's hash, so its Automation grant (playing Spotify, below) survives rebuilds
 codesign -f -s - -i com.ryha.yabai-helper -r='designated => identifier "com.ryha.yabai-helper"' ~/.local/bin/yabai-helper 2>/dev/null
 clang -O2 ~/.local/src/notify-post.c -o ~/.local/bin/notify-post
+clang -O2 ~/.local/src/wmctl.c -o ~/.local/bin/wmctl
 swiftc -O ~/.local/src/power-menu.swift -o ~/.local/bin/power-menu
 swiftc -O ~/.local/src/night-shift.swift -o ~/.local/bin/night-shift
 swiftc -O ~/.local/src/display-scale.swift -o ~/.local/bin/display-scale
-swiftc -O ~/.local/src/sendkey.swift -o ~/.local/bin/sendkey
+swiftc -O ~/.local/src/menu-extra.swift -o ~/.local/bin/menu-extra
+swiftc -O ~/.local/src/notifications.swift -o ~/.local/bin/notifications
 swiftc -O ~/.local/src/bind-repeat.swift -o ~/.local/bin/bind-repeat
 swiftc -O ~/.local/src/finder-trash.swift -o ~/.local/bin/finder-trash
 swiftc -O ~/.local/src/wallpaper-band.swift -o ~/.local/bin/wallpaper-band
@@ -222,7 +231,7 @@ defaults write -g AppleReduceDesktopTinting -bool true
 # with it off it shows the wallpaper, whose top edge is black. (Menus, sidebars and the Dock go translucent too.)
 defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null ||
 	echo "  (couldn't turn off Reduce transparency - do it in Accessibility > Display, or give the terminal Full Disk Access)"
-# ctrl+alt+cmd+1..9,0 -> Desktop 1..10 (~/.local/bin/ws sends these while SIP is on). Not macOS's ctrl+N: Ctrl is real
+# ctrl+alt+cmd+1..9,0 -> Desktop 1..10 (yabai-helper's workspace binds press these while SIP is on). Not macOS's ctrl+N: Ctrl is real
 # in terminals, so ctrl+3 there switched Desktops
 codes=(18 19 20 21 23 22 26 28 25 29)
 for i in 1 2 3 4 5 6 7 8 9 10; do
@@ -251,7 +260,7 @@ hotkey 30 true 52 21 393216
 hotkey 31 true 52 21 917504
 hotkey 184 true 53 23 393216
 # Ctrl+arrows are word jump in apps (Karabiner) and the shell: no Mission Control / App Exposé (32-35) or
-# Desktop left/right (79-82) on them. ws resolves prev/next to a Desktop number, so its SIP-on fallback uses ctrl+alt+cmd+N
+# Desktop left/right (79-82) on them. yabai-helper resolves prev/next to a Desktop number, so its SIP-on fallback uses ctrl+alt+cmd+N
 hotkey 32 false 65535 126 8650752
 hotkey 33 false 65535 125 8650752
 hotkey 34 false 65535 126 8781824
@@ -320,22 +329,9 @@ cat >~/Library/LaunchAgents/com.ryha.yabai-helper.plist <<PLIST
 PLIST
 launchctl bootout gui/$UID/com.ryha.yabai-helper 2>/dev/null || true
 launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.yabai-helper.plist
-# lid-sleep-watcher (.local/bin): blanks the screen when the lid shuts while sleep is disabled ("Keep Awake With Lid
-# Closed"). Disabled sleep survives a reboot, so start it at login too; it quits right away if sleep is on, and the
-# toggle kickstarts it.
-cat >~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>Label</key><string>com.ryha.lid-sleep-watcher</string>
-	<key>ProgramArguments</key><array><string>$HOME/.local/bin/lid-sleep-watcher</string></array>
-	<key>RunAtLoad</key><true/>
-</dict>
-</plist>
-PLIST
+# the old lid-sleep-watcher agent; yabai-helper blanks the screen on lid close now
 launchctl bootout gui/$UID/com.ryha.lid-sleep-watcher 2>/dev/null || true
-launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist
+rm -f ~/Library/LaunchAgents/com.ryha.lid-sleep-watcher.plist
 # Crash notifications instead of macOS's "quit unexpectedly" dialog (.local/src/crash-notify.swift); reports are
 # still written to ~/Library/Logs/DiagnosticReports
 defaults write com.apple.CrashReporter DialogType none
@@ -446,8 +442,9 @@ if $sip_off; then
 	# everything else that would otherwise prompt or need switching on by hand
 	yabai_bin=$(readlink -f "$(command -v yabai)")
 	tcc_grant "$sysdb" kTCCServiceAccessibility "$yabai_bin" "$yabai_bin" 1
-	# binds run from Karabiner-Console-User-Server, so it's what macOS asks about: Accessibility (osascript clicking
-	# menu bar items, power-menu's key tap), posting keys (sendkey) and scripting System Events and Finder
+	# binds run from Karabiner-Console-User-Server, so it's what macOS asks about: Accessibility (menu-extra and
+	# notifications, power-menu's key tap), posting keys (notifications) and scripting System Events, Finder and Ghostty
+	# (term opens its windows)
 	kcus=org.pqrs.Karabiner-Console-User-Server
 	kcus_app="/Library/Application Support/org.pqrs/Karabiner-Elements/Karabiner-Console-User-Server.app"
 	for svc in Accessibility PostEvent; do
@@ -455,6 +452,9 @@ if $sip_off; then
 	done
 	tcc_automation $kcus "$kcus_app"
 	tcc_automation $kcus "$kcus_app" 0 com.apple.finder /System/Library/CoreServices/Finder.app
+	tcc_automation $kcus "$kcus_app" 0 com.mitchellh.ghostty /Applications/Ghostty.app
+	# crash-notify opens its Ghostty window through term too (the Nvim app, built further down, asks once)
+	tcc_automation com.ryha.crash-notify ~/.local/share/crash-notify/CrashNotify.app 0 com.mitchellh.ghostty /Applications/Ghostty.app
 	# Raycast runs the theme script (Switch Theme), whose osascript flips dark/light mode through System Events, and
 	# Set Wallpaper's Add Wallpaper Image reads the Finder selection
 	tcc_automation com.raycast.macos /Applications/Raycast.app
@@ -524,17 +524,17 @@ brew services start syncthing
 # "Fix Keyboard" app (Raycast/Spotlight): runs ~/.local/bin/fixkeys to reapply the binds and restart Karabiner
 mkdir -p ~/Applications
 osacompile -o ~/Applications/Fix\ Keyboard.app -e "do shell script \"$HOME/.local/bin/fixkeys\"" 2>/dev/null
-# "Nvim" app (~/Applications): opens files in nvim in a new Ghostty window; the default for text and code files, so
+# "Nvim" app (~/Applications): opens files in nvim in a new Ghostty window (.local/bin/term); the default for text and code files, so
 # Finder, `open` and Raycast never use TextEdit (RTF still opens in TextEdit)
 osacompile -o ~/Applications/Nvim.app -e "on open fs
 	set args to \"\"
 	repeat with f in fs
 		set args to args & \" \" & quoted form of POSIX path of f
 	end repeat
-	do shell script \"open -na Ghostty --args -e $(command -v nvim)\" & args
+	do shell script \"$HOME/.local/bin/term $(command -v nvim)\" & args
 end open
 on run
-	do shell script \"open -na Ghostty --args -e $(command -v nvim)\"
+	do shell script \"$HOME/.local/bin/term $(command -v nvim)\"
 end run" 2>/dev/null
 plist=~/Applications/Nvim.app/Contents/Info.plist
 plutil -replace CFBundleIdentifier -string com.ryha.nvim "$plist"

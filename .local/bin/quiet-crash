@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# quiet-crash <pid>: this app is being closed on purpose, so don't notify if it crashes on the way out. Some apps
-# segfault in their own quit code (KeePassXC, soh). close-window, force-kill-window and quit-app call this;
-# crash-notify (.local/src/crash-notify.swift) skips crash reports for marked pids.
-[[ $1 =~ ^[0-9]+$ ]] || exit 0
-mkdir -p ~/.cache/quiet-crash
-# pids get reused; drop old marks
-find ~/.cache/quiet-crash -type f -mtime +1 -delete 2>/dev/null
-touch ~/.cache/quiet-crash/"$1"

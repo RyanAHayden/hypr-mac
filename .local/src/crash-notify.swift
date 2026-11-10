@@ -1,7 +1,7 @@
 // Crash notifications like Omarchy's: macOS's "X quit unexpectedly" dialog is off (setup.sh sets CrashReporter
 // DialogType none), and this posts a notification for each new crash report instead. Clicking it opens Ghostty with
-// Claude (cld) on the report and the app's last few minutes of log. Crashes from a deliberate close (close-window,
-// force-kill-window, quit-app mark the pid with quiet-crash) are skipped. Runs as a LaunchAgent; setup.sh builds it
+// Claude (cld) on the report and the app's last few minutes of log. Crashes from a deliberate close (SUPER+W, SUPER+Shift+W,
+// SUPER+Q: yabai-helper marks the pid in ~/.cache/quiet-crash) are skipped. Runs as a LaunchAgent; setup.sh builds it
 // into ~/.local/share/crash-notify/CrashNotify.app, since notifications need an app bundle.
 import AppKit
 import UserNotifications
@@ -93,12 +93,8 @@ final class Watcher: NSObject, UNUserNotificationCenterDelegate {
 			with a fix or workaround.
 			"""
 		// a login shell so brew's PATH (claude, jq) is set; cld trusts the working directory
-		touch(NSHomeDirectory() + "/.cache/yabai-new-window")
-		run("/usr/bin/open", ["-na", "Ghostty", "--args", "--working-directory=\(work)",
-		                      "-e", "/bin/zsh", "-lc", "exec ~/.local/bin/cld \"$1\"", "zsh", prompt])
+		run(NSHomeDirectory() + "/.local/bin/term", ["--cwd", work, "/bin/zsh", "-lc", "exec ~/.local/bin/cld \"$1\"", "zsh", prompt])
 	}
-
-	func touch(_ path: String) { fm.createFile(atPath: path, contents: nil) }
 }
 
 let app = NSApplication.shared

@@ -17,7 +17,10 @@
 //   - real macOS minimize (yellow button): the window is made sticky while minimized, so restoring it brings it up
 //     on the Space you're on rather than switching back to the one it was minimized on.
 //   - no Music: macOS starts it when Play is pressed (keyboard, AirPods) with nothing playing; quit it and play Spotify.
-//   - `ws move` (SUPER+Shift+N): switch and move back to back over the socket, so the move doesn't flash.
+//   - the window and workspace binds (wmctl, below): workspaces (SUPER+N, A/D, Shift+N moves, which switch and move back
+//     to back so the move doesn't flash), the scratchpad, Option+Tab cycling, resizing, groups, and closing, killing and
+//     quitting apps. One command at a time in the order pressed, each a few socket queries instead of bash + yabai + jq.
+//   - "Keep Awake With Lid Closed" (sleep disabled) leaves the screen on when the lid shuts: blank it when it closes.
 //   - SUPER+F fullscreen (yabai zoom-fullscreen) gets a blue border, and stays on the workspace: whichever window
 //     you focus there is the fullscreen one.
 //   - focus lock (SUPER+Shift+O, .local/bin/focus-lock), like Omarchy's: new windows open without stealing focus.
@@ -26,23 +29,30 @@
 //   - scratchpad: shown as S in the bar slot of the workspace it stands in for, with its wallpaper dimmed (Dimmer).
 //   - menu bar icons left of the notch: a red lock while focus lock is on, a cup while sleep is off (Keep Awake With Lid
 //     Closed); and a red "yabai paused" notice in place of the workspaces while yabai isn't running (SUPER+Shift+P).
-// yabai signals (yabairc) and binds ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
-// wm.hide | wm.unhide | wm.move <space> | wm.menubar <1 hidden, 0 shown> | wm.created <window> | wm.focuslock |
-// wm.awake | wm.opaque (notifyutil takes ~100 ms). Built to ~/.local/bin/yabai-helper by setup.sh, which runs it as a LaunchAgent.
+// yabai signals (yabairc) and scripts ping it with ~/.local/bin/notify-post wm.bar | wm.focus | wm.closed | wm.demin |
+// wm.menubar <1 hidden, 0 shown> | wm.created <window> | wm.focuslock | wm.awake | wm.opaque (notifyutil takes
+// ~100 ms); binds send commands with ~/.local/bin/wmctl (see Binds). Built to ~/.local/bin/yabai-helper by setup.sh,
+// which runs it as a LaunchAgent.
 import AppKit
+import IOKit
 import notify
 
 // MARK: - yabai over its socket (same message format as `yabai -m`: int32 length, then each arg NUL-terminated, then NUL)
+
+func unixAddress(_ path: String) -> sockaddr_un {
+	var addr = sockaddr_un()
+	addr.sun_family = sa_family_t(AF_UNIX)
+	let bytes = Array(path.utf8CString)
+	withUnsafeMutableBytes(of: &addr.sun_path) { dst in bytes.withUnsafeBytes { dst.copyMemory(from: UnsafeRawBufferPointer(rebasing: $0.prefix(dst.count))) } }
+	return addr
+}
 
 func connectYabai() -> Int32? {
 	let fd = socket(AF_UNIX, SOCK_STREAM, 0)
 	guard fd >= 0 else { return nil }
 	var timeout = timeval(tv_sec: 1, tv_usec: 0)
 	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-	var addr = sockaddr_un()
-	addr.sun_family = sa_family_t(AF_UNIX)
-	let path = Array("/tmp/yabai_\(NSUserName()).socket".utf8CString)
-	withUnsafeMutableBytes(of: &addr.sun_path) { dst in path.withUnsafeBytes { dst.copyMemory(from: UnsafeRawBufferPointer(rebasing: $0.prefix(dst.count))) } }
+	var addr = unixAddress("/tmp/yabai_\(NSUserName()).socket")
 	let connected = withUnsafePointer(to: &addr) {
 		$0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
 	}
@@ -76,6 +86,8 @@ func yabai(_ args: [String]) -> Data? {
 	return out
 }
 
+// a command that worked: yabai answers a failure with 0x07, then the error
+func ok(_ args: [String]) -> Bool { yabai(args).map { $0.first != 0x07 } ?? false }
 func query(_ args: [String]) -> Any? { yabai(["query"] + args).flatMap { try? JSONSerialization.jsonObject(with: $0) } }
 func list(_ args: [String]) -> [[String: Any]] { query(args) as? [[String: Any]] ?? [] }
 func one(_ args: [String]) -> [String: Any]? { query(args) as? [String: Any] }
@@ -96,7 +108,31 @@ func usable(_ w: [String: Any]) -> Bool {
 
 func currentSpace() -> Int? { one(["--spaces", "--space"])?["index"] as? Int }
 
+let scratch = 11 // the scratchpad (SUPER+S), see Binds
 let attic = 12 // hidden Space SUPER+M parks windows on (not in the bar, skipped by SUPER+A/D)
+
+// Native fullscreen Desktops belong to the workspace they were made from (.local/bin/fs-origin records it):
+// fullscreen Space id -> its workspace's Space id
+func fsOrigins() -> [Int: Int] {
+	let dir = NSHomeDirectory() + "/.cache/fs-origin/"
+	var origins = [Int: Int]()
+	for f in (try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? [] {
+		if let fs = Int(f), let o = (try? String(contentsOfFile: dir + f, encoding: .utf8)).flatMap({ Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }) { origins[fs] = o }
+	}
+	return origins
+}
+
+// Without the scripting addition yabai can't switch Spaces: press macOS's own "Switch to Desktop N" (ctrl+alt+cmd+N,
+// setup.sh). Needs Post Event access for this helper (SIP on: Privacy & Security > Accessibility, add yabai-helper).
+func desktopKey(_ n: Int) {
+	let codes: [Int: CGKeyCode] = [1: 18, 2: 19, 3: 20, 4: 21, 5: 23, 6: 22, 7: 26, 8: 28, 9: 25, 10: 29]
+	guard let code = codes[n] else { return }
+	for down in [true, false] {
+		let e = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down)
+		e?.flags = [.maskControl, .maskAlternate, .maskCommand]
+		e?.post(tap: .cghidEventTap)
+	}
+}
 
 // Focus lock is on while this file exists (.local/bin/focus-lock toggles it and posts wm.focuslock)
 let lockFile = NSHomeDirectory() + "/.local/state/focus-lock"
@@ -115,23 +151,26 @@ final class Focus {
 	var warpedAt = Date.distantPast
 	var warpedTo = CGPoint.zero
 	var checkPending = false
-	var closedAt = Date.distantPast
+	var closedAt = Date.distantPast // a close, quit, hide or Space switch: macOS activates some app right after
+	var openingAt = Date.distantPast // a "new window" bind (wmctl opening): a window is on its way
 	var trail = [(at: Date, point: CGPoint)]() // where the mouse has been in the last moment (global mouse monitor)
 	var parked = [Int]() // SUPER+M'd window ids, oldest first (windows found on the attic without a record go last)
 	let stuckDir = NSHomeDirectory() + "/.cache/yabai-min-sticky" // windows made sticky while minimized, one file per id
 
 	// wm.focus: focus moved, or a window moved/resized. Opening several windows at once fires a burst of these,
 	// so coalesce them and act on wherever focus ends up.
+	// One query of the focused window per check, handed to each step (only a zoom handover changes it in between).
 	func changed() {
-		if holdFocus() { return } // straight away, not after the burst: keys typed meanwhile go to the new window
+		if focusLocked, holdFocus(one(["--windows", "--window"])) { return } // straight away, not after the burst: keys typed meanwhile go to the new window
 		guard !checkPending else { return }
 		checkPending = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
 			self.checkPending = false
-			if self.holdFocus() { return } // focus goes straight back; don't zoom or move the mouse to the new window
-			self.syncZoom()
-			self.syncSeeThrough()
-			self.followFocus()
+			var w = one(["--windows", "--window"])
+			if self.holdFocus(w) { return } // focus goes straight back; don't zoom or move the mouse to the new window
+			if self.syncZoom(w) { w = one(["--windows", "--window"]) }
+			self.syncSeeThrough(w)
+			self.followFocus(w)
 		}
 	}
 
@@ -143,10 +182,13 @@ final class Focus {
 	var zoomColor = false
 	var hoverFocus = "autoraise" // yabairc's focus_follows_mouse, put back when zoom loses focus
 
-	func syncZoom() {
-		guard let w = one(["--windows", "--window"]) else { return }
-		let zoomed = flag(w, "has-fullscreen-zoom") || passZoom(to: w)
-		guard zoomed != zoomColor else { return }
+	// true when it handed the zoom to this window (its frame changed)
+	@discardableResult
+	func syncZoom(_ w: [String: Any]?) -> Bool {
+		guard let w else { return false }
+		let passed = !flag(w, "has-fullscreen-zoom") && passZoom(to: w)
+		let zoomed = flag(w, "has-fullscreen-zoom") || passed
+		guard zoomed != zoomColor else { return passed }
 		zoomColor = zoomed
 		if zoomed {
 			if let d = yabai(["config", "focus_follows_mouse"]), let v = String(data: d, encoding: .utf8)?
@@ -164,6 +206,7 @@ final class Focus {
 		}
 		borders.arguments = ["active_color=\(zoomed ? themed("border-zoom", "0xff3b82f6") : themed("border", "0xffe8ddd0"))"] // updates the running instance (bordersrc)
 		try? borders.run()
+		return passed
 	}
 
 	// SUPER+F is fullscreen for the workspace: when focus moves to another tiled window on a Space with a zoomed one
@@ -181,9 +224,9 @@ final class Focus {
 		return true
 	}
 
-	func followFocus() {
+	func followFocus(_ w: [String: Any]?) {
 		guard NSEvent.pressedMouseButtons == 0, // dragging a window: leave the mouse alone
-			let w = one(["--windows", "--window"]), let id = w["id"] as? Int, let f = frame(w),
+			let w, let id = w["id"] as? Int, let f = frame(w),
 			let at = CGEvent(source: nil)?.location else { return }
 		// something focused a parked window (AltTab, Raycast's window search): bring it here instead
 		if w["space"] as? Int == attic, let space = currentSpace(), space != attic { bring(id, to: space); return }
@@ -240,7 +283,9 @@ final class Focus {
 
 	// Instant alt-tab: macOS's own Space switch on activate is off (yabairc, scripting addition only), so do it here
 	func activated(_ app: NSRunningApplication) {
-		if Date().timeIntervalSince(closedAt) < 0.3 { return } // the activation a close/hide causes, not a switch
+		// the activation a close, quit, hide or Space switch causes, not an alt-tab. Those land 70-110 ms after; 300 ms
+		// covers them without eating a real alt-tab.
+		if Date().timeIntervalSince(closedAt) < 0.3 { return }
 		let pid = Int(app.processIdentifier)
 		guard let space = currentSpace(), space != attic else { return }
 		let windows = list(["--windows"])
@@ -256,16 +301,13 @@ final class Focus {
 		}
 		guard let switchOnActivate = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleSpacesSwitchOnActivate"] as? NSNumber,
 			!switchOnActivate.boolValue else { return }
-		// the "new window" binds touch this first: a window is on its way, so stay put
-		if age("yabai-new-window") < 2 { return }
-		// ws just switched Spaces, or a window just closed / an app quit (close binds, yabairc): this activation came
-		// from that, not from alt-tab. Those land 70-110 ms after; 300 ms covers them without eating a real alt-tab.
-		if age("ws-switch") < 0.3 { return }
+		// a "new window" bind just ran: a window is on its way, so stay put
+		if Date().timeIntervalSince(openingAt) < 2 { return }
 		// front-to-back, so the first match is the app's most recently used window
 		if let id = mine.first(where: { !flag($0, "is-sticky") && $0["space"] as? Int != attic })?["id"] as? Int { focus(id) }
 	}
 
-	// wm.move (state = Space), from `ws move`: take the focused window to that Space and follow it. Switch first, then
+	// wmctl ws move: take the focused window to that Space and follow it. Switch first, then
 	// move it onto the now-visible Space (yabai only tiles visible Spaces, so moving first shows it at its old size
 	// for a moment), and send both over the socket back to back so the empty Space shows for under a frame.
 	func move(to space: Int) {
@@ -273,7 +315,7 @@ final class Focus {
 		closedAt = Date() // the switch makes macOS activate an app; that's not an alt-tab
 		let switched = yabai(["space", "--focus", String(space)]).map { $0.first != 0x07 } ?? false // 0x07 = yabai error
 		_ = yabai(["window", String(id), "--space", String(space)])
-		if switched { focus(id) } // without the scripting addition it can't switch Spaces; the window still moves
+		if switched { focus(id) } else { desktopKey(space) } // without the scripting addition: macOS's Desktop shortcut
 	}
 
 	// MARK: see-through while focused
@@ -281,18 +323,23 @@ final class Focus {
 	// Focused windows are fully opaque (yabairc); apps listed in ~/.config/yabai/see-through stay slightly see-through
 	// while focused too (unfocused, every window fades). Their focused window gets its own opacity, dropped again when
 	// focus moves on; windows pinned with SUPER+Backspace (.local/bin/window-opacity, a marker per id) are left alone.
-	// The list is read on every focus change, so edits apply on the next one.
+	// The list is read again when it changes, so edits apply on the next focus change.
 	let seeThroughOpacity = "0.95"
 	var seeThroughID = 0
 
+	var seeThroughRead: (at: Date, apps: Set<String>)?
 	func seeThroughApps() -> Set<String> {
-		let text = (try? String(contentsOfFile: NSHomeDirectory() + "/.config/yabai/see-through", encoding: .utf8)) ?? ""
-		return Set(text.split(separator: "\n").map { $0.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false)[0]
+		let path = NSHomeDirectory() + "/.config/yabai/see-through"
+		let changed = (try? FileManager.default.attributesOfItem(atPath: path))?[.modificationDate] as? Date ?? .distantPast
+		if let r = seeThroughRead, r.at == changed { return r.apps }
+		let text = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""
+		let apps = Set(text.split(separator: "\n").map { $0.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false)[0]
 			.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty })
+		seeThroughRead = (changed, apps)
+		return apps
 	}
 
-	func syncSeeThrough() {
-		let w = one(["--windows", "--window"])
+	func syncSeeThrough(_ w: [String: Any]?) {
 		let id = w?["id"] as? Int ?? 0
 		guard id != seeThroughID else { return }
 		if seeThroughID != 0, !pinned(seeThroughID) { _ = yabai(["window", String(seeThroughID), "--opacity", "0.0"]) } // 0 = back to yabairc's
@@ -325,8 +372,8 @@ final class Focus {
 		lockTarget = focusLocked ? one(["--windows", "--window"])?["id"] as? Int ?? 0 : 0
 	}
 
-	func holdFocus() -> Bool {
-		guard focusLocked, let id = one(["--windows", "--window"])?["id"] as? Int, id != lockTarget else { return false }
+	func holdFocus(_ w: [String: Any]?) -> Bool {
+		guard focusLocked, let id = w?["id"] as? Int, id != lockTarget else { return false }
 		if let at = born[id], Date().timeIntervalSince(at) < stealGrace, lockTarget != 0 {
 			focus(lockTarget)
 			return true
@@ -410,12 +457,6 @@ final class Focus {
 			focus(id)
 		}
 	}
-
-	func age(_ marker: String) -> TimeInterval {
-		let path = NSHomeDirectory() + "/.cache/" + marker
-		guard let m = (try? FileManager.default.attributesOfItem(atPath: path))?[.modificationDate] as? Date else { return .infinity }
-		return Date().timeIntervalSince(m)
-	}
 }
 
 // MARK: - Workspace bar
@@ -434,7 +475,7 @@ let pausedText = NSAttributedString(string: "YABAI PAUSED  ·  SUPER+SHIFT+P",
 typealias Item = (label: String, state: Character) // a = shown on its display, o = has windows, e = empty
 
 // 1-5 always, higher Spaces when occupied or shown. Space 11, the scratchpad, isn't drawn: while it's shown it stands in
-// for the workspace you came from (.local/bin/scratchpad), which stays lit. Only real windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
+// for the workspace you came from (Binds.pad), which stays lit. Only real windows count (not sticky, minimized or hidden ones). Keyed by display UUID; nil if yabai didn't answer (busy or
 // restarting), so the bar keeps what it shows instead of blinking off and uncovering the menus.
 var onFullscreen = false // a display shows a native fullscreen Desktop (set by workspaces())
 // Menu bar set to auto-hide (SUPER+Shift+Space, .local/bin/toggle-menubar): no bar. toggle-menubar posts wm.menubar with
@@ -454,23 +495,17 @@ func workspaces() -> [String: [Item]]? {
 	var uuidOf = [Int: String]()
 	for d in displays { if let i = d["index"] as? Int, let u = d["uuid"] as? String { uuidOf[i] = u } }
 	// Native fullscreen Desktops belong to the workspace they came from (.local/bin/fs-origin): shown as "F" right after it
-	let dir = NSHomeDirectory() + "/.cache/fs-origin/"
 	var indexOf = [Int: Int]()
 	for s in spaces { if let id = s["id"] as? Int, let i = s["index"] as? Int { indexOf[id] = i } }
 	var originOf = [Int: Int]() // fullscreen space index -> its workspace's index
-	for f in (try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? [] {
-		guard let fs = Int(f), let o = (try? String(contentsOfFile: dir + f, encoding: .utf8)).flatMap({ Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }),
-			let fi = indexOf[fs], let oi = indexOf[o] else { continue }
-		originOf[fi] = oi
-	}
+	for (fs, o) in fsOrigins() { if let fi = indexOf[fs], let oi = indexOf[o] { originOf[fi] = oi } }
 	let parents = Set(originOf.values)
-	let padShown = spaces.contains { $0["index"] as? Int == 11 && flag($0, "is-visible") }
-	let ret = (try? String(contentsOfFile: NSHomeDirectory() + "/.cache/scratchpad-return", encoding: .utf8))
-		.flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }.flatMap { $0 == 11 ? nil : $0 } ?? 1
+	let padShown = spaces.contains { $0["index"] as? Int == scratch && flag($0, "is-visible") }
+	let ret = scratchReturn()
 	var rows = [String: [(Double, Item)]]()
 	var fullscreen = Set<String>() // displays showing a native fullscreen Space: no menu bar there, so no bar
 	for s in spaces {
-		guard let i = s["index"] as? Int, i != attic, i != 11, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
+		guard let i = s["index"] as? Int, i != attic, i != scratch, let d = s["display"] as? Int, let uuid = uuidOf[d] else { continue }
 		let shown = flag(s, "is-visible") || (padShown && i == ret)
 		if flag(s, "is-native-fullscreen") {
 			if flag(s, "is-visible") { fullscreen.insert(uuid) }
@@ -493,10 +528,12 @@ func uuid(of screen: NSScreen) -> String? {
 	return CFUUIDCreateString(nil, u) as String
 }
 
+// The window server's on-screen windows; fetched once per layout or check and handed to the functions below
+func screenWindows() -> [[String: Any]] { CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? [] }
+
 // The menu bar's height: the window server's Menubar window on that screen (37 points on a notched display, where
 // visibleFrame leaves a point more, so the bar hung below the menu bar), else the gap above visibleFrame
-func barHeight(_ screen: NSScreen) -> CGFloat {
-	let list = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? []
+func barHeight(_ screen: NSScreen, _ list: [[String: Any]]) -> CGFloat {
 	for w in list where w[kCGWindowName as String] as? String == "Menubar" {
 		if let b = w[kCGWindowBounds as String] as? [String: CGFloat], b["X"] == screen.frame.minX, let h = b["Height"], h > 0 { return h }
 	}
@@ -504,10 +541,9 @@ func barHeight(_ screen: NSScreen) -> CGFloat {
 }
 
 // The left side of the menu bar: up to the notch, or else up to the first menu bar icon (status items) on that screen
-func leftWidth(_ screen: NSScreen) -> CGFloat {
+func leftWidth(_ screen: NSScreen, _ list: [[String: Any]]) -> CGFloat {
 	if let notch = screen.auxiliaryTopLeftArea, notch.width > 0 { return notch.width }
 	let statusLevel = Int(CGWindowLevelForKey(.statusWindow))
-	let list = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? []
 	let icons = list.compactMap { w -> CGFloat? in
 		guard w[kCGWindowLayer as String] as? Int == statusLevel, let b = w[kCGWindowBounds as String] as? [String: CGFloat],
 			let x = b["X"], x > screen.frame.minX, x < screen.frame.maxX else { return nil }
@@ -596,15 +632,16 @@ final class Bar {
 		// (canJoinAllSpaces lost, re-ordering doesn't help); fresh panels join all Spaces, so rebuild once on the way out.
 		if onFullscreen { leftFullscreen = true } else if leftFullscreen { leftFullscreen = false; rebuild(); return }
 		let icons = indicators()
+		let windows = screenWindows()
 		for (id, p) in panels {
-			let h = barHeight(p.screen)
+			let h = barHeight(p.screen, windows)
 			let items = rows[id] ?? []
 			guard h > 0, !menuBarHidden, paused || !items.isEmpty else { p.panel.orderOut(nil); continue } // menu bar auto-hidden, or no Spaces there
 			if p.row.items.map(\.label) != items.map(\.label) || p.row.items.map(\.state) != items.map(\.state) { p.row.items = items }
 			if p.row.icons.map(\.name) != icons.map(\.name) { p.row.icons = icons }
 			if p.row.paused != paused { p.row.paused = paused }
 			let content = paused ? pausedText.size().width + 20 : slotW * CGFloat(items.count)
-			let w = max(pad * 2 + content + iconW * CGFloat(icons.count), leftWidth(p.screen))
+			let w = max(pad * 2 + content + iconW * CGFloat(icons.count), leftWidth(p.screen, windows))
 			let f = NSRect(x: p.screen.frame.minX, y: p.screen.frame.maxY - h, width: w, height: h)
 			if p.panel.frame != f { p.panel.setFrame(f, display: true) }
 			p.panel.alphaValue = hidden ? 0 : 1
@@ -624,16 +661,263 @@ final class Bar {
 	}
 
 	func menuOpen() -> Bool {
-		guard let list = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]],
-			let mainH = NSScreen.screens.first?.frame.height else { return false }
+		guard let mainH = NSScreen.screens.first?.frame.height else { return false }
+		let list = screenWindows()
 		let menuLevel = Int(CGWindowLevelForKey(.popUpMenuWindow))
+		// where a menu dropped from each display's menu bar starts
+		let menuTops = panels.values.map { mainH - $0.screen.frame.maxY + barHeight($0.screen, list) }
 		return list.contains { w in
 			guard w[kCGWindowLayer as String] as? Int == menuLevel,
 				let b = w[kCGWindowBounds as String] as? [String: CGFloat], let y = b["Y"] else { return false }
 			// a menu bar menu starts right under the bar of its display (CG coordinates: origin top-left of the main display)
-			return panels.values.contains { p in abs(y - (mainH - p.screen.frame.maxY + barHeight(p.screen))) < 4 }
+			return menuTops.contains { abs(y - $0) < 4 }
 		}
 	}
+}
+
+// MARK: - Binds (wmctl)
+
+// The window and workspace binds in bindings.conf send their command here with ~/.local/bin/wmctl, one datagram each on
+// ~/.cache/yabai-helper.sock (args NUL-separated). They run on the main queue one after another, so quick presses queue
+// in order instead of overlapping (reading focus mid-switch) or being dropped.
+//   ws focus|move|silent <N|prev|next>, ws focus recent   workspaces (silent: send the window there, stay here)
+//   pad toggle|show|move                                  scratchpad
+//   cycle next|prev                                       Option+Tab through this workspace's windows
+//   resize w|h <px>                                       grow/shrink the focused window
+//   group toggle|into <dir>|next|prev                     groups (yabai stacks)
+//   close | kill | quit                                   SUPER+W / SUPER+Shift+W / SUPER+Q
+//   hide | unhide                                         SUPER+M parking (Focus)
+//   opening                                               a "new window" bind is about to open one (Focus.activated)
+
+// The scratchpad stands in for the Space you came from (the bar lights that slot as S, SUPER+A/D go on from it). Kept in
+// a file so the bar and a restarted helper know it.
+let returnFile = NSHomeDirectory() + "/.cache/scratchpad-return"
+func scratchReturn() -> Int {
+	(try? String(contentsOfFile: returnFile, encoding: .utf8)).flatMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+		.flatMap { $0 == scratch ? nil : $0 } ?? 1
+}
+
+final class Binds {
+	let focuser: Focus
+	init(_ focuser: Focus) { self.focuser = focuser }
+
+	func run(_ a: [String]) {
+		let arg = a.count > 1 ? a[1] : "", arg2 = a.count > 2 ? a[2] : ""
+		switch (a.first ?? "", arg) {
+		case ("ws", "focus"): wsFocus(arg2)
+		case ("ws", "move"): if let n = resolve(arg2) { focuser.move(to: n) }
+		case ("ws", "silent"): wsSilent(arg2)
+		case ("pad", _): pad(arg)
+		case ("cycle", _): cycle(arg)
+		case ("resize", _): if let d = Int(arg2) { resize(arg, d) }
+		case ("group", _): group(arg, arg2)
+		case ("close", _): close()
+		case ("kill", _): forceKill()
+		case ("quit", _): quit()
+		case ("hide", _): focuser.hide(); bar.refresh()
+		case ("unhide", _): focuser.unhide(); bar.refresh()
+		case ("opening", _): focuser.openingAt = Date()
+		default: NSLog("wmctl: unknown command %@", a.joined(separator: " "))
+		}
+	}
+
+	// MARK: workspaces
+
+	// prev/next go through 1..10 on this display and wrap around at either end, skipping the scratchpad and the attic;
+	// a fullscreen Desktop comes right after its workspace (2, 2's fullscreen app, 3, ...). On the scratchpad they go on
+	// from the workspace it stands in for.
+	func resolve(_ t: String) -> Int? {
+		if let n = Int(t) { return n }
+		guard t == "prev" || t == "next", var cur = currentSpace() else { return nil }
+		if cur == scratch { cur = scratchReturn() }
+		let spaces = list(["--spaces", "--display"])
+		var indexOf = [Int: Int]()
+		for s in spaces { if let id = s["id"] as? Int, let i = s["index"] as? Int { indexOf[id] = i } }
+		let origins = fsOrigins()
+		let fs = spaces.filter { flag($0, "is-native-fullscreen") }.compactMap { s -> (index: Int, origin: Int?)? in
+			guard let i = s["index"] as? Int, let id = s["id"] as? Int else { return nil }
+			return (i, origins[id].flatMap { indexOf[$0] })
+		}
+		let plain = spaces.filter { !flag($0, "is-native-fullscreen") }.compactMap { $0["index"] as? Int }
+			.filter { $0 < scratch || $0 == cur }.sorted()
+		var order = plain.flatMap { n in [n] + fs.filter { $0.origin == n }.map(\.index) }
+		order += fs.map(\.index).filter { !order.contains($0) }
+		guard !order.isEmpty else { return nil }
+		let i = order.firstIndex(of: cur) ?? 0
+		return order[((i + (t == "next" ? 1 : -1)) % order.count + order.count) % order.count]
+	}
+
+	func wsFocus(_ t: String) {
+		focuser.closedAt = Date() // the switch makes macOS activate an app; that's not an alt-tab
+		if t == "recent" { _ = yabai(["space", "--focus", "recent"]); return } // no macOS shortcut for it without the SA
+		guard var n = resolve(t) else { return }
+		if Int(t) != nil, let kid = fullscreenKid(n) { n = kid }
+		if !ok(["space", "--focus", String(n)]) { desktopKey(n) }
+	}
+
+	// SUPER+N: when workspace N's only window is fullscreen (or you're already on N), go to its fullscreen Desktop
+	func fullscreenKid(_ n: Int) -> Int? {
+		let origins = fsOrigins()
+		guard !origins.isEmpty else { return nil }
+		let spaces = list(["--spaces"])
+		guard let ws = spaces.first(where: { $0["index"] as? Int == n }), let wsID = ws["id"] as? Int else { return nil }
+		let kids = spaces.filter { flag($0, "is-native-fullscreen") && origins[$0["id"] as? Int ?? -1] == wsID }.compactMap { $0["index"] as? Int }
+		guard let kid = kids.first else { return nil }
+		let own = list(["--windows"]).contains { $0["space"] as? Int == n && !flag($0, "is-sticky") && !flag($0, "is-minimized") && !flag($0, "is-hidden") }
+		return !own || flag(ws, "has-focus") ? kid : nil
+	}
+
+	// send the focused window to Space t and stay here, focusing a window left on this Space (not the moved one, which
+	// would pull us over to it)
+	func wsSilent(_ t: String) {
+		guard let n = resolve(t) else { return }
+		focuser.closedAt = Date()
+		guard ok(["window", "--space", String(n)]) else { return }
+		if let id = list(["--windows", "--space"]).first(where: { flag($0, "is-visible") && !flag($0, "is-minimized") && !flag($0, "has-focus") })?["id"] as? Int { focus(id) }
+	}
+
+	// Omarchy's scratchpad as the 11th Space, tiled like any other; Discord, Spotify and KeePassXC live there (yabairc).
+	//   toggle: go there, or back to the Space you came from if you're on it; show: go there (stay if already there);
+	//   move: send the focused window there (stay here); on the scratchpad, send it back instead
+	func pad(_ action: String) {
+		guard let cur = currentSpace() else { return }
+		let leave = { try? String(cur).write(toFile: returnFile, atomically: true, encoding: .utf8) }
+		switch action {
+		case "toggle": if cur == scratch { wsFocus(String(scratchReturn())) } else { leave(); wsFocus(String(scratch)) }
+		case "show": if cur != scratch { leave(); wsFocus(String(scratch)) }
+		case "move": wsSilent(String(cur == scratch ? scratchReturn() : scratch))
+		default: break
+		}
+	}
+
+	// MARK: windows
+
+	// Option+Tab / Option+Shift+Tab: focus the next/previous window on this workspace, tiled and floating alike (yabai's
+	// own --focus next/prev only walks the tiling tree), left to right then top to bottom, wrapping around. A fullscreen
+	// (SUPER+F) window's frame is the whole Space, which would sort it first every time and bounce between two windows as
+	// the zoom follows focus, so while one is zoomed it keeps the order saved when none was.
+	var cycleOrder = [Int: [Int]]() // Space id -> window ids
+
+	func cycle(_ dir: String) {
+		guard let space = one(["--spaces", "--space"])?["id"] as? Int else { return }
+		let all = list(["--windows", "--space"]).filter { flag($0, "is-visible") && !flag($0, "is-minimized") && !flag($0, "is-hidden") }
+		let framed: [(frame: CGRect, id: Int)] = all.compactMap { w in
+			guard let f = frame(w), let id = w["id"] as? Int else { return nil }
+			return (f, id)
+		}
+		let byFrame = framed.sorted { a, b in a.frame.minX != b.frame.minX ? a.frame.minX < b.frame.minX : a.frame.minY < b.frame.minY }.map(\.id)
+		var order = byFrame
+		if all.contains(where: { flag($0, "has-fullscreen-zoom") }) {
+			let kept = (cycleOrder[space] ?? []).filter(byFrame.contains)
+			order = kept + byFrame.filter { !kept.contains($0) }
+		}
+		cycleOrder[space] = order
+		guard order.count > 1 else { return }
+		let focused = all.first { flag($0, "has-focus") }?["id"] as? Int
+		let i = focused.flatMap { order.firstIndex(of: $0) } ?? -1
+		let n = order.count
+		focus(order[((i + (dir == "prev" ? -1 : 1)) % n + n) % n])
+	}
+
+	// Grow (+) or shrink (-) the focused window by px, Omarchy SUPER+-/= style. yabai resizes a tiled window by dragging
+	// the edge it shares with a neighbour, so drag the right/bottom edge when there's a window that side, else the
+	// left/top one the other way. Floating windows grow from bottom-right.
+	func resize(_ axis: String, _ d: Int) {
+		guard let w = one(["--windows", "--window"]) else { return }
+		let wide = axis == "w"
+		if flag(w, "is-floating") { _ = yabai(["window", "--resize", wide ? "bottom_right:\(d):0" : "bottom_right:0:\(d)"]); return }
+		if one(["--windows", "--window", wide ? "east" : "south"]) != nil {
+			_ = yabai(["window", "--resize", wide ? "right:\(d):0" : "bottom:0:\(d)"])
+		} else {
+			_ = yabai(["window", "--resize", wide ? "left:\(-d):0" : "top:0:\(-d)"])
+		}
+	}
+
+	// Omarchy window groups as yabai stacks (windows sharing one tile, one shown at a time).
+	//   toggle: ungroup the focused window, or group it with its nearest neighbour; into <dir>: move it into the
+	//   window/group to west|east|north|south; next|prev: cycle the windows in the focused group (wraps)
+	func group(_ action: String, _ dir: String) {
+		switch action {
+		case "next": if !ok(["window", "--focus", "stack.next"]) { _ = yabai(["window", "--focus", "stack.first"]) }
+		case "prev": if !ok(["window", "--focus", "stack.prev"]) { _ = yabai(["window", "--focus", "stack.last"]) }
+		case "toggle", "into":
+			guard let w = one(["--windows", "--window"]), let id = w["id"] as? Int else { return }
+			let stacked = (w["stack-index"] as? Int ?? 0) > 0
+			// yabai has no unstack: floating drops it out of the stack, unfloating re-tiles it
+			if stacked, ok(["window", String(id), "--toggle", "float"]) { _ = yabai(["window", String(id), "--toggle", "float"]) }
+			if action == "into" { _ = yabai(["window", dir, "--stack", String(id)]) }
+			else if !stacked { for d in ["east", "west", "south", "north"] where ok(["window", d, "--stack", String(id)]) { break } }
+		default: break
+		}
+	}
+
+	// MARK: closing
+
+	// SUPER+W: close the focused window. Apps that only order their window out on close (Spotify, Discord) keep running
+	// with a blank tile in yabai, so quit those instead. yabai sometimes loses track of focus (e.g. Infuse/Catalyst video
+	// players), so fall back to the frontmost app as macOS sees it and close its frontmost window.
+	func close() {
+		focuser.closedAt = Date() // closing makes macOS activate another app; that's not an alt-tab
+		var w = one(["--windows", "--window"])
+		if w == nil, let pid = frontPID() {
+			w = list(["--windows"]).first { $0["pid"] as? Int == pid && !flag($0, "is-minimized") }
+			if w == nil { quietCrash(pid); terminate(pid); return }
+		}
+		guard let w, let id = w["id"] as? Int, let pid = w["pid"] as? Int else { return }
+		quietCrash(pid)
+		if ["Spotify", "Discord"].contains(w["app"] as? String ?? "") || !ok(["window", String(id), "--close"]) { terminate(pid) }
+	}
+
+	// SUPER+Shift+W: SIGKILL the app owning the focused window (works on frozen apps); the frontmost app if yabai lost focus
+	func forceKill() {
+		guard let pid = one(["--windows", "--window"])?["pid"] as? Int ?? frontPID(), pid > 1 else { return }
+		focuser.closedAt = Date()
+		quietCrash(pid)
+		kill(pid_t(pid), SIGKILL)
+	}
+
+	// SUPER+Q: quit the frontmost app (a normal quit, so it can still ask to save), rather than leaving it to the app's own
+	// Cmd+Q, which some players swallow (Infuse during playback)
+	func quit() {
+		guard let app = NSWorkspace.shared.frontmostApplication else { return }
+		switch app.bundleIdentifier {
+		case "com.apple.finder": return // Finder has no Quit (Cmd+Q does nothing there); keep it that way
+		case "com.mitchellh.ghostty": close() // one Ghostty runs every terminal (.local/bin/term): quit just this one
+		default:
+			focuser.closedAt = Date()
+			quietCrash(Int(app.processIdentifier))
+			app.terminate()
+		}
+	}
+
+	func frontPID() -> Int? { NSWorkspace.shared.frontmostApplication.map { Int($0.processIdentifier) } }
+	func terminate(_ pid: Int) { NSRunningApplication(processIdentifier: pid_t(pid))?.terminate() }
+
+	// This app is being closed on purpose, so crash-notify (.local/src/crash-notify.swift) stays quiet if it crashes on
+	// the way out; some apps segfault in their own quit code (KeePassXC, soh). Pids get reused, so old marks are dropped.
+	func quietCrash(_ pid: Int) {
+		let dir = NSHomeDirectory() + "/.cache/quiet-crash/", fm = FileManager.default
+		try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
+		for f in (try? fm.contentsOfDirectory(atPath: dir)) ?? [] {
+			if let m = (try? fm.attributesOfItem(atPath: dir + f))?[.modificationDate] as? Date, Date().timeIntervalSince(m) > 86400 { try? fm.removeItem(atPath: dir + f) }
+		}
+		fm.createFile(atPath: dir + String(pid), contents: nil)
+	}
+}
+
+// MARK: - Lid closed while staying awake
+
+// With sleep disabled ("Keep Awake With Lid Closed", .config/raycast/scripts/power-lid-sleep.sh) macOS leaves the screen
+// on when the lid shuts, so blank it: when the lid closes, and when the screen wakes while it's closed.
+let pmRoot = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+func blankIfLidClosed(_ closed: Bool? = nil) {
+	let shut = closed ?? (IORegistryEntryCreateCFProperty(pmRoot, "AppleClamshellState" as CFString, kCFAllocatorDefault, 0)?
+		.takeRetainedValue() as? Bool ?? false)
+	guard shut, sleepDisabled() else { return }
+	let p = Process()
+	p.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
+	p.arguments = ["displaysleepnow"]
+	try? p.run()
 }
 
 // MARK: - Scratchpad dim
@@ -649,7 +933,7 @@ final class Dimmer {
 
 	// on Space 11 (helper start, Space changes): make it if it isn't there yet
 	func ensure() {
-		guard let s = one(["--spaces", "--space"]), s["index"] as? Int == 11, let id = s["id"] as? Int, id != spaceID || panel == nil,
+		guard let s = one(["--spaces", "--space"]), s["index"] as? Int == scratch, let id = s["id"] as? Int, id != spaceID || panel == nil,
 			let d = s["display"] as? Int, let du = list(["--displays"]).first(where: { $0["index"] as? Int == d })?["uuid"] as? String,
 			let screen = NSScreen.screens.first(where: { uuid(of: $0) == du }) else { return }
 		reset()
@@ -679,18 +963,32 @@ final class Dimmer {
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
-// `ws` checks this (kill -0) before handing moves over; cheaper than pgrep
-try? String(getpid()).write(toFile: NSHomeDirectory() + "/.cache/yabai-helper.pid", atomically: true, encoding: .utf8)
 let bar = Bar()
 let focuser = Focus()
+let binds = Binds(focuser)
 let dimmer = Dimmer()
+// wmctl's socket (Binds)
+let sockPath = NSHomeDirectory() + "/.cache/yabai-helper.sock"
+unlink(sockPath)
+let sock = socket(AF_UNIX, SOCK_DGRAM, 0)
+var sockAddr = unixAddress(sockPath)
+_ = withUnsafePointer(to: &sockAddr) { $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(sock, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) } }
+_ = fcntl(sock, F_SETFL, O_NONBLOCK)
+let wmctl = DispatchSource.makeReadSource(fileDescriptor: sock, queue: .main)
+wmctl.setEventHandler {
+	var buf = [UInt8](repeating: 0, count: 1024)
+	while true {
+		let n = recv(sock, &buf, buf.count, 0)
+		if n <= 0 { break }
+		binds.run(buf[0..<n].split(separator: 0).map { String(decoding: $0, as: UTF8.self) })
+	}
+}
+wmctl.resume()
 var tokens = [Int32](repeating: 0, count: 12)
 notify_register_dispatch("wm.bar", &tokens[0], .main) { _ in bar.refresh() }
 notify_register_dispatch("wm.focus", &tokens[1], .main) { _ in focuser.changed() }
 notify_register_dispatch("wm.closed", &tokens[2], .main) { _ in focuser.closed(); bar.refresh() }
 notify_register_dispatch("wm.demin", &tokens[3], .main) { _ in focuser.syncMinimized(); bar.refresh() }
-notify_register_dispatch("wm.hide", &tokens[4], .main) { _ in focuser.hide(); bar.refresh() }
-notify_register_dispatch("wm.unhide", &tokens[5], .main) { _ in focuser.unhide(); bar.refresh() }
 notify_register_dispatch("wm.menubar", &tokens[7], .main) { token in
 	var state: UInt64 = 0
 	notify_get_state(token, &state)
@@ -705,16 +1003,11 @@ notify_register_dispatch("wm.created", &tokens[8], .main) { token in
 notify_register_dispatch("wm.opaque", &tokens[11], .main) { _ in focuser.repin() }
 notify_register_dispatch("wm.focuslock", &tokens[9], .main) { _ in focuser.lockChanged(); bar.refresh() }
 notify_register_dispatch("wm.awake", &tokens[10], .main) { _ in stayAwake = sleepDisabled(); bar.refresh() }
-notify_register_dispatch("wm.move", &tokens[6], .main) { token in
-	var space: UInt64 = 0
-	notify_get_state(token, &space)
-	focuser.move(to: Int(space))
-}
 let ws = NSWorkspace.shared.notificationCenter
 ws.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { _ in focuser.leaveAttic(); dimmer.ensure(); bar.refresh() }
 ws.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { note in
 	// focus lock: the app activating can come before yabai reports its new window focused, so check now too
-	if focusLocked, focuser.holdFocus() { return }
+	if focusLocked, focuser.holdFocus(one(["--windows", "--window"])) { return }
 	if let a = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication { focuser.activated(a) }
 }
 // Music can't be deleted (sealed system volume) and macOS has no setting for what Play starts, so swap it for Spotify.
@@ -728,6 +1021,14 @@ ws.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: ni
 	play.arguments = ["-e", "tell application \"Spotify\" to play"] // starts Spotify if needed (yabairc puts it on the scratchpad)
 	try? play.run()
 }
+ws.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) { _ in blankIfLidClosed() }
+// IOPMrootDomain's kIOPMMessageClamshellStateChange; its argument's bit 0 (kClamshellStateBit) is set when the lid is shut
+let lidPort = IONotificationPortCreate(kIOMainPortDefault)
+IONotificationPortSetDispatchQueue(lidPort, .main)
+var lidNote: io_object_t = 0
+IOServiceAddInterestNotification(lidPort, pmRoot, "IOGeneralInterest", { _, _, type, arg in
+	if type == 0xE003_4100 { blankIfLidClosed(Int(bitPattern: arg) & 1 != 0) }
+}, nil, &lidNote)
 NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in bar.rebuild(); dimmer.reset(); dimmer.ensure() }
 // Mouse moves drive the bar's hover hiding and tell followFocus where hover focus came from (no permission needed for
 // mouse events); the slow timer catches menus closing while the mouse is still, and window counts changing without an event.
@@ -736,6 +1037,7 @@ Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in bar.trackMous
 Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in stayAwake = sleepDisabled(); bar.refresh() } // sleep also changes outside the toggle (sudo pmset)
 bar.rebuild()
 dimmer.ensure()
-focuser.syncZoom() // a window may already be zoomed (helper restarted)
+focuser.syncZoom(one(["--windows", "--window"])) // a window may already be zoomed (helper restarted)
 focuser.lockChanged()
+blankIfLidClosed() // at login with sleep still disabled
 app.run()

@@ -29,7 +29,7 @@ awk '
 		if ((j = index(cmd, "   # ")) > 0) { desc = substr(cmd, j + 5); cmd = substr(cmd, 1, j - 1); mine = group = "" }
 		if (desc == "") {
 			desc = cmd
-			gsub(/touch ~\/\.cache\/yabai-new-window; |~\/\.local\/bin\/|\/opt\/homebrew\/bin\/|\/Applications\/[^ ]*\/MacOS\/|^ *repeat |^ +| +$/, "", desc)
+			gsub(/~\/\.local\/bin\/wmctl opening; |~\/\.local\/bin\/(wmctl )?|\/opt\/homebrew\/bin\/|\/Applications\/[^ ]*\/MacOS\/|^ *repeat |^ +| +$/, "", desc)
 		}
 		printf "\033[1m%-28s\033[0m %s  \033[2m%s%s%s\033[0m\n", pretty(combo), desc, mine, (mine != "" ? " · " : ""), section
 	}

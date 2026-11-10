@@ -87,7 +87,7 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Ctrl+Shift+Escape, Cmd+Ctrl+T | Activity Monitor (task manager) |
 | Cmd+Shift+C, M, / | Discord, Spotify, KeePassXC, on the scratchpad (their windows always open there) |
 | Cmd+Option+Space | macOS Dictation (setup gives it a hidden F19 shortcut) |
-| Cmd+W / Cmd+Shift+W | close / force kill |
+| Cmd+W / Cmd+Shift+W / Cmd+Q | close / force kill / quit the app (in Ghostty, which runs every terminal window, just closes this one) |
 | Cmd+M / Cmd+Option+M | minimize (instant: parked on hidden Space 12) / bring back the latest |
 | Cmd+H/J/K/L, Shift+H/J/K/L | focus / move (warp) |
 | Cmd+1..0, Shift+1..0 | Space / move window to Space |
@@ -115,12 +115,12 @@ the clipboard) and Spotlight's Cmd+Space goes to Raycast. Full list: `.config/bi
 | Cmd+Ctrl+V / Cmd+Ctrl+E | Raycast clipboard history / emoji picker |
 | Cmd+Ctrl+Shift+Space | theme picker (Raycast "Switch Theme", see Themes) |
 | Cmd+Ctrl+Space | next wallpaper in the theme (Raycast "Set Wallpaper" picks from a grid) |
-| Opening a text/code file | nvim in a new Ghostty window (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
+| Opening a text/code file | nvim in a new Ghostty window (`.local/bin/term`: new windows come from the running Ghostty, not a new instance each) (setup makes `~/Applications/Nvim.app` the default with duti; never TextEdit, except RTF) |
 | Raycast "Create App Shortcut" | makes `~/Applications/<Name>.app` that opens a file/folder/URL or runs a shell command, launchable from Raycast |
 | Cmd+Ctrl+B / W / P | Bluetooth / Wi-Fi / Battery menu from the menu bar |
 | Cmd+Ctrl+N | toggle Night Shift (`.local/src/night-shift.swift`) |
 | Cmd+Ctrl+C | capture menu: macOS screenshot/recording toolbar |
-| Cmd+, / Cmd+Shift+, | dismiss the newest notification / clear all (`.local/bin/notifications`) |
+| Cmd+, / Cmd+Shift+, | dismiss the newest notification / clear all (`.local/src/notifications.swift`) |
 | Cmd+Ctrl+, , Cmd+Shift+Option+, | Notification Center (history) |
 | Cmd+/ , Cmd+Option+/ | display scaling: bigger / more space, through the Retina "Looks like" sizes (`.local/src/display-scale.swift`) |
 | Cmd+Ctrl+D, Cmd+Shift+Q | Displays settings, Calculator |
@@ -189,20 +189,23 @@ yabai-helper also does the focus fixes, natively and over yabai's socket (no bas
 when focus moves to another window (new window, alt-tab, close) and the mouse isn't in it, it moves the mouse there,
 so hover focus doesn't hand focus back; after a close, minimize or quit it focuses the next window on the Space
 (macOS leaves focus on nothing); and it does the instant alt-tab jump across Spaces (scripting addition only).
-yabai signals ping it with `notify-post` (`.local/src/notify-post.c`; `notifyutil` takes ~100 ms).
+yabai signals ping it with `notify-post` (`.local/src/notify-post.c`; `notifyutil` takes ~100 ms). The window and
+workspace binds (SUPER+N, A/D, moves, scratchpad, Option+Tab, resize, groups, close/kill/quit) run in it too: the bind
+sends the command with `wmctl` (`.local/src/wmctl.c`, ~1 ms) and the helper runs them one at a time in the order
+pressed, a few ms each instead of ~15 ms of bash + yabai + jq.
 
 Workspaces 1-9 and 10 sit on SUPER+1..0; SUPER+A/D cycle through them and wrap around. SUPER+M doesn't use macOS minimize (its ~300 ms animation can't be turned off): yabai-helper parks the window on
 hidden Space 12 instantly, and it comes back to the workspace you're on with SUPER+Option+M, by switching to its app
 (Dock, Cmd+Tab, Raycast) or by picking it in AltTab. Real minimize (yellow button) still works: the window is kept sticky while
 minimized, so restoring it brings it up on the current workspace.
-The scratchpad is the 11th Space (`.local/bin/scratchpad`): a normal tiled workspace where Discord, Spotify and
+The scratchpad is the 11th Space (`Binds.pad` in yabai-helper): a normal tiled workspace where Discord, Spotify and
 KeePassXC live. It stands in for the workspace you came from: that slot in the bar stays lit and shows S, SUPER+A/D go
 on from that one (from 2, SUPER+S then SUPER+A goes to 1), and its wallpaper is dimmed, like Hyprland's special workspace.
 Workspaces 1-5 always show, higher ones when occupied; current = white pill, occupied = white, empty = grey.
 
 SUPER+Shift+P pauses/resumes yabai entirely (`.local/bin/yabai-pause`): yabai owns SUPER(Cmd)+drag and can't tell
 left Cmd from right, so this is how Cmd-drag reaches macOS. While paused nothing tiles, the bar stops updating,
-workspace keys fall back to the slower macOS switch (1-9 only), and alt-tab won't jump to other Spaces.
+workspace keys do nothing, and alt-tab won't jump to other Spaces.
 
 ## Crash notifications
 
@@ -211,7 +214,7 @@ macOS's "X quit unexpectedly" dialog is off (`CrashReporter DialogType none`). I
 `com.ryha.crash-notify` LaunchAgent) watches `~/Library/Logs/DiagnosticReports` and posts a notification for each
 app crash. Clicking it opens Ghostty with `cld` in `~/.cache/crashes`, asked to explain the crash report and the
 process's last 5 minutes of log (saved there when it crashed). Apps you close with SUPER+W, SUPER+Shift+W or SUPER+Q
-are marked by `.local/bin/quiet-crash` first, so the ones that crash on their way out (KeePassXC) stay silent.
+are marked by yabai-helper first (`~/.cache/quiet-crash`), so the ones that crash on their way out (KeePassXC) stay silent.
 
 ## Shell
 
