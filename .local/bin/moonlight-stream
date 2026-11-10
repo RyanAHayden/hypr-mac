@@ -30,4 +30,5 @@ post(8, true); post(8, false)
 for (const [key, bit] of mods.reverse()) { flags &= ~bit; post(key, false) }
 ' >/dev/null
 
-exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>&1
+mkdir -p ~/.cache/clip-sync
+exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>>~/.cache/clip-sync/log

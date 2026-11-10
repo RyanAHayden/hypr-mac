@@ -57,10 +57,17 @@ def norm(text):
     return text.replace("\r\n", "\n")
 
 
+misses = 0
+
+
 def window_open():
+    # a query can fail for a moment while Spaces switch, so the window only counts as closed after ~6 s of misses
+    global misses
     if not wid:
         return True
-    return subprocess.run(["yabai", "-m", "query", "--windows", "--window", wid], capture_output=True).returncode == 0
+    gone = subprocess.run(["yabai", "-m", "query", "--windows", "--window", wid], capture_output=True).returncode
+    misses = misses + 1 if gone else 0
+    return misses < 3
 
 
 lock = threading.Lock()
@@ -95,11 +102,12 @@ while window_open():
         if changed:
             try:
                 send(cur)
-            except subprocess.TimeoutExpired:
-                pass
+            except Exception as e:  # keep running; the next copy tries again
+                print(f"{time.strftime('%F %T')} send: {e!r}", file=sys.stderr, flush=True)
         if time.monotonic() - checked > 2:
             checked = time.monotonic()
             if not window_open():
                 break
     watcher.kill()
+    print(f"{time.strftime('%F %T')} watcher ended (exit {watcher.returncode})", file=sys.stderr, flush=True)
     time.sleep(2)  # host unreachable or SSH dropped: retry while the stream window is still open
