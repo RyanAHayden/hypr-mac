@@ -258,7 +258,8 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   clipboard over SSH from this Mac (Moonlight has none) until the window closes. Hosts are matched by stream window
   title in `moonlight-stream`. Karabiner sends left Ctrl (and Caps Lock) as right Ctrl in Moonlight: the work
   laptop's PowerToys Keyboard Manager swallows a left Ctrl coming in through Sunshine, which drops Ctrl from
-  shortcuts or leaves apps thinking it's still held. Host side (not in this repo): the work laptop's Sunshine streams whatever its primary screen is and leaves the
+  shortcuts or leaves apps thinking it's still held. Moonlight captures system keys (otherwise it drops Cmd), so right Cmd is the
+  host's Super; left Cmd's binds still run on the Mac, but an unbound left Cmd combo reaches the host as Super too. Host side (not in this repo): the work laptop's Sunshine streams whatever its primary screen is and leaves the
   display layout alone: its own screen (mirrored with the virtual display, and left on) at its own resolution, or the
   virtual display with the lid closed. Pinning it to the virtual display failed while mirrored. It keeps its Windows cursor (blanking it caused trouble);
   omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
