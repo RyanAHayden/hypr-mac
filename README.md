@@ -262,7 +262,7 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
   host's Super; left Cmd's binds still run on the Mac, but an unbound left Cmd combo reaches the host as Super too. Host side (not in this repo): the work laptop's Sunshine streams whatever its primary screen is and leaves the
   display layout alone: its own screen (mirrored with the virtual display, and left on) at its own resolution, or the
   virtual display with the lid closed. Pinning it to the virtual display failed while mirrored. It keeps its Windows cursor (blanking it caused trouble);
-  omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
+  omarchy-desktop's Sunshine streams a headless output sized to the client
   (dotfiles `bin/stream-display`).
 - Syncthing runs always (brew service) instead of being bound to a mount.
 - The nvim (LazyVim) config comes from its own repo, [nvim](https://github.com/RyanAHayden/nvim) (cloned to `~/nvim` and stowed into `~/.config/nvim`), shared with dotfiles. It uses the theme `theme` set (see Themes).
