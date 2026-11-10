@@ -158,6 +158,12 @@ defaults write art.ginzburg.MiddleClick allowMoreFingers -bool false
 # moved); fixed 20 Mbps, no vsync/frame pacing (latency over smoothness); remote desktop mouse mode, so the Mac's own
 # cursor can be shown (.local/bin/moonlight-stream turns it on); quit the app on disconnect so Sunshine's undo runs
 m=com.moonlight-stream.Moonlight
+# Moonlight calls itself a game (LSSupportsGameMode), so fullscreen streams switched on Game Mode: opt it out and
+# re-sign ad hoc (no hardened runtime, so its own frameworks still load). A brew upgrade undoes it until setup runs again.
+ml=/Applications/Moonlight.app
+if [ -d $ml ] && [ "$(defaults read $ml/Contents/Info LSSupportsGameMode 2>/dev/null)" != 0 ]; then
+	plutil -replace LSSupportsGameMode -bool NO $ml/Contents/Info.plist && codesign -f -s - $ml
+fi
 defaults write $m width -int 2560
 defaults write $m height -int 1600
 defaults write $m fps -int 60
