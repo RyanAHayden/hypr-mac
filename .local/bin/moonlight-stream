@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# yabai window_created for Moonlight (yabairc): when a stream window opens, turn on Moonlight's local cursor
+# (Ctrl+Alt+Shift+C; it starts hidden every stream and has no setting) and share the clipboard with that host until
+# the window closes. The hosts hide their own cursor while streaming (Sunshine prep-cmds), so ours is the only one.
+wid=$1
+title=$(yabai -m query --windows --window "$wid" | jq -r .title)
+
+# stream windows are titled with the Moonlight host name; the app's own window is "Moonlight"
+case "$title" in
+  SHS05660770683C) host=work kind=windows ;;
+  omarchy-desktop) host=desktop kind=wayland ;;
+  *) exit 0 ;;
+esac
+
+# the toggle only reaches Moonlight once its stream window has focus
+for _ in $(seq 50); do
+  [ "$(yabai -m query --windows --window "$wid" | jq -r '."has-focus"')" = true ] && break
+  sleep 0.1
+done
+sleep 0.5
+osascript -l JavaScript -e '
+ObjC.import("CoreGraphics")
+// the bridge hands CG constants over as strings, so the values are spelled out: Control | Option | Shift, HID tap = 0
+for (const down of [true, false]) {
+  const e = $.CGEventCreateKeyboardEvent(null, 8, down)  // 8 = C
+  $.CGEventSetFlags(e, 0x40000 | 0x80000 | 0x20000)
+  $.CGEventPost(0, e)
+}' >/dev/null
+
+exec ~/.local/bin/clip-sync "$host" "$kind" "$wid" </dev/null >/dev/null 2>&1

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # Two-way text clipboard between this Mac and a Moonlight host over SSH (Moonlight has no clipboard sharing).
 # Usage: clip-sync <ssh host> windows|wayland [yabai window id]. Runs until that window closes (or forever without
-# one); moonlight-stream starts it for each stream. Two SSH sessions: one watches the host's clipboard and prints
-# each change as a base64 line, the other reads base64 lines and sets it. The Mac side polls pbpaste.
-import base64, subprocess, sys, threading, time
+# one); moonlight-stream starts it for each stream. Every connection goes from this Mac to the host: one long SSH
+# session watches the host's clipboard and prints each change as a base64 line, and each Mac copy (pbpaste, polled)
+# is sent with its own short SSH command over a shared master connection.
+import base64, os, subprocess, sys, tempfile, threading, time
 
 host, kind = sys.argv[1], sys.argv[2]
 wid = sys.argv[3] if len(sys.argv) > 3 else None
+os.makedirs(os.path.expanduser("~/.cache/clip-sync"), exist_ok=True)
+SSH = ["ssh", "-T", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "ControlMaster=auto",
+       "-o", "ControlPersist=60", "-o", "ControlPath=~/.cache/clip-sync/%C"]
 
 
 def ps(script):
@@ -14,45 +18,53 @@ def ps(script):
     return f"powershell -NoProfile -NonInteractive -EncodedCommand {enc}"
 
 
-# Each watcher skips the clipboard it starts with, so connecting doesn't overwrite either side
-REMOTE = {
-    "windows": (
-        ps("$l = Get-Clipboard -Raw; while ($true) { $c = Get-Clipboard -Raw; if ($c -and $c -ne $l) { $l = $c;"
-           " [Console]::Out.WriteLine([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($c)));"
-           " [Console]::Out.Flush() }; Start-Sleep -Milliseconds 300 }"),
-        ps("while (($l = [Console]::In.ReadLine()) -ne $null) {"
-           " Set-Clipboard -Value ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($l))) }"),
-    ),
-    "wayland": (
-        "export WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-1}; wl-paste -n -t text --watch sh -c 'base64 -w0; echo' | tail -n +2",
-        "export WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-1}; while read -r l; do printf %s \"$l\" | base64 -d | wl-copy; done",
-    ),
-}
-watch_cmd, set_cmd = REMOTE[kind]
-lock = threading.Lock()
+# The watcher skips the clipboard it starts with, so connecting doesn't overwrite the Mac's
+WATCH = {
+    "windows": ps("$l = Get-Clipboard -Raw; while ($true) { $c = Get-Clipboard -Raw; if ($c -and $c -ne $l) { $l = $c;"
+                  " [Console]::Out.WriteLine([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($c)));"
+                  " [Console]::Out.Flush() }; Start-Sleep -Milliseconds 300 }"),
+    "wayland": "export WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-1};"
+               " wl-paste -n -t text --watch sh -c 'base64 -w0; echo' | tail -n +2",
+}[kind]
+
+
+def send(text):
+    if kind == "wayland":
+        subprocess.run(SSH + [host, "WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-wayland-1} wl-copy"], input=text.encode(),
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
+        return
+    # Windows OpenSSH doesn't hand piped stdin to PowerShell, so the text rides in the command line (32k limit, about
+    # 9k characters once encoded twice); anything bigger goes over scp first
+    b64 = base64.b64encode(text.replace("\n", "\r\n").encode()).decode()
+    if len(b64) < 7000:
+        cmd = ps(f"Set-Clipboard -Value ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{b64}')))")
+    else:
+        with tempfile.NamedTemporaryFile("w", suffix=".txt") as f:
+            f.write(b64)
+            f.flush()
+            subprocess.run(["scp", "-O", "-q"] + SSH[2:] + [f.name, f"{host}:.clip-sync"], timeout=30)
+        cmd = ps("Set-Clipboard -Value ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("
+                 "(Get-Content ~\\.clip-sync -Raw)))); Remove-Item ~\\.clip-sync")
+    subprocess.run(SSH + [host, cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                   timeout=15)
 
 
 def pbpaste():
     return subprocess.run(["pbpaste"], capture_output=True).stdout.decode("utf-8", "replace")
 
 
-last = pbpaste()
-
-
 def norm(text):
     return text.replace("\r\n", "\n")
-
-
-def ssh(cmd, **kw):
-    return subprocess.Popen(["ssh", "-T", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", host, cmd],
-                            stdout=subprocess.PIPE, stdin=subprocess.DEVNULL if "stdin" not in kw else kw["stdin"],
-                            stderr=subprocess.DEVNULL)
 
 
 def window_open():
     if not wid:
         return True
     return subprocess.run(["yabai", "-m", "query", "--windows", "--window", wid], capture_output=True).returncode == 0
+
+
+lock = threading.Lock()
+last = norm(pbpaste())
 
 
 def watch(proc):
@@ -69,25 +81,25 @@ def watch(proc):
 
 
 while window_open():
-    watcher, setter = ssh(watch_cmd), ssh(set_cmd, stdin=subprocess.PIPE)
+    watcher = subprocess.Popen(SSH + [host, WATCH], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                               stderr=subprocess.DEVNULL)
     threading.Thread(target=watch, args=(watcher,), daemon=True).start()
     checked = time.monotonic()
-    while watcher.poll() is None and setter.poll() is None:
+    while watcher.poll() is None:
         time.sleep(0.3)
         cur = norm(pbpaste())
         with lock:
-            if cur and cur != last:
+            changed = cur and cur != last
+            if changed:
                 last = cur
-                out = cur.replace("\n", "\r\n") if kind == "windows" else cur
-                try:
-                    setter.stdin.write(base64.b64encode(out.encode()) + b"\n")
-                    setter.stdin.flush()
-                except BrokenPipeError:
-                    break
+        if changed:
+            try:
+                send(cur)
+            except subprocess.TimeoutExpired:
+                pass
         if time.monotonic() - checked > 2:
             checked = time.monotonic()
             if not window_open():
                 break
-    for p in (watcher, setter):
-        p.kill()
+    watcher.kill()
     time.sleep(2)  # host unreachable or SSH dropped: retry while the stream window is still open

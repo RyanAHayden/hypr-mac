@@ -250,11 +250,14 @@ Ctrl+X Ctrl+E opens the command line in nvim. Prompt is starship with the Linux 
 - Menu bar is pitch black on any wallpaper: macOS 15 has no menu bar colour setting (Reduce transparency makes it
   solid grey), and the menu bar takes the colour of the wallpaper under it, so `set-wallpaper` paints a black band
   across the top of the copy it sets (`wallpaper-band`, sized from the window server's menu bar height).
-- Moonlight (to the desktop's Sunshine) is set up for remote desktop, not games: windowed 1440p
-  (Ctrl+Alt+Shift+X = native fullscreen on its own Space), 20 Mbps, remote
-  desktop mouse mode. Press Ctrl+Alt+Shift+C once per stream to draw the Mac's own cursor (no lag); the desktop's
-  Sunshine "Desktop" app hides Hyprland's cursor while streaming (`cursor:invisible`, prep-cmd in
-  `~/.config/sunshine/apps.json` there, not in this repo).
+- Moonlight is set up for remote desktop, not games: native fullscreen (own Space) at 2560x1600, the screen below the
+  notch, 20 Mbps, remote desktop mouse mode. When a stream window opens, yabai runs `moonlight-stream`: it turns on
+  Moonlight's local cursor (Ctrl+Alt+Shift+C, so the pointer has no network lag) and runs `clip-sync`, a two-way text
+  clipboard over SSH from this Mac (Moonlight has none) until the window closes. Hosts are matched by stream window
+  title in `moonlight-stream`. Host side (not in this repo): the work laptop's Sunshine streams its virtual display
+  as the only screen at the client's resolution and blanks Windows' cursors (hypr-win `stream-cursor.ps1`);
+  omarchy-desktop's Sunshine streams a headless output sized to the client and hides Hyprland's cursor
+  (dotfiles `bin/stream-display`).
 - Syncthing runs always (brew service) instead of being bound to a mount.
 - The nvim (LazyVim) config comes from its own repo, [nvim](https://github.com/RyanAHayden/nvim) (cloned to `~/nvim` and stowed into `~/.config/nvim`), shared with dotfiles. It uses the theme `theme` set (see Themes).
 - Zen comes from its own repo, [zen](https://github.com/RyanAHayden/zen) (cloned to `~/zen`), which dotfiles uses too, so prefs, mods, shortcuts and extensions match on both.
