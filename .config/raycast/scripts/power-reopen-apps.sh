@@ -14,6 +14,13 @@ if [ "$(defaults read com.apple.loginwindow TALLogoutSavesState 2>/dev/null)" = 
 else
 	on=true msg="Running apps reopen after restart / log out"
 fi
+# the saved app list is emptied and locked while off (System Events restart ignores the two prefs)
+relaunch=~/Library/Preferences/ByHost/com.apple.loginwindow.$(ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}').plist
+[ -e "$relaunch" ] && chflags nouchg "$relaunch"
 defaults write com.apple.loginwindow TALLogoutSavesState -bool $on
 defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool $on
+if [ $on = false ]; then
+	defaults -currentHost write com.apple.loginwindow TALAppsToRelaunchAtLogin -array
+	chflags uchg "$relaunch"
+fi
 echo "$msg"

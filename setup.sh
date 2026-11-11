@@ -212,6 +212,18 @@ defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
 # restart/log out doesn't reopen the apps that were running (a stray `open file.txt` brought TextEdit back every login)
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool false
+# ...but `System Events to restart` (the power menu) ignores those and still saves + relaunches the running apps,
+# so empty the saved list and lock the file (power-reopen-apps.sh unlocks it when turned back on)
+relaunch=~/Library/Preferences/ByHost/com.apple.loginwindow.$(ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}').plist
+[ -e "$relaunch" ] && chflags nouchg "$relaunch"
+defaults -currentHost write com.apple.loginwindow TALAppsToRelaunchAtLogin -array
+chflags uchg "$relaunch"
+# Spotify's own "open at login" (its StartUpHelper login item); prefs only exist after its first launch
+spotify_prefs=~/Library/Application\ Support/Spotify/prefs
+if [ -f "$spotify_prefs" ]; then
+	sed -i '' '/^app.autostart-mode=/d' "$spotify_prefs"
+	echo 'app.autostart-mode="off"' >>"$spotify_prefs"
+fi
 # Tailscale: plain menu-bar menu instead of the windowed UI (copying an IP opened a floating window that stole
 # focus, and closing it stopped Tailscale). Undocumented key, found in the app binary.
 defaults write io.tailscale.ipn.macsys WindowedUIDisabled -bool true
