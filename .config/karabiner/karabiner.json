@@ -4202,6 +4202,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4235,6 +4240,11 @@
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4273,6 +4283,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4308,6 +4323,11 @@
                                             "^com\\.hnc\\.Discord$",
                                             "^md\\.obsidian$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4342,6 +4362,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4375,6 +4400,11 @@
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4407,6 +4437,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4441,6 +4476,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4475,6 +4515,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4509,6 +4554,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4544,6 +4594,11 @@
                                             "^com\\.hnc\\.Discord$",
                                             "^md\\.obsidian$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4576,6 +4631,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4610,6 +4670,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4644,6 +4709,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4677,6 +4747,11 @@
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4709,6 +4784,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4743,6 +4823,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^md\\.obsidian$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4775,6 +4860,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4807,6 +4897,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4842,6 +4937,11 @@
                                             "^com\\.hnc\\.Discord$",
                                             "^md\\.obsidian$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4875,6 +4975,11 @@
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4909,6 +5014,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4947,6 +5057,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -4981,6 +5096,11 @@
                                             "^com\\.moonlight-stream\\.Moonlight$",
                                             "^com\\.hnc\\.Discord$",
                                             "^com\\.microsoft\\.VSCode$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5013,6 +5133,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5042,6 +5167,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5071,6 +5201,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5100,6 +5235,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5129,6 +5269,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5158,6 +5303,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5187,6 +5337,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5216,6 +5371,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5245,6 +5405,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5274,6 +5439,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5303,6 +5473,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5340,6 +5515,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5372,6 +5552,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5401,6 +5586,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5430,6 +5620,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5462,6 +5657,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5494,6 +5694,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5523,6 +5728,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]
@@ -5552,6 +5762,11 @@
                                             "^com\\.mitchellh\\.ghostty$",
                                             "^com\\.apple\\.Terminal$",
                                             "^com\\.moonlight-stream\\.Moonlight$"
+                                        ],
+                                        "file_paths": [
+                                            "/bin/java$",
+                                            "/steamapps/",
+                                            "/Epic Games/"
                                         ]
                                     }
                                 ]

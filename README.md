@@ -54,7 +54,7 @@ Modifiers are laid out like Linux, via Karabiner-Elements (`.config/karabiner/ka
 | Physical key | Becomes | Used for |
 |---|---|---|
 | Caps Lock | Ctrl | Same as Ctrl |
-| Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps (not Ctrl+H: Cmd+H hides the app; in Obsidian Ctrl+D/U/R/H/L and in VS Code Ctrl+D/E/I/J/K/L/N/O/R/U/V/W/Y stay Ctrl for vim mode and pane switching; with Shift they're Cmd+Shift again in VS Code, e.g. Ctrl+Shift+D/E = debug/explorer, except Ctrl+Shift+H/J/K/L (resize) and Ctrl+Shift+G (Source Control) which stay Ctrl), Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) |
+| Ctrl | Linux-style Ctrl | Ctrl+C/V/S/T/W/F/Z/1..0... = Cmd+... in GUI apps (not Ctrl+H: Cmd+H hides the app; in Obsidian Ctrl+D/U/R/H/L and in VS Code Ctrl+D/E/I/J/K/L/N/O/R/U/V/W/Y stay Ctrl for vim mode and pane switching; with Shift they're Cmd+Shift again in VS Code, e.g. Ctrl+Shift+D/E = debug/explorer, except Ctrl+Shift+H/J/K/L (resize) and Ctrl+Shift+G (Source Control) which stay Ctrl), Ctrl+arrows/Backspace = word jump/delete, Home/End = line start/end. Real Ctrl in Ghostty/Terminal (copy/paste there is Ctrl+Shift+C/V) and in games (anything run by `java` such as Minecraft, Steam and Epic games), so Ctrl-to-sprint can't Cmd+Q/Cmd+W them |
 | Option | Alt | Never bound alone, so nvim/tmux get Meta (M-h, M-1..9, M-Enter) from either side. Outside terminals Alt+[ / Alt+] are back/forward (Cmd+[ / ] do nothing) |
 | Left Cmd | SUPER | All window manager binds (`bindings.conf`). Unbound Cmd combos still reach apps: Cmd+C/V/X, Cmd+Q (Cmd+Tab is AltTab) |
 | Fn+H/J/K/L | Arrows | Everywhere, Shift works for selecting |
