@@ -5,6 +5,9 @@
 # to Ghostty isn't taken for an alt-tab. Binds, crash-notify and the Nvim app (setup.sh) use it.
 cwd=
 [ "$1" = --cwd ] && { cwd=$2; shift 2; }
+# Ghostty runs a command with launchd's bare PATH (no Homebrew, so LazyVim left out SPACE g g without lazygit);
+# run it through a login + interactive zsh so it gets the same PATH as a shell window
+[ $# -gt 0 ] && set -- /bin/zsh -lic 'exec "$@"' zsh "$@"
 cmd=
 [ $# -gt 0 ] && cmd=$(printf '%q ' "$@")
 ~/.local/bin/wmctl opening 2>/dev/null
