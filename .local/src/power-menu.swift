@@ -98,7 +98,8 @@ let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap,
 	}
 	let to: NSMenuItem?
 	switch event.getIntegerValueField(.keyboardEventKeycode) {
-	case 36, 76, 49 where isToggle(wrap.highlighted):
+	// a where clause covers only the case's last pattern, so each one needs its own
+	case 36 where isToggle(wrap.highlighted), 76 where isToggle(wrap.highlighted), 49 where isToggle(wrap.highlighted):
 		toggle(wrap.highlighted!)
 		return nil
 	case 126 where wrap.highlighted == nil || wrap.highlighted == items.first: to = items.last
