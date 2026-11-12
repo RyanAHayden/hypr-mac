@@ -209,6 +209,12 @@ defaults write com.apple.spaces spans-displays -bool false
 defaults write -g _HIHideMenuBar -bool false
 defaults write -g NSWindowShouldDragOnGesture -bool true
 defaults write -g NSAutomaticWindowAnimationsEnabled -bool false
+# no system sounds: alert beeps muted, no UI sound effects (Trash, screenshots), no volume-change pop, no startup chime
+osascript -e 'set volume alert volume 0'
+defaults write -g com.apple.sound.beep.volume -float 0
+defaults write -g com.apple.sound.uiaudio.enabled -int 0
+defaults write -g com.apple.sound.beep.feedback -int 0
+sudo nvram StartupMute=%01
 # restart/log out doesn't reopen the apps that were running (a stray `open file.txt` brought TextEdit back every login)
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool false
