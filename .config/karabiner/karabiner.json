@@ -477,7 +477,7 @@
                                 },
                                 "to": [
                                     {
-                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/wmctl opening; /Applications/Zen.app/Contents/MacOS/zen --new-window"
+                                        "shell_command": "export PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin; ~/.local/bin/wmctl opening; /Applications/Zen.app/Contents/MacOS/zen --blank-window"
                                     }
                                 ]
                             },
